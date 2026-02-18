@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox, filedialog
+from tkinter import ttk, scrolledtext, messagebox, filedialog, font as tkfont
 import os
 import re
 import yt_dlp
@@ -542,7 +542,8 @@ class PlaylistDownloaderApp:
     def __init__(self, root):
         self.root = root
         self.root.title("🎵 Ultimate Music & Video Downloader")
-        self.root.geometry("1100x800")
+        self.root.geometry("1200x850")
+        self.root.minsize(900, 600)  # Mindestgröße für bessere Usability
         self.root.resizable(True, True)
         
         # Einstellungen laden
@@ -551,9 +552,9 @@ class PlaylistDownloaderApp:
         # Theme konfigurieren
         self.setup_theme()
         
-        # Erstelle Notebook (Tabs)
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        # Erstelle Notebook (Tabs) mit modernerem Design
+        self.notebook = ttk.Notebook(self.root, style='TNotebook')
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
         
         # Tabs erstellen
         self.create_download_tab()
@@ -576,56 +577,126 @@ class PlaylistDownloaderApp:
         self.process_queues()
     
     def setup_theme(self):
-        """Konfiguriert das Theme"""
+        """Konfiguriert das Theme mit modernem Windows 11-inspiriertem Design"""
         self.style = ttk.Style()
         
-        # Verfügbare Themes anzeigen
-        # print("Verfügbare Themes:", self.style.theme_names())
-        
-        # Nutze 'vista' oder 'winnative' für Windows-Look
-        if 'vista' in self.style.theme_names():
+        # Nutze natives Windows-Theme
+        available_themes = self.style.theme_names()
+        if 'vista' in available_themes:
             self.style.theme_use('vista')
-        elif 'winnative' in self.style.theme_names():
+        elif 'winnative' in available_themes:
             self.style.theme_use('winnative')
+        elif 'aqua' in available_themes:  # macOS
+            self.style.theme_use('aqua')
         else:
             self.style.theme_use('clam')
         
-        # Farben
+        # Moderne Farbpalette - Windows 11 inspiriert
         if self.settings.get('theme') == 'dark':
-            self.bg_color = '#1e1e1e'
-            self.fg_color = '#ffffff'
-            self.accent_color = '#1db954'
-            self.surface_color = '#282828'
+            # Dark Mode - Windows 11 Farben
+            self.bg_color = '#202020'           # Dunklerer Hintergrund
+            self.fg_color = '#E8E8E8'           # Heller Text
+            self.accent_color = '#60A5FA'       # Modernes Blau (statt Spotify-Grün)
+            self.surface_color = '#2B2B2B'      # Erhöhte Oberflächen
+            self.hover_color = '#3A3A3A'        # Hover-Zustand
+            self.border_color = '#3F3F46'       # Subtile Grenzen
+            self.success_color = '#10B981'      # Grün
+            self.warning_color = '#F59E0B'      # Orange
+            self.error_color = '#EF4444'        # Rot
+            self.input_bg = '#1A1A1A'           # Eingabefelder
+            self.input_fg = '#F8F8F8'           # Eingabefeld-Text
         else:
-            self.bg_color = '#f0f0f0'
-            self.fg_color = '#000000'
-            self.accent_color = '#0078d4'
-            self.surface_color = '#ffffff'
+            # Light Mode - Windows 11 Farben
+            self.bg_color = '#F3F4F6'           # Heller Hintergrund
+            self.fg_color = '#1F2937'           # Dunkler Text
+            self.accent_color = '#3B82F6'       # Modernes Blau
+            self.surface_color = '#FFFFFF'      # Weiße Oberflächen
+            self.hover_color = '#E5E7EB'        # Hover-Zustand
+            self.border_color = '#D1D5DB'       # Grenzen
+            self.success_color = '#059669'      # Grün
+            self.warning_color = '#D97706'      # Orange
+            self.error_color = '#DC2626'        # Rot
+            self.input_bg = '#FFFFFF'           # Eingabefelder
+            self.input_fg = '#111827'           # Eingabefeld-Text
         
+        # Konfiguriere Root-Fenster
         self.root.configure(bg=self.bg_color)
+        
+        # Konfiguriere ttk-Widgets mit modernem Look
+        self.configure_ttk_styles()
+    
+    def configure_ttk_styles(self):
+        """Konfiguriert ttk-Widget-Styles für modernes Aussehen"""
+        # Notebook (Tabs)
+        self.style.configure('TNotebook', background=self.bg_color, borderwidth=0)
+        self.style.configure('TNotebook.Tab', 
+                           padding=[20, 10], 
+                           font=('Segoe UI', 9),
+                           borderwidth=0)
+        self.style.map('TNotebook.Tab',
+                      background=[('selected', self.surface_color), ('!selected', self.hover_color)],
+                      foreground=[('selected', self.accent_color), ('!selected', self.fg_color)])
+        
+        # Progressbar
+        self.style.configure('TProgressbar',
+                           background=self.accent_color,
+                           troughcolor=self.hover_color,
+                           borderwidth=0,
+                           thickness=8)
+        
+        # Combobox
+        self.style.configure('TCombobox',
+                           fieldbackground=self.input_bg,
+                           background=self.surface_color,
+                           foreground=self.input_fg,
+                           borderwidth=1,
+                           relief='solid')
+        
+        # Separator
+        self.style.configure('TSeparator', background=self.border_color)
+        
+        # Treeview
+        self.style.configure('Treeview',
+                           background=self.input_bg,
+                           foreground=self.input_fg,
+                           fieldbackground=self.input_bg,
+                           borderwidth=0)
+        self.style.configure('Treeview.Heading',
+                           background=self.surface_color,
+                           foreground=self.fg_color,
+                           font=('Segoe UI', 9, 'bold'),
+                           borderwidth=1,
+                           relief='flat')
+        self.style.map('Treeview',
+                      background=[('selected', self.accent_color)],
+                      foreground=[('selected', '#FFFFFF')])
     
     def create_download_tab(self):
         """Erstellt den Haupt-Download-Tab"""
         tab = tk.Frame(self.notebook, bg=self.bg_color)
         self.notebook.add(tab, text="📥 Download")
         
-        # Header
-        header_frame = tk.Frame(tab, bg=self.surface_color, height=60)
+        # Header mit modernem Design
+        header_frame = tk.Frame(tab, bg=self.surface_color, height=80)
         header_frame.pack(fill=tk.X, padx=0, pady=0)
         header_frame.pack_propagate(False)
         
         title_label = tk.Label(
             header_frame,
             text="🎵 Music & Video Downloader",
-            font=("Segoe UI", 16, "bold"),
+            font=("Segoe UI", 18, "bold"),
             bg=self.surface_color,
             fg=self.accent_color
         )
-        title_label.pack(pady=15)
+        title_label.pack(pady=20)
         
-        # Main Content
+        # Dezente Trennlinie
+        separator = tk.Frame(tab, bg=self.border_color, height=1)
+        separator.pack(fill=tk.X)
+        
+        # Main Content mit besseren Abständen
         main_frame = tk.Frame(tab, bg=self.bg_color)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
         
         # URL Input Frame
         input_frame = tk.LabelFrame(
@@ -647,25 +718,34 @@ class PlaylistDownloaderApp:
             url_input_frame,
             textvariable=self.url_var,
             font=("Segoe UI", 10),
-            bg='white',
-            fg='black',
-            relief=tk.SOLID,
-            bd=1
+            bg=self.input_bg,
+            fg=self.input_fg,
+            relief=tk.FLAT,
+            bd=0,
+            insertbackground=self.accent_color,
+            highlightthickness=2,
+            highlightbackground=self.border_color,
+            highlightcolor=self.accent_color
         )
-        url_entry.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        url_entry.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 8), ipady=6)
         
         preview_btn = tk.Button(
             url_input_frame,
             text="👁️ Vorschau",
             command=self.show_preview,
-            font=("Segoe UI", 9),
+            font=("Segoe UI", 9, "bold"),
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=10,
-            cursor='hand2'
+            bd=0,
+            padx=20,
+            pady=8,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
         preview_btn.pack(side=tk.LEFT)
+        self.add_button_hover(preview_btn, self.accent_color)
         
         # Buttons Frame
         button_frame = tk.Frame(input_frame, bg=self.surface_color)
@@ -675,43 +755,55 @@ class PlaylistDownloaderApp:
             button_frame,
             text="📋 Playlist laden",
             command=self.load_playlist,
-            font=("Segoe UI", 9, "bold"),
+            font=("Segoe UI", 10, "bold"),
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=20,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        self.load_playlist_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.load_playlist_btn.pack(side=tk.LEFT, padx=(0, 8))
+        self.add_button_hover(self.load_playlist_btn, self.accent_color)
         
         self.download_single_btn = tk.Button(
             button_frame,
             text="⬇️ Einzeln Download",
             command=self.download_single_video,
-            font=("Segoe UI", 9, "bold"),
-            bg='#4CAF50',
+            font=("Segoe UI", 10, "bold"),
+            bg=self.success_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=20,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        self.download_single_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.download_single_btn.pack(side=tk.LEFT, padx=(0, 8))
+        self.add_button_hover(self.download_single_btn, self.success_color)
         
         self.add_to_queue_btn = tk.Button(
             button_frame,
             text="➕ Zur Queue",
             command=self.add_to_queue,
-            font=("Segoe UI", 9, "bold"),
-            bg='#FF9800',
+            font=("Segoe UI", 10, "bold"),
+            bg=self.warning_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=20,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
         self.add_to_queue_btn.pack(side=tk.LEFT)
+        self.add_button_hover(self.add_to_queue_btn, self.warning_color)
         
         # Preview/Playlist Info Frame
         self.info_frame = tk.LabelFrame(
@@ -728,15 +820,18 @@ class PlaylistDownloaderApp:
         self.info_text = scrolledtext.ScrolledText(
             self.info_frame,
             font=("Segoe UI", 9),
-            bg='white',
-            fg='black',
-            relief=tk.SOLID,
-            bd=1,
+            bg=self.input_bg,
+            fg=self.input_fg,
+            relief=tk.FLAT,
+            bd=0,
             wrap=tk.WORD,
             height=8,
-            state=tk.DISABLED
+            state=tk.DISABLED,
+            highlightthickness=1,
+            highlightbackground=self.border_color,
+            insertbackground=self.accent_color
         )
-        self.info_text.pack(fill=tk.BOTH, expand=True)
+        self.info_text.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
         
         # Download Control Frame
         control_frame = tk.LabelFrame(
@@ -767,26 +862,34 @@ class PlaylistDownloaderApp:
             folder_frame,
             textvariable=self.folder_var,
             font=("Segoe UI", 9),
-            bg='white',
-            fg='black',
-            relief=tk.SOLID,
-            bd=1,
-            state='readonly'
+            bg=self.input_bg,
+            fg=self.input_fg,
+            relief=tk.FLAT,
+            bd=0,
+            state='readonly',
+            readonlybackground=self.input_bg,
+            highlightthickness=1,
+            highlightbackground=self.border_color
         )
-        folder_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        folder_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8), ipady=4)
         
         folder_btn = tk.Button(
             folder_frame,
             text="🗂️ Ändern",
             command=self.select_download_folder,
-            font=("Segoe UI", 9),
+            font=("Segoe UI", 9, "bold"),
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=10,
-            cursor='hand2'
+            bd=0,
+            padx=16,
+            pady=6,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
         folder_btn.pack(side=tk.LEFT)
+        self.add_button_hover(folder_btn, self.accent_color)
         
         # Buttons
         btn_frame = tk.Frame(control_frame, bg=self.surface_color)
@@ -796,31 +899,39 @@ class PlaylistDownloaderApp:
             btn_frame,
             text="▶️ Playlist Download starten",
             command=self.start_playlist_download,
-            font=("Segoe UI", 10, "bold"),
-            bg='#4CAF50',
+            font=("Segoe UI", 11, "bold"),
+            bg=self.success_color,
             fg='white',
             relief=tk.FLAT,
-            padx=20,
-            pady=10,
+            bd=0,
+            padx=24,
+            pady=12,
             cursor='hand2',
-            state=tk.DISABLED
+            state=tk.DISABLED,
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        self.start_download_btn.pack(side=tk.LEFT, padx=(0, 5))
+        self.start_download_btn.pack(side=tk.LEFT, padx=(0, 8))
+        self.add_button_hover(self.start_download_btn, self.success_color)
         
         self.stop_download_btn = tk.Button(
             btn_frame,
             text="⏹️ Abbrechen",
             command=self.stop_download,
-            font=("Segoe UI", 10, "bold"),
-            bg='#e74c3c',
+            font=("Segoe UI", 11, "bold"),
+            bg=self.error_color,
             fg='white',
             relief=tk.FLAT,
-            padx=20,
-            pady=10,
+            bd=0,
+            padx=24,
+            pady=12,
             cursor='hand2',
-            state=tk.DISABLED
+            state=tk.DISABLED,
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
         self.stop_download_btn.pack(side=tk.LEFT)
+        self.add_button_hover(self.stop_download_btn, self.error_color)
         
         # Progress Frame
         progress_frame = tk.LabelFrame(
@@ -844,13 +955,17 @@ class PlaylistDownloaderApp:
         )
         progress_label.pack(anchor=tk.W, pady=(0, 5))
         
-        # Windows-Style Progressbar
+        # Moderne Progressbar
+        progress_container = tk.Frame(progress_frame, bg=self.surface_color)
+        progress_container.pack(fill=tk.X, pady=2)
+        
         self.progress_bar = ttk.Progressbar(
-            progress_frame,
+            progress_container,
             mode='determinate',
-            length=400
+            length=400,
+            style='TProgressbar'
         )
-        self.progress_bar.pack(fill=tk.X)
+        self.progress_bar.pack(fill=tk.X, padx=2)
         
         # Log Frame
         log_frame = tk.LabelFrame(
@@ -864,17 +979,27 @@ class PlaylistDownloaderApp:
         )
         log_frame.pack(fill=tk.BOTH, expand=True)
         
+        # Font-Auswahl mit Try-Except für bessere Kompatibilität
+        try:
+            available_fonts = tkfont.families()
+            log_font = ("Cascadia Mono", 9) if "Cascadia Mono" in available_fonts else ("Consolas", 9)
+        except:
+            log_font = ("Consolas", 9)
+        
         self.log_text = scrolledtext.ScrolledText(
             log_frame,
-            font=("Consolas", 8),
-            bg='#0d0d0d' if self.settings.get('theme') == 'dark' else 'white',
-            fg='#00ff00' if self.settings.get('theme') == 'dark' else 'black',
-            relief=tk.SOLID,
-            bd=1,
+            font=log_font,
+            bg='#1A1A1A' if self.settings.get('theme') == 'dark' else '#FAFAFA',
+            fg='#A5F3FC' if self.settings.get('theme') == 'dark' else '#374151',
+            relief=tk.FLAT,
+            bd=0,
             wrap=tk.WORD,
-            state=tk.DISABLED
+            state=tk.DISABLED,
+            highlightthickness=1,
+            highlightbackground=self.border_color,
+            insertbackground=self.accent_color
         )
-        self.log_text.pack(fill=tk.BOTH, expand=True)
+        self.log_text.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
     
     def create_queue_tab(self):
         """Erstellt den Queue-Tab"""
@@ -882,7 +1007,7 @@ class PlaylistDownloaderApp:
         self.notebook.add(tab, text="📑 Queue")
         
         main_frame = tk.Frame(tab, bg=self.bg_color)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
         
         # Controls
         control_frame = tk.LabelFrame(
@@ -907,11 +1032,15 @@ class PlaylistDownloaderApp:
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=18,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        import_file_btn.pack(side=tk.LEFT, padx=(0, 5))
+        import_file_btn.pack(side=tk.LEFT, padx=(0, 8))
+        self.add_button_hover(import_file_btn, self.accent_color)
         
         import_clipboard_btn = tk.Button(
             btn_frame,
@@ -921,39 +1050,51 @@ class PlaylistDownloaderApp:
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=18,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        import_clipboard_btn.pack(side=tk.LEFT, padx=(0, 5))
+        import_clipboard_btn.pack(side=tk.LEFT, padx=(0, 8))
+        self.add_button_hover(import_clipboard_btn, self.accent_color)
         
         clear_queue_btn = tk.Button(
             btn_frame,
             text="🗑️ Queue leeren",
             command=self.clear_queue,
             font=("Segoe UI", 9, "bold"),
-            bg='#e74c3c',
+            bg=self.error_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=18,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        clear_queue_btn.pack(side=tk.LEFT, padx=(0, 5))
+        clear_queue_btn.pack(side=tk.LEFT, padx=(0, 8))
+        self.add_button_hover(clear_queue_btn, self.error_color)
         
         self.start_queue_btn = tk.Button(
             btn_frame,
             text="▶️ Queue starten",
             command=self.start_queue_download,
             font=("Segoe UI", 9, "bold"),
-            bg='#4CAF50',
+            bg=self.success_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=18,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
         self.start_queue_btn.pack(side=tk.LEFT)
+        self.add_button_hover(self.start_queue_btn, self.success_color)
         
         # Queue List
         list_frame = tk.LabelFrame(
@@ -974,13 +1115,18 @@ class PlaylistDownloaderApp:
         self.queue_listbox = tk.Listbox(
             list_frame,
             font=("Segoe UI", 9),
-            bg='white',
-            fg='black',
-            relief=tk.SOLID,
-            bd=1,
+            bg=self.input_bg,
+            fg=self.input_fg,
+            relief=tk.FLAT,
+            bd=0,
+            highlightthickness=1,
+            highlightbackground=self.border_color,
+            selectbackground=self.accent_color,
+            selectforeground='white',
+            activestyle='none',
             yscrollcommand=scrollbar.set
         )
-        self.queue_listbox.pack(fill=tk.BOTH, expand=True)
+        self.queue_listbox.pack(fill=tk.BOTH, expand=True, padx=2, pady=2)
         scrollbar.config(command=self.queue_listbox.yview)
         
         # Context Menu
@@ -995,7 +1141,7 @@ class PlaylistDownloaderApp:
         self.notebook.add(tab, text="📜 History")
         
         main_frame = tk.Frame(tab, bg=self.bg_color)
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
         
         # Controls
         control_frame = tk.Frame(main_frame, bg=self.surface_color)
@@ -1009,25 +1155,33 @@ class PlaylistDownloaderApp:
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=18,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        refresh_btn.pack(side=tk.LEFT, padx=5)
+        refresh_btn.pack(side=tk.LEFT, padx=8)
+        self.add_button_hover(refresh_btn, self.accent_color)
         
         clear_history_btn = tk.Button(
             control_frame,
             text="🗑️ History löschen",
             command=self.clear_history,
             font=("Segoe UI", 9, "bold"),
-            bg='#e74c3c',
+            bg=self.error_color,
             fg='white',
             relief=tk.FLAT,
-            padx=15,
-            pady=8,
-            cursor='hand2'
+            bd=0,
+            padx=18,
+            pady=10,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        clear_history_btn.pack(side=tk.LEFT, padx=5)
+        clear_history_btn.pack(side=tk.LEFT, padx=8)
+        self.add_button_hover(clear_history_btn, self.error_color)
         
         # History Table
         list_frame = tk.LabelFrame(
@@ -1215,11 +1369,17 @@ class PlaylistDownloaderApp:
             lang_frame,
             textvariable=self.subtitle_language_var,
             font=("Segoe UI", 9),
-            bg='white',
-            fg='black',
-            width=15
+            bg=self.input_bg,
+            fg=self.input_fg,
+            relief=tk.FLAT,
+            bd=0,
+            width=15,
+            insertbackground=self.accent_color,
+            highlightthickness=1,
+            highlightbackground=self.border_color,
+            highlightcolor=self.accent_color
         )
-        lang_entry.pack(side=tk.LEFT)
+        lang_entry.pack(side=tk.LEFT, ipady=4)
         
         # Download-Einstellungen
         download_frame = tk.LabelFrame(
@@ -1252,11 +1412,17 @@ class PlaylistDownloaderApp:
             speed_frame,
             textvariable=self.speed_limit_var,
             font=("Segoe UI", 9),
-            bg='white',
-            fg='black',
-            width=10
+            bg=self.input_bg,
+            fg=self.input_fg,
+            relief=tk.FLAT,
+            bd=0,
+            width=10,
+            insertbackground=self.accent_color,
+            highlightthickness=1,
+            highlightbackground=self.border_color,
+            highlightcolor=self.accent_color
         )
-        speed_entry.pack(side=tk.LEFT)
+        speed_entry.pack(side=tk.LEFT, ipady=4)
         
         tk.Label(
             speed_frame,
@@ -1319,14 +1485,18 @@ class PlaylistDownloaderApp:
             text="💾 Einstellungen speichern",
             command=self.save_settings_gui,
             font=("Segoe UI", 10, "bold"),
-            bg='#4CAF50',
+            bg=self.success_color,
             fg='white',
             relief=tk.FLAT,
-            padx=20,
-            pady=10,
-            cursor='hand2'
+            bd=0,
+            padx=24,
+            pady=12,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        save_btn.pack(side=tk.LEFT, padx=5)
+        save_btn.pack(side=tk.LEFT, padx=8)
+        self.add_button_hover(save_btn, self.success_color)
         
         update_btn = tk.Button(
             button_frame,
@@ -1336,11 +1506,15 @@ class PlaylistDownloaderApp:
             bg=self.accent_color,
             fg='white',
             relief=tk.FLAT,
-            padx=20,
-            pady=10,
-            cursor='hand2'
+            bd=0,
+            padx=24,
+            pady=12,
+            cursor='hand2',
+            activebackground=self.hover_color,
+            activeforeground='white'
         )
-        update_btn.pack(side=tk.LEFT, padx=5)
+        update_btn.pack(side=tk.LEFT, padx=8)
+        self.add_button_hover(update_btn, self.accent_color)
     
     def create_about_tab(self):
         """Erstellt den About-Tab"""
@@ -1350,25 +1524,28 @@ class PlaylistDownloaderApp:
         main_frame = tk.Frame(tab, bg=self.surface_color)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
-        # Title
+        # Title mit modernem Gradient-Effekt (simuliert)
         title_label = tk.Label(
             main_frame,
             text="🎵 Ultimate Music & Video Downloader",
-            font=("Segoe UI", 18, "bold"),
+            font=("Segoe UI", 20, "bold"),
             bg=self.surface_color,
             fg=self.accent_color
         )
-        title_label.pack(pady=(20, 10))
+        title_label.pack(pady=(30, 10))
         
-        # Version
+        # Version mit Badge-Stil
+        version_frame = tk.Frame(main_frame, bg=self.accent_color, padx=12, pady=4)
+        version_frame.pack(pady=8)
+        
         version_label = tk.Label(
-            main_frame,
+            version_frame,
             text="Version 3.0",
-            font=("Segoe UI", 12),
-            bg=self.surface_color,
-            fg=self.fg_color
+            font=("Segoe UI", 11, "bold"),
+            bg=self.accent_color,
+            fg='white'
         )
-        version_label.pack(pady=5)
+        version_label.pack()
         
         # Separator
         ttk.Separator(main_frame, orient='horizontal').pack(fill=tk.X, pady=20)
@@ -1421,21 +1598,25 @@ class PlaylistDownloaderApp:
         credits_label.pack(pady=10)
     
     def create_status_bar(self):
-        """Erstellt die Status-Bar"""
-        status_frame = tk.Frame(self.root, bg=self.surface_color, height=25)
+        """Erstellt die Status-Bar mit modernem Design"""
+        status_frame = tk.Frame(self.root, bg=self.surface_color, height=30)
         status_frame.pack(fill=tk.X, side=tk.BOTTOM)
         status_frame.pack_propagate(False)
+        
+        # Obere Trennlinie
+        separator = tk.Frame(self.root, bg=self.border_color, height=1)
+        separator.pack(fill=tk.X, side=tk.BOTTOM)
         
         self.status_var = tk.StringVar(value="Bereit")
         status_label = tk.Label(
             status_frame,
             textvariable=self.status_var,
-            font=("Segoe UI", 8),
+            font=("Segoe UI", 9),
             bg=self.surface_color,
             fg=self.fg_color,
             anchor=tk.W
         )
-        status_label.pack(fill=tk.X, padx=10, pady=3)
+        status_label.pack(fill=tk.BOTH, padx=12, pady=6)
     
     # Funktionen
     def select_download_folder(self):
@@ -1828,6 +2009,32 @@ Songs:
         
         # Schedule next check
         self.root.after(100, self.process_queues)
+    
+    def add_button_hover(self, button, original_color):
+        """Fügt Hover-Effekt zu Buttons hinzu"""
+        # Berechne hellere Hover-Farbe
+        def lighten_color(color):
+            # Konvertiere Hex zu RGB
+            color = color.lstrip('#')
+            r, g, b = tuple(int(color[i:i+2], 16) for i in (0, 2, 4))
+            # Erhelle die Farbe um 15%
+            r = min(255, int(r * 1.15))
+            g = min(255, int(g * 1.15))
+            b = min(255, int(b * 1.15))
+            return f'#{r:02x}{g:02x}{b:02x}'
+        
+        hover_color = lighten_color(original_color)
+        
+        def on_enter(e):
+            if button['state'] != 'disabled':
+                button['background'] = hover_color
+        
+        def on_leave(e):
+            if button['state'] != 'disabled':
+                button['background'] = original_color
+        
+        button.bind('<Enter>', on_enter)
+        button.bind('<Leave>', on_leave)
 
 def main():
     root = tk.Tk()
