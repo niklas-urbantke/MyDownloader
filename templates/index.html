@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist Downloader</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M9 18V5l12-2v13M9 13l12-2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        <circle cx="6" cy="18" r="3" stroke-width="2"/>
+                        <circle cx="18" cy="16" r="3" stroke-width="2"/>
+                    </svg>
+                    <h1>Music Playlist Downloader</h1>
+                </div>
+                <div class="ffmpeg-status" id="ffmpegStatus">
+                    <div class="status-indicator">
+                        <div class="status-dot"></div>
+                        <span>FFmpeg wird geprüft...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h2>Playlist laden</h2>
+                <p class="subtitle">YouTube Playlist URL eingeben</p>
+                
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="playlistUrl" 
+                        class="input-field" 
+                        placeholder="https://www.youtube.com/playlist?list=..."
+                    >
+                    <button id="loadBtn" class="btn btn-primary">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                        Playlist laden
+                    </button>
+                </div>
+
+                <div class="info-box" id="infoBox" style="display: none;">
+                    <div class="info-content">
+                        <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                            <path d="M12 16v-4M12 8h.01" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                        </svg>
+                        <div class="info-text">
+                            <strong id="playlistName">Playlist Name</strong>
+                            <p id="playlistInfo">0 Songs gefunden</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Download Section -->
+            <section class="download-section card" id="downloadSection" style="display: none;">
+                <h2>Download starten</h2>
+                <p class="subtitle">Alle Songs werden als MP3 heruntergeladen</p>
+                
+                <button id="startBtn" class="btn btn-success btn-large">
+                    <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Download starten
+                </button>
+            </section>
+
+            <!-- Progress Section -->
+            <section class="progress-section card" id="progressSection" style="display: none;">
+                <h2>Download läuft...</h2>
+                
+                <!-- Overall Progress -->
+                <div class="progress-container">
+                    <div class="progress-header">
+                        <span class="progress-label">Gesamtfortschritt</span>
+                        <span class="progress-percentage" id="overallPercentage">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="overallProgress"></div>
+                    </div>
+                    <div class="progress-info">
+                        <span id="progressText">0 von 0 Songs</span>
+                    </div>
+                </div>
+
+                <!-- Current Song -->
+                <div class="current-song">
+                    <div class="song-info">
+                        <div class="song-icon-container">
+                            <svg class="song-icon rotating" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                <path d="M12 6v6l4 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+                            </svg>
+                        </div>
+                        <div class="song-details">
+                            <span class="song-label">Aktueller Song:</span>
+                            <strong id="currentSong">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Song List -->
+                <div class="song-list">
+                    <h3>Download-Status</h3>
+                    <div class="song-list-container" id="songList">
+                        <!-- Dynamic song items will be added here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Completion Section -->
+            <section class="completion-section card" id="completionSection" style="display: none;">
+                <div class="completion-content">
+                    <div class="success-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <polyline points="22 4 12 14.01 9 11.01" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h2>Download abgeschlossen!</h2>
+                    <p id="completionText">0 Songs erfolgreich heruntergeladen</p>
+                    <p class="folder-info">Speicherort: <code id="folderPath">-</code></p>
+                    <button id="newDownloadBtn" class="btn btn-primary btn-large">
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke-width="2"/>
+                            <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                        </svg>
+                        Neuen Download starten
+                    </button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2026 Music Playlist Downloader | Made with ❤️</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+flask==3.0.0
+flask-socketio==5.3.6
+python-socketio==5.11.0
+yt-dlp==2024.3.10
+spotipy==2.23.0
+python-dotenv==1.0.1
+beautifulsoup4==4.12.3
+requests==2.31.0
+lxml==5.1.0
+pywebview==5.0.5

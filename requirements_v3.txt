@@ -1,0 +1,17 @@
+# Requirements für Ultimate Music & Video Downloader v3.0
+
+# Core
+yt-dlp>=2024.3.10
+requests>=2.31.0
+
+# GUI & Image Processing
+Pillow>=10.0.0
+
+# Optional: Enhanced clipboard support (Windows meist eingebaut)
+# pyperclip>=1.8.2
+
+# Optional: Drag & Drop support (für zukünftige Features)
+# tkinterdnd2>=0.3.0
+
+# Note: tkinter ist normalerweise mit Python vorinstalliert
+# Falls nicht: sudo apt-get install python3-tk (Linux)

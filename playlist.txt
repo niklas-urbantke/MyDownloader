@@ -1,0 +1,10 @@
+# Playlist Songs - Ein Song pro Zeile im Format: Künstler - Titel
+# Zeilen die mit # beginnen werden ignoriert
+
+# Beispiel:
+# Ed Sheeran - Shape of You
+# Adele - Hello
+# The Weeknd - Blinding Lights
+
+# Füge hier deine Songs ein:
+

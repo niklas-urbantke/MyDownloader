@@ -1,0 +1,13 @@
+{
+    "download_folder": "C:/Users/Niklas Urbantke/OneDrive/Musik/Ohne Struktur/Böhse Onkelz",
+    "audio_format": "mp3",
+    "audio_quality": "0",
+    "download_subtitles": false,
+    "subtitle_language": "de,en",
+    "speed_limit": "",
+    "theme": "dark",
+    "auto_queue": false,
+    "embed_thumbnail": true,
+    "embed_metadata": true,
+    "keep_video": false
+}
