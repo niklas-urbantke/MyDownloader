@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=MyDownloader
+Comment=Ultimate Music & Video Downloader
+Exec=MyDownloader
+Icon=mydownloader
+Terminal=false
+Categories=AudioVideo;Audio;Video;Network;
+Keywords=youtube;download;music;video;audio;
