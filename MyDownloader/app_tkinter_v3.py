@@ -324,6 +324,30 @@ def get_youtube_playlist(url):
         log_message(f"❌ Fehler beim Laden der Playlist: {e}")
         return None
 
+def is_playlist_url(url):
+    """Prüft, ob URL eine Playlist ist"""
+    try:
+        # YouTube Playlist erkennen
+        if 'list=' in url and 'youtube.com' in url:
+            return True
+        
+        # Prüfe mit yt-dlp ob es eine Playlist ist
+        ydl_opts = {
+            'extract_flat': True,
+            'quiet': True,
+            'no_warnings': True
+        }
+        
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=False)
+            # Wenn 'entries' vorhanden ist, ist es eine Playlist
+            if info and 'entries' in info and len(info.get('entries', [])) > 1:
+                return True
+        
+        return False
+    except:
+        return False
+
 def file_exists(save_dir, filename):
     """Prüft, ob eine Datei bereits existiert"""
     return os.path.exists(os.path.join(save_dir, filename))
@@ -511,21 +535,75 @@ def download_queue_thread(settings):
     
     success_count = 0
     error_count = 0
+    playlist_count = 0
     
     for idx, url in enumerate(items, 1):
         if not download_running:
             log_message("\n⚠️ Download abgebrochen!")
             break
         
-        result = download_single(url, base_dir, settings, idx, len(items))
-        
-        if result:
-            success_count += 1
+        # Prüfe, ob es eine Playlist ist
+        if is_playlist_url(url):
+            log_message(f"\n🎵 [{idx}/{len(items)}] Playlist erkannt: {url}")
+            playlist_data = get_youtube_playlist(url)
+            
+            if playlist_data:
+                playlist_count += 1
+                # Download in eigenen Ordner
+                playlist_name = playlist_data['name']
+                playlist_dir = os.path.join(base_dir, clean(playlist_name))
+                os.makedirs(playlist_dir, exist_ok=True)
+                
+                log_message(f"📁 Ordner: {playlist_dir}")
+                log_message(f"📝 {len(playlist_data['songs'])} Songs in Playlist\n")
+                
+                # Download alle Songs der Playlist
+                pl_success = 0
+                pl_error = 0
+                pl_skipped = 0
+                
+                for song_idx, song in enumerate(playlist_data['songs'], 1):
+                    if not download_running:
+                        log_message("\n⚠️ Download abgebrochen!")
+                        break
+                    
+                    result = search_and_download(song, playlist_dir, settings, song_idx, len(playlist_data['songs']))
+                    
+                    if result == "skipped":
+                        pl_skipped += 1
+                    elif result:
+                        pl_success += 1
+                    else:
+                        pl_error += 1
+                
+                log_message(f"\n✅ Playlist '{playlist_name}' abgeschlossen:")
+                log_message(f"   ✅ Erfolgreich: {pl_success}")
+                log_message(f"   ⏭️ Übersprungen: {pl_skipped}")
+                log_message(f"   ❌ Fehler: {pl_error}\n")
+                
+                # Zur History hinzufügen
+                add_to_history(url, playlist_name)
+                
+                if pl_success > 0 or pl_skipped > 0:
+                    success_count += 1
+                else:
+                    error_count += 1
+            else:
+                log_message(f"❌ [{idx}/{len(items)}] Playlist konnte nicht geladen werden\n")
+                error_count += 1
         else:
-            error_count += 1
+            # Einzelnes Video/Audio
+            log_message(f"\n🎵 [{idx}/{len(items)}] Einzelvideo/-audio: {url}")
+            result = download_single(url, base_dir, settings, idx, len(items))
+            
+            if result:
+                success_count += 1
+            else:
+                error_count += 1
     
     log_message(f"\n{'='*60}")
     log_message(f"Queue-Download abgeschlossen!")
+    log_message(f"📋 Playlists: {playlist_count}")
     log_message(f"✅ Erfolgreich: {success_count}")
     log_message(f"❌ Fehler: {error_count}")
     log_message(f"📁 Speicherort: {base_dir}")
