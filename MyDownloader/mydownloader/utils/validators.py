@@ -131,7 +131,7 @@ def validate_audio_format(format_str: str) -> bool:
     Returns:
         True if valid
     """
-    valid_formats = ['mp3', 'm4a', 'opus', 'flac', 'wav', 'none']
+    valid_formats = ['mp3', 'mp4', 'm4a', 'opus', 'flac', 'wav', 'none']
     return format_str.lower() in valid_formats
 
 

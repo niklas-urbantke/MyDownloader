@@ -91,9 +91,12 @@ class Downloader:
             "retries": 10,
         }
         
-        # Audio format settings
+        # Format settings
         audio_format = settings.get('audio_format', 'mp3')
-        if audio_format and audio_format != 'none':
+        if audio_format == 'mp4':
+            opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+            opts['merge_output_format'] = 'mp4'
+        elif audio_format and audio_format != 'none':
             opts['format'] = 'bestaudio/best'
             opts['postprocessors'] = [{
                 'key': 'FFmpegExtractAudio',

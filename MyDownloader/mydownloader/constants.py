@@ -37,6 +37,7 @@ DEFAULT_SETTINGS = {
 # Audio Formats
 AUDIO_FORMATS = {
     'mp3': 'MP3 (MPEG Audio Layer III)',
+    'mp4': 'MP4 (Video)',
     'm4a': 'M4A (MPEG-4 Audio)',
     'opus': 'OPUS (Opus Audio)',
     'flac': 'FLAC (Lossless)',

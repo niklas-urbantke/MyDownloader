@@ -384,12 +384,17 @@ def download_single(url, save_dir, settings, idx=1, total=1):
         "retries": 10,
     }
     
-    # Audio-Format
-    if settings.get('audio_format') and settings['audio_format'] != 'none':
+    selected_format = settings.get('audio_format', 'mp3')
+    
+    # Format
+    if selected_format == 'mp4':
+        ydl_opts['format'] = 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best'
+        ydl_opts['merge_output_format'] = 'mp4'
+    elif selected_format and selected_format != 'none':
         ydl_opts['format'] = 'bestaudio/best'
         ydl_opts['postprocessors'] = [{
             'key': 'FFmpegExtractAudio',
-            'preferredcodec': settings['audio_format'],
+            'preferredcodec': selected_format,
             'preferredquality': settings.get('audio_quality', '0'),
         }]
         
@@ -446,7 +451,8 @@ def search_and_download(song, save_dir, settings, idx, total):
     })
     
     # Dateiname im Format: "Künstler - Titel"
-    filename = f"{artist} - {title}.{settings.get('audio_format', 'mp3')}"
+    selected_format = settings.get('audio_format', 'mp3')
+    filename = f"{artist} - {title}.{selected_format if selected_format != 'none' else 'webm'}"
     
     # Prüfe, ob der Song bereits existiert
     if file_exists(save_dir, filename):
@@ -1395,7 +1401,7 @@ class PlaylistDownloaderApp:
         ).pack(side=tk.LEFT)
         
         self.audio_format_var = tk.StringVar(value=self.settings.get('audio_format', 'mp3'))
-        formats = ['mp3', 'm4a', 'opus', 'flac', 'wav', 'none (Video)']
+        formats = ['mp3', 'mp4', 'm4a', 'opus', 'flac', 'wav', 'none (Video)']
         format_combo = ttk.Combobox(
             format_frame,
             textvariable=self.audio_format_var,
@@ -1774,7 +1780,7 @@ class PlaylistDownloaderApp:
             "📋 Download kompletter Playlists",
             "📑 Queue-System für Batch-Downloads",
             "👁️ Vorschau vor dem Download",
-            "🎵 Unterstützung für MP3, M4A, FLAC, OPUS, WAV",
+            "🎵 Unterstützung für MP3, MP4, M4A, FLAC, OPUS, WAV",
             "💬 Untertitel-Download",
             "📊 Download-History",
             "⚙️ Umfangreiche Einstellungen",
