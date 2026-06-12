@@ -108,7 +108,7 @@ als GitHub-Release.
 
 ## Alte Versionen
 
-- **v3 (Python/tkinter)**: auf dem [`main`-Branch](https://github.com/niklas-urbantke/YouTube-Downloader/tree/main)
+- **v3 (Python/tkinter)**: über den Tag [`v3.0.0`](https://github.com/niklas-urbantke/YouTube-Downloader/tree/v3.0.0)
 - **Komplettes Archiv** (Flask-UI, C++-Prototyp, Spotify-Loader …): auf dem
   [`recovery`-Branch](https://github.com/niklas-urbantke/YouTube-Downloader/tree/recovery)
 
