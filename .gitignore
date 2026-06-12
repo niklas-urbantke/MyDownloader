@@ -26,3 +26,7 @@ Desktop.ini
 # Env
 .env
 .env.local
+
+# Python (Reste der v3)
+__pycache__/
+*.pyc
