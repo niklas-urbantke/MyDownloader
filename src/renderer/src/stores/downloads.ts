@@ -5,9 +5,15 @@ import type { DownloadItem, DownloadRequest } from '@shared/types'
 export const useDownloadsStore = defineStore('downloads', () => {
   const items = ref<DownloadItem[]>([])
   const logs = ref<Record<string, string[]>>({})
+  /** true = Warteschlange wird gerade abgearbeitet */
+  const processing = ref(false)
 
   async function load(): Promise<void> {
     items.value = await window.api.downloads.list()
+    processing.value = await window.api.downloads.queueState()
+    window.api.downloads.onQueueState((p) => {
+      processing.value = p
+    })
     window.api.downloads.onChanged((item) => {
       const idx = items.value.findIndex((i) => i.id === item.id)
       if (idx === -1) items.value.push(item)
@@ -54,6 +60,20 @@ export const useDownloadsStore = defineStore('downloads', () => {
     return log
   }
 
+  async function startQueue(): Promise<void> {
+    await window.api.downloads.startQueue()
+  }
+
+  async function pauseQueue(): Promise<void> {
+    await window.api.downloads.pauseQueue()
+  }
+
+  async function move(id: string, direction: 'up' | 'down'): Promise<void> {
+    await window.api.downloads.move(id, direction)
+    // Reihenfolge kommt aus dem Main-Process — Liste neu übernehmen
+    items.value = await window.api.downloads.list()
+  }
+
   const activeItems = computed(() =>
     items.value.filter(
       (i) =>
@@ -72,6 +92,7 @@ export const useDownloadsStore = defineStore('downloads', () => {
   return {
     items,
     logs,
+    processing,
     load,
     add,
     addMany,
@@ -80,6 +101,9 @@ export const useDownloadsStore = defineStore('downloads', () => {
     remove,
     clearFinished,
     fetchLog,
+    startQueue,
+    pauseQueue,
+    move,
     activeItems,
     queuedItems,
     errorItems,

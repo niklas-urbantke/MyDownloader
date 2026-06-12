@@ -7,6 +7,7 @@ import BxCard from '../components/BxCard.vue'
 import BxBtn from '../components/BxBtn.vue'
 import BxChip from '../components/BxChip.vue'
 import BxProgress from '../components/BxProgress.vue'
+import BxBanner from '../components/BxBanner.vue'
 import BxDialog from '../components/BxDialog.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { useDownloadsStore } from '../stores/downloads'
@@ -107,6 +108,21 @@ function showInFolder(item: DownloadItem): void {
   <PageHead :title="t('queue.title')" :sub="t('queue.subtitle')">
     <template #actions>
       <BxBtn
+        v-if="!downloads.processing"
+        icon="play"
+        variant="cta"
+        :label="t('queue.start')"
+        :disabled="downloads.queuedItems.length === 0"
+        @click="downloads.startQueue()"
+      />
+      <BxBtn
+        v-else
+        icon="pause"
+        variant="outline"
+        :label="t('queue.pause')"
+        @click="downloads.pauseQueue()"
+      />
+      <BxBtn
         icon="paper"
         variant="ghost"
         :label="t('queue.importFile')"
@@ -143,8 +159,16 @@ function showInFolder(item: DownloadItem): void {
     </div>
   </div>
 
-  <div v-else class="stack">
-    <BxCard v-for="item in [...downloads.items].reverse()" :key="item.id" :padded="false">
+  <BxBanner
+    v-if="downloads.queuedItems.length > 0 && !downloads.processing"
+    variant="info"
+    style="margin-bottom: 16px"
+  >
+    {{ t('queue.notStartedHint', { n: downloads.queuedItems.length }) }}
+  </BxBanner>
+
+  <div v-if="downloads.items.length > 0" class="stack">
+    <BxCard v-for="(item, index) in downloads.items" :key="item.id" :padded="false">
       <div class="bx-card-section">
         <div class="row" style="align-items: flex-start; gap: 16px">
           <img
@@ -206,6 +230,24 @@ function showInFolder(item: DownloadItem): void {
           </div>
 
           <div class="row" style="flex-shrink: 0">
+            <template v-if="item.status === 'queued'">
+              <BxBtn
+                icon="arrow-up"
+                variant="ghost"
+                size="sm"
+                :title="t('queue.moveUp')"
+                :disabled="index === 0"
+                @click="downloads.move(item.id, 'up')"
+              />
+              <BxBtn
+                icon="arrow-down"
+                variant="ghost"
+                size="sm"
+                :title="t('queue.moveDown')"
+                :disabled="index === downloads.items.length - 1"
+                @click="downloads.move(item.id, 'down')"
+              />
+            </template>
             <BxBtn
               v-if="item.status === 'completed'"
               icon="folder"

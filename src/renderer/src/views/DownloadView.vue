@@ -85,7 +85,10 @@ async function start(goToQueue: boolean): Promise<void> {
     probeError.value = t('download.errors.invalidUrl')
     return
   }
-  await downloads.add(buildRequest())
+  const request = buildRequest()
+  // "Download starten" legt sofort los; "Zur Warteschlange" wartet auf Queue-Start
+  request.startNow = goToQueue
+  await downloads.add(request)
   showToast(t('download.added'))
   url.value = ''
   info.value = null

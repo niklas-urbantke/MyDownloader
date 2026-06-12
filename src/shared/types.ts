@@ -95,6 +95,8 @@ export type DownloadStatus =
 
 export interface DownloadRequest {
   url: string
+  /** true = sofort starten; false/undefined = wartet, bis die Queue gestartet wird */
+  startNow?: boolean
   /** Überschreibt die globalen Einstellungen für diesen Download (optional) */
   overrides?: Partial<
     Pick<
@@ -204,6 +206,10 @@ export const IPC = {
   downloadClearFinished: 'download:clear-finished',
   downloadList: 'download:list',
   downloadGetLog: 'download:get-log',
+  downloadQueueStart: 'download:queue-start',
+  downloadQueuePause: 'download:queue-pause',
+  downloadQueueState: 'download:queue-state',
+  downloadMove: 'download:move',
   // Events (Main -> Renderer)
   downloadChanged: 'download:changed',
   downloadLogLine: 'download:log-line',

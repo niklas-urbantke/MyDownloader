@@ -40,6 +40,7 @@ export const queue = new DownloadQueue({
     updateDockProgress()
   },
   onLogLine: (id, line) => broadcast(IPC.downloadLogLine, { id, line }),
+  onQueueState: (processing) => broadcast(IPC.downloadQueueState, processing),
   onItemFinished: (item) => {
     addHistoryEntry(item)
     const settings = getSettings()
@@ -79,6 +80,12 @@ export function registerIpc(): void {
   ipcMain.handle(IPC.downloadClearFinished, () => queue.clearFinished())
   ipcMain.handle(IPC.downloadList, () => queue.list())
   ipcMain.handle(IPC.downloadGetLog, (_e, id: string) => queue.getLog(id))
+  ipcMain.handle(IPC.downloadQueueStart, () => queue.startProcessing())
+  ipcMain.handle(IPC.downloadQueuePause, () => queue.pauseProcessing())
+  ipcMain.handle(IPC.downloadQueueState, () => queue.isProcessing())
+  ipcMain.handle(IPC.downloadMove, (_e, id: string, direction: 'up' | 'down') =>
+    queue.move(id, direction)
+  )
 
   // --- Verlauf ----------------------------------------------------------------
   ipcMain.handle(IPC.historyList, () => listHistory())

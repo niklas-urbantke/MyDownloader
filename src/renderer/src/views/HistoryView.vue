@@ -61,7 +61,7 @@ async function showInFolder(entry: HistoryEntry): Promise<void> {
 }
 
 async function redownload(entry: HistoryEntry): Promise<void> {
-  await downloads.add({ url: entry.url, knownTitle: entry.title })
+  await downloads.add({ url: entry.url, knownTitle: entry.title, startNow: true })
   showToast(t('download.added'))
 }
 

@@ -17,6 +17,8 @@ export interface QueueEvents {
   onItemChanged: (item: DownloadItem) => void
   onLogLine: (id: string, line: string) => void
   onItemFinished: (item: DownloadItem) => void
+  /** Meldet, ob die Warteschlange gerade aktiv abgearbeitet wird */
+  onQueueState: (processing: boolean) => void
 }
 
 interface InternalItem {
@@ -51,8 +53,44 @@ function emptyProgress(): DownloadProgress {
 export class DownloadQueue {
   private items = new Map<string, InternalItem>()
   private order: string[] = []
+  /**
+   * false = wartende Einträge bleiben liegen, bis der Nutzer die Queue
+   * startet. Einträge mit request.startNow laufen immer sofort los.
+   */
+  private processing = false
 
   constructor(private events: QueueEvents) {}
+
+  isProcessing(): boolean {
+    return this.processing
+  }
+
+  startProcessing(): void {
+    if (!this.processing) {
+      this.processing = true
+      this.events.onQueueState(true)
+    }
+    this.tick()
+  }
+
+  pauseProcessing(): void {
+    if (this.processing) {
+      this.processing = false
+      this.events.onQueueState(false)
+    }
+  }
+
+  /** Verschiebt einen wartenden Eintrag in der Reihenfolge nach oben/unten. */
+  move(id: string, direction: 'up' | 'down'): void {
+    const idx = this.order.indexOf(id)
+    if (idx === -1) return
+    const target = direction === 'up' ? idx - 1 : idx + 1
+    if (target < 0 || target >= this.order.length) return
+    ;[this.order[idx], this.order[target]] = [this.order[target], this.order[idx]]
+    // Beide betroffenen Items neu melden, damit der Renderer die Reihenfolge übernimmt
+    this.emit(this.order[idx])
+    this.emit(this.order[target])
+  }
 
   list(): DownloadItem[] {
     return this.order
@@ -118,6 +156,7 @@ export class DownloadQueue {
     if (!entry) return
     if (entry.item.status !== 'error' && entry.item.status !== 'cancelled') return
     entry.cancelled = false
+    entry.request.startNow = true // expliziter Nutzer-Klick → sofort loslegen
     entry.log.length = 0
     entry.item.status = 'queued'
     entry.item.progress = emptyProgress()
@@ -185,9 +224,19 @@ export class DownloadQueue {
     for (const id of this.order) {
       if (running >= max) break
       const entry = this.items.get(id)
-      if (entry && entry.item.status === 'queued') {
-        running++
-        void this.run(entry, settings)
+      if (!entry || entry.item.status !== 'queued') continue
+      // Ohne gestartete Queue laufen nur explizit gestartete Downloads
+      if (!this.processing && !entry.request.startNow) continue
+      running++
+      void this.run(entry, settings)
+    }
+
+    // Queue automatisch beenden, wenn nichts Wartendes mehr da ist
+    if (this.processing) {
+      const hasQueued = this.order.some((id) => this.items.get(id)?.item.status === 'queued')
+      if (!hasQueued) {
+        this.processing = false
+        this.events.onQueueState(false)
       }
     }
   }

@@ -27,7 +27,7 @@ onMounted(async () => {
     showToast(t('clipboard.detected'), 'info', {
       actionLabel: t('clipboard.download'),
       onAction: () => {
-        void downloadsStore.add({ url })
+        void downloadsStore.add({ url, startNow: true })
         router.push({ name: 'queue' })
       }
     })
@@ -55,10 +55,8 @@ const navGroups = computed(() => [
   },
   {
     label: t('nav.sections.system'),
-    items: [
-      { route: 'settings', icon: 'setting', labelKey: 'nav.settings' },
-      { route: 'about', icon: 'information', labelKey: 'nav.about' }
-    ] as NavItem[]
+    // Info bewusst nur im Footer — keine Dopplung in der Liste (Issue #5)
+    items: [{ route: 'settings', icon: 'setting', labelKey: 'nav.settings' }] as NavItem[]
   }
 ])
 

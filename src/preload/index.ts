@@ -43,6 +43,16 @@ const api = {
     clearFinished: (): Promise<string[]> => ipcRenderer.invoke(IPC.downloadClearFinished),
     list: (): Promise<DownloadItem[]> => ipcRenderer.invoke(IPC.downloadList),
     getLog: (id: string): Promise<string[]> => ipcRenderer.invoke(IPC.downloadGetLog, id),
+    startQueue: (): Promise<void> => ipcRenderer.invoke(IPC.downloadQueueStart),
+    pauseQueue: (): Promise<void> => ipcRenderer.invoke(IPC.downloadQueuePause),
+    queueState: (): Promise<boolean> => ipcRenderer.invoke(IPC.downloadQueueState),
+    move: (id: string, direction: 'up' | 'down'): Promise<void> =>
+      ipcRenderer.invoke(IPC.downloadMove, id, direction),
+    onQueueState: (cb: (processing: boolean) => void): (() => void) => {
+      const listener = (_e: unknown, processing: boolean): void => cb(processing)
+      ipcRenderer.on(IPC.downloadQueueState, listener)
+      return () => ipcRenderer.removeListener(IPC.downloadQueueState, listener)
+    },
     onChanged: (cb: (item: DownloadItem) => void): (() => void) => {
       const listener = (_e: unknown, item: DownloadItem): void => cb(item)
       ipcRenderer.on(IPC.downloadChanged, listener)
