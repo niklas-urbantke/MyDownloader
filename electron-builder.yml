@@ -1,0 +1,103 @@
+appId: com.niklasurbantke.mydownloader
+productName: MyDownloader
+copyright: Copyright © 2026 Niklas Urbantke
+
+directories:
+  buildResources: build
+  output: release
+
+files:
+  - out/**
+  - package.json
+  - '!**/.DS_Store'
+
+asar: true
+
+# Gebündelte Binaries (yt-dlp, ffmpeg) je Plattform/Architektur.
+# Vorher ausführen: node scripts/fetch-binaries.mjs --platform <p> --arch <a>
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.utilities
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+  extraResources:
+    - from: resources/bin/darwin-${arch}
+      to: bin
+  darkModeSupport: true
+  # Ohne Apple-Developer-Zertifikat wird unsigniert gebaut (Gatekeeper:
+  # Rechtsklick → Öffnen beim ersten Start)
+  identity: null
+
+dmg:
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+win:
+  icon: build/icon.png
+  target:
+    - target: nsis
+      arch: [x64]
+    - target: portable
+      arch: [x64]
+  extraResources:
+    - from: resources/bin/win32-${arch}
+      to: bin
+
+nsis:
+  artifactName: ${productName}-Setup-${version}.${ext}
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  deleteAppDataOnUninstall: false
+  shortcutName: MyDownloader
+
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+
+linux:
+  icon: build/icon.png
+  category: AudioVideo
+  synopsis: Moderner Musik- & Video-Downloader
+  description: >-
+    MyDownloader lädt Videos, Songs und komplette Playlists über yt-dlp und
+    FFmpeg — mit Warteschlange, Verlauf und Metadaten-Embedding.
+  maintainer: Niklas Urbantke
+  target:
+    - target: AppImage
+      arch: [x64]
+    - target: deb
+      arch: [x64]
+    - target: pacman
+      arch: [x64]
+  extraResources:
+    - from: resources/bin/linux-${arch}
+      to: bin
+
+appImage:
+  artifactName: ${productName}-${version}-${arch}.${ext}
+
+deb:
+  artifactName: ${name}_${version}_${arch}.${ext}
+  # ffmpeg/yt-dlp sind gebündelt — keine harten Paketabhängigkeiten nötig
+  depends:
+    - libgtk-3-0
+    - libnotify4
+    - libnss3
+    - libxss1
+    - libxtst6
+    - xdg-utils
+    - libatspi2.0-0
+    - libuuid1
+    - libsecret-1-0
+
+pacman:
+  artifactName: ${name}-${version}-${arch}.${ext}
+
+publish:
+  provider: github
+  owner: niklas-urbantke
+  repo: YouTube-Downloader
+  releaseType: release
