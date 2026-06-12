@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import { registerIpc, queue } from './ipc'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -47,6 +48,7 @@ if (!gotLock) {
       optimizer.watchWindowShortcuts(window)
     })
 
+    registerIpc()
     createWindow()
 
     app.on('activate', () => {
@@ -64,5 +66,10 @@ if (!gotLock) {
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()
+  })
+
+  // Laufende yt-dlp-Prozesse beim Beenden sauber abräumen
+  app.on('before-quit', () => {
+    queue.cancelAll()
   })
 }
