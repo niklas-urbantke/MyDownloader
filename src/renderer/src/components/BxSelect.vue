@@ -31,12 +31,13 @@ const currentLabel = computed(
       <span>{{ currentLabel }}</span>
     </div>
 
-    <div v-else class="f-control">
-      <AppIcon v-if="icon" :name="icon" />
+    <!-- Select liegt als Overlay über der gesamten Box — komplette Fläche klickbar -->
+    <div v-else class="f-control f-control--select" :class="{ 'has-icon': !!icon }">
+      <AppIcon v-if="icon" :name="icon" class="f-deco" />
       <select v-model="model">
         <option v-for="o in options" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
-      <AppIcon name="arrow-down" />
+      <AppIcon name="arrow-down" class="f-deco f-deco--arrow" />
     </div>
 
     <div v-if="hint" class="f-hint">{{ hint }}</div>

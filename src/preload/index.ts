@@ -25,7 +25,8 @@ const api = {
     get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.settingsGet),
     set: (patch: Partial<AppSettings>): Promise<AppSettings> =>
       ipcRenderer.invoke(IPC.settingsSet, patch),
-    pickFolder: (): Promise<string | null> => ipcRenderer.invoke(IPC.settingsPickFolder)
+    pickFolder: (defaultPath?: string): Promise<string | null> =>
+      ipcRenderer.invoke(IPC.settingsPickFolder, defaultPath)
   },
 
   media: {

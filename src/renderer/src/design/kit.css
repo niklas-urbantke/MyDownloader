@@ -765,3 +765,31 @@
 [data-theme='dark'] .chip--warn { background: #3A2F12; color: #E8B84B; }
 [data-theme='dark'] .toggle { background: #41598C; }
 [data-theme='dark'] .toggle.on { background: #2F5DA8; }
+
+/* ---- select: gesamte Box klickbar (Issue #3) ---- */
+.f-control--select { position: relative; padding: 0; }
+.f-control--select:focus-within { padding: 0; }
+.f-control--select select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0 40px 0 14px;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.f-control--select.has-icon select { padding-left: 42px; }
+.f-control--select .f-deco {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.f-control--select .f-deco--arrow { left: auto; right: 14px; }

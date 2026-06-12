@@ -58,10 +58,10 @@ export function registerIpc(): void {
   // --- Settings -------------------------------------------------------------
   ipcMain.handle(IPC.settingsGet, () => getSettings())
   ipcMain.handle(IPC.settingsSet, (_e, patch: Partial<AppSettings>) => updateSettings(patch))
-  ipcMain.handle(IPC.settingsPickFolder, async () => {
+  ipcMain.handle(IPC.settingsPickFolder, async (_e, defaultPath?: string) => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory'],
-      defaultPath: getSettings().downloadFolder
+      defaultPath: defaultPath || getSettings().downloadFolder
     })
     return result.canceled ? null : (result.filePaths[0] ?? null)
   })

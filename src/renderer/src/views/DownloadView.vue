@@ -12,8 +12,10 @@ import BxSegmented from '../components/BxSegmented.vue'
 import BxToggle from '../components/BxToggle.vue'
 import BxChip from '../components/BxChip.vue'
 import AppIcon from '../components/AppIcon.vue'
+import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
 import { useDownloadsStore } from '../stores/downloads'
+import { useDownloadOptionsStore } from '../stores/downloadOptions'
 import { showToast } from '../composables/toast'
 import { formatDuration, formatCount, isHttpUrl } from '../utils/format'
 
@@ -27,11 +29,18 @@ const probing = ref(false)
 const probeError = ref('')
 const info = ref<MediaInfo | null>(null)
 
-// Optionen für diesen Download (Abweichung von den globalen Einstellungen)
-const useDefaults = ref(true)
-const mode = ref<'audio' | 'video'>('audio')
-const audioFormat = ref('mp3')
-const videoQuality = ref('best')
+// Optionen für diesen Download — leben im Store und überdauern Downloads
+// und Seitenwechsel (Issue #3); Reset nur per Toggle oder App-Neustart.
+const options = useDownloadOptionsStore()
+const { useDefaults, mode, audioFormat, videoQuality, folder, writeSubtitles } =
+  storeToRefs(options)
+
+async function pickFolder(): Promise<void> {
+  const picked = await window.api.settings.pickFolder(
+    folder.value || settingsStore.settings?.downloadFolder
+  )
+  if (picked) folder.value = picked
+}
 
 const audioFormatOptions = ['mp3', 'm4a', 'opus', 'flac', 'wav'].map((v) => ({
   value: v,
@@ -53,10 +62,12 @@ function buildRequest(): DownloadRequest {
   if (info.value) request.knownTitle = info.value.title
   if (!useDefaults.value) {
     request.overrides = {
-      mode: mode.value,
+      mode: (mode.value === 'both' ? 'video' : mode.value) as AppSettings['mode'],
       audioFormat: audioFormat.value as AppSettings['audioFormat'],
-      videoQuality: videoQuality.value as AppSettings['videoQuality']
+      videoQuality: videoQuality.value as AppSettings['videoQuality'],
+      writeSubtitles: writeSubtitles.value
     }
+    if (folder.value) request.overrides.downloadFolder = folder.value
   }
   return request
 }
@@ -261,11 +272,21 @@ const playlistPreview = computed(() => {
           </div>
           <div class="col-4">
             <BxField
+              v-model="folder"
               :label="t('download.options.folder')"
               icon="folder"
-              :model-value="settingsStore.settings?.downloadFolder ?? ''"
-              readonly
-            />
+              :placeholder="settingsStore.settings?.downloadFolder ?? ''"
+            >
+              <template #append>
+                <BxBtn
+                  size="sm"
+                  variant="outline"
+                  icon="manage-folder"
+                  :label="t('settings.fields.browse')"
+                  @click="pickFolder"
+                />
+              </template>
+            </BxField>
           </div>
         </div>
       </div>
