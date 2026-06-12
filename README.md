@@ -10,7 +10,11 @@ neue Funktionen.
 ## Features
 
 - **Downloads**: einzelne Videos/Songs, komplette Playlists (eigene
-  Unterordner), Warteschlange mit bis zu 5 parallelen Downloads
+  Unterordner), Warteschlange mit bis zu 5 parallelen Downloads —
+  manuell startbar, pausierbar und umsortierbar
+- **Vorlagen**: Download-Presets mit Format, Qualität und eigenen
+  Speicherorten — auf Wunsch Video **und** Audio in einem Rutsch
+  (getrennte Ordner je Format)
 - **Audio**: MP3, M4A, OPUS, FLAC, WAV — Qualität wählbar, Cover-Thumbnail
   und Metadaten werden automatisch eingebettet
 - **Video**: MP4, MKV, WEBM — Auflösung begrenzbar (480p bis 4K)
