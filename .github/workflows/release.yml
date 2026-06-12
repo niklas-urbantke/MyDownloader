@@ -1,0 +1,67 @@
+name: Release
+
+# Baut bei jedem Versions-Tag (v4.0.0, v4.1.0 …) alle Installer und hängt
+# sie an ein GitHub-Release:
+#   Windows: MyDownloader-Setup-<v>.exe + portable .exe
+#   macOS:   .dmg + .zip (arm64 & x64)
+#   Linux:   .AppImage + .deb + .pacman
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fetch bundled binaries (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          node scripts/fetch-binaries.mjs --platform darwin --arch arm64
+          node scripts/fetch-binaries.mjs --platform darwin --arch x64
+
+      - name: Fetch bundled binaries (Windows)
+        if: runner.os == 'Windows'
+        run: node scripts/fetch-binaries.mjs --platform win32 --arch x64
+
+      - name: Fetch bundled binaries (Linux)
+        if: runner.os == 'Linux'
+        run: node scripts/fetch-binaries.mjs --platform linux --arch x64
+
+      - name: Build bundles
+        run: npm run build
+
+      - name: Package & publish (macOS)
+        if: runner.os == 'macOS'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npx electron-builder --mac --arm64 --x64 --publish always
+
+      - name: Package & publish (Windows)
+        if: runner.os == 'Windows'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --win --x64 --publish always
+
+      - name: Package & publish (Linux)
+        if: runner.os == 'Linux'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx electron-builder --linux --x64 --publish always

@@ -1,0 +1,26 @@
+# Maintainer: Niklas Urbantke
+# AUR-Paket für MyDownloader (Binary-Repackaging des offiziellen .deb-Releases).
+# Veröffentlichen: dieses PKGBUILD in ein AUR-Repo (ssh://aur@aur.archlinux.org/mydownloader-bin.git)
+# pushen; bei jedem Release pkgver anheben und Checksummen mit `updpkgsums` erneuern.
+
+pkgname=mydownloader-bin
+pkgver=4.0.0
+pkgrel=1
+pkgdesc="Moderner Musik- & Video-Downloader (yt-dlp + FFmpeg gebündelt)"
+arch=('x86_64')
+url="https://github.com/niklas-urbantke/YouTube-Downloader"
+license=('MIT')
+provides=('mydownloader')
+conflicts=('mydownloader')
+depends=('gtk3' 'nss' 'alsa-lib' 'libnotify' 'libxss' 'libxtst' 'xdg-utils' 'at-spi2-core' 'util-linux-libs' 'libsecret')
+options=('!strip')
+source=("${url}/releases/download/v${pkgver}/mydownloader_${pkgver}_amd64.deb")
+sha256sums=('SKIP')
+
+package() {
+  bsdtar -xf data.tar.* -C "${pkgdir}"
+
+  # Desktop-Integration sicherstellen
+  install -dm755 "${pkgdir}/usr/bin"
+  ln -sf "/opt/MyDownloader/mydownloader" "${pkgdir}/usr/bin/mydownloader"
+}
