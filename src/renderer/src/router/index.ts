@@ -22,6 +22,17 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/HistoryView.vue')
   },
   {
+    path: '/templates',
+    name: 'templates',
+    component: () => import('../views/TemplatesView.vue')
+  },
+  {
+    // Detail/Bearbeiten als eigene View ('new' = Anlage) — gleiche Maske für beides
+    path: '/templates/:id',
+    name: 'template-edit',
+    component: () => import('../views/TemplateEditView.vue')
+  },
+  {
     path: '/settings',
     name: 'settings',
     component: () => import('../views/SettingsView.vue')

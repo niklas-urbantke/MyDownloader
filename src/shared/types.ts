@@ -151,6 +151,26 @@ export interface DownloadItem {
 }
 
 // ---------------------------------------------------------------------------
+// Vorlagen (Download-Presets)
+// ---------------------------------------------------------------------------
+
+export interface DownloadTemplate {
+  id: string
+  name: string
+  /** 'both' lädt Video UND Audio (zwei Queue-Einträge) */
+  mode: DownloadMode | 'both'
+  audioFormat: AudioFormat
+  audioQuality: AppSettings['audioQuality']
+  videoContainer: VideoContainer
+  videoQuality: VideoQuality
+  writeSubtitles: boolean
+  /** Zielordner (leer = globaler Download-Ordner); bei 'both' der Video-Ordner */
+  folder: string
+  /** Separater Audio-Ordner im 'both'-Modus (leer = folder) */
+  audioFolder: string
+}
+
+// ---------------------------------------------------------------------------
 // Verlauf
 // ---------------------------------------------------------------------------
 
@@ -214,6 +234,10 @@ export const IPC = {
   downloadChanged: 'download:changed',
   downloadLogLine: 'download:log-line',
   clipboardUrl: 'clipboard:url',
+  // Vorlagen
+  templatesList: 'templates:list',
+  templatesSave: 'templates:save',
+  templatesDelete: 'templates:delete',
   // Verlauf
   historyList: 'history:list',
   historyClear: 'history:clear',

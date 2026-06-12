@@ -6,6 +6,7 @@ import {
   type BinaryStatus,
   type DownloadItem,
   type DownloadRequest,
+  type DownloadTemplate,
   type HistoryEntry,
   type MediaInfo
 } from '../shared/types'
@@ -64,6 +65,13 @@ const api = {
       ipcRenderer.on(IPC.downloadLogLine, listener)
       return () => ipcRenderer.removeListener(IPC.downloadLogLine, listener)
     }
+  },
+
+  templates: {
+    list: (): Promise<DownloadTemplate[]> => ipcRenderer.invoke(IPC.templatesList),
+    save: (template: DownloadTemplate): Promise<DownloadTemplate> =>
+      ipcRenderer.invoke(IPC.templatesSave, template),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IPC.templatesDelete, id)
   },
 
   history: {

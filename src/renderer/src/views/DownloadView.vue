@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import type { AppSettings, DownloadRequest, MediaInfo } from '@shared/types'
+import type { AppSettings, DownloadRequest, DownloadTemplate, MediaInfo } from '@shared/types'
 import PageHead from '../components/PageHead.vue'
 import BxCard from '../components/BxCard.vue'
 import BxBtn from '../components/BxBtn.vue'
@@ -16,7 +16,9 @@ import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
 import { useDownloadsStore } from '../stores/downloads'
 import { useDownloadOptionsStore } from '../stores/downloadOptions'
+import { useTemplatesStore } from '../stores/templates'
 import BxDialog from '../components/BxDialog.vue'
+import BxBanner from '../components/BxBanner.vue'
 import { showToast } from '../composables/toast'
 import { formatDuration, formatCount, isHttpUrl, analyzeCombiUrl, type CombiUrl } from '../utils/format'
 
@@ -33,14 +35,42 @@ const info = ref<MediaInfo | null>(null)
 // Optionen für diesen Download — leben im Store und überdauern Downloads
 // und Seitenwechsel (Issue #3); Reset nur per Toggle oder App-Neustart.
 const options = useDownloadOptionsStore()
-const { useDefaults, mode, audioFormat, videoQuality, folder, writeSubtitles } =
+const { useDefaults, mode, audioFormat, videoQuality, folder, audioFolder, writeSubtitles, templateId } =
   storeToRefs(options)
+
+const templates = useTemplatesStore()
+const activeTemplate = computed<DownloadTemplate | null>(
+  () => (templateId.value ? (templates.byId(templateId.value) ?? null) : null)
+)
+const templateOptions = computed(() => [
+  { value: '', label: t('templates.manual') },
+  ...templates.entries.map((tp) => ({ value: tp.id, label: tp.name }))
+])
+
+// Vorschau automatisch, sobald eine gültige URL eingegeben/eingefügt wurde
+let probeTimer: ReturnType<typeof setTimeout> | null = null
+watch(url, (value, old) => {
+  if (value === old) return
+  probeError.value = ''
+  if (probeTimer) clearTimeout(probeTimer)
+  if (!isHttpUrl(value)) return
+  probeTimer = setTimeout(() => {
+    if (!probing.value && isHttpUrl(url.value)) void probe()
+  }, 600)
+})
 
 async function pickFolder(): Promise<void> {
   const picked = await window.api.settings.pickFolder(
     folder.value || settingsStore.settings?.downloadFolder
   )
   if (picked) folder.value = picked
+}
+
+async function pickAudioFolder(): Promise<void> {
+  const picked = await window.api.settings.pickFolder(
+    audioFolder.value || folder.value || settingsStore.settings?.downloadFolder
+  )
+  if (picked) audioFolder.value = picked
 }
 
 const audioFormatOptions = ['mp3', 'm4a', 'opus', 'flac', 'wav'].map((v) => ({
@@ -80,19 +110,83 @@ async function chooseCombi(which: 'video' | 'playlist'): Promise<void> {
   await next?.()
 }
 
-function buildRequest(): DownloadRequest {
-  const request: DownloadRequest = { url: url.value.trim() }
-  if (info.value) request.knownTitle = info.value.title
-  if (!useDefaults.value) {
-    request.overrides = {
-      mode: (mode.value === 'both' ? 'video' : mode.value) as AppSettings['mode'],
-      audioFormat: audioFormat.value as AppSettings['audioFormat'],
-      videoQuality: videoQuality.value as AppSettings['videoQuality'],
-      writeSubtitles: writeSubtitles.value
+/**
+ * Baut die Download-Requests: normalerweise einer; im "Beides"-Modus
+ * (manuell oder per Vorlage) zwei — Video und Audio mit eigenen Ordnern.
+ */
+function buildRequests(): DownloadRequest[] {
+  const base: DownloadRequest = { url: url.value.trim() }
+  if (info.value) base.knownTitle = info.value.title
+
+  // Vorlage gewählt → Vorlage bestimmt alles
+  const tpl = activeTemplate.value
+  if (tpl) {
+    const videoReq: DownloadRequest = {
+      ...base,
+      overrides: {
+        mode: 'video',
+        videoContainer: tpl.videoContainer,
+        videoQuality: tpl.videoQuality,
+        writeSubtitles: tpl.writeSubtitles,
+        ...(tpl.folder ? { downloadFolder: tpl.folder } : {})
+      }
     }
-    if (folder.value) request.overrides.downloadFolder = folder.value
+    const audioReq: DownloadRequest = {
+      ...base,
+      overrides: {
+        mode: 'audio',
+        audioFormat: tpl.audioFormat,
+        audioQuality: tpl.audioQuality,
+        writeSubtitles: tpl.writeSubtitles,
+        ...(tpl.audioFolder || tpl.folder
+          ? { downloadFolder: tpl.audioFolder || tpl.folder }
+          : {})
+      }
+    }
+    if (tpl.mode === 'video') return [videoReq]
+    if (tpl.mode === 'audio') return [audioReq]
+    return [videoReq, audioReq]
   }
-  return request
+
+  if (useDefaults.value) return [base]
+
+  const common = {
+    audioFormat: audioFormat.value as AppSettings['audioFormat'],
+    videoQuality: videoQuality.value as AppSettings['videoQuality'],
+    writeSubtitles: writeSubtitles.value
+  }
+  if (mode.value === 'both') {
+    return [
+      {
+        ...base,
+        overrides: {
+          ...common,
+          mode: 'video',
+          ...(folder.value ? { downloadFolder: folder.value } : {})
+        }
+      },
+      {
+        ...base,
+        overrides: {
+          ...common,
+          mode: 'audio',
+          ...(audioFolder.value || folder.value
+            ? { downloadFolder: audioFolder.value || folder.value }
+            : {})
+        }
+      }
+    ]
+  }
+  return [
+    {
+      ...base,
+      overrides: {
+        ...common,
+        mode: mode.value as AppSettings['mode'],
+        ...(folder.value ? { downloadFolder: folder.value } : {})
+      }
+    }
+  ]
 }
 
 async function probe(): Promise<void> {
@@ -121,11 +215,12 @@ async function start(goToQueue: boolean): Promise<void> {
     return
   }
   if (interceptCombi(() => start(goToQueue))) return
-  const request = buildRequest()
   // "Download starten" legt sofort los; "Zur Warteschlange" wartet auf Queue-Start
-  request.startNow = goToQueue
-  await downloads.add(request)
-  showToast(t('download.added'))
+  const requests = buildRequests().map((r) => ({ ...r, startNow: goToQueue }))
+  await downloads.addMany(requests)
+  showToast(
+    requests.length > 1 ? t('download.addedMany', { n: requests.length }) : t('download.added')
+  )
   url.value = ''
   info.value = null
   if (goToQueue) router.push({ name: 'queue' })
@@ -285,55 +380,130 @@ const playlistPreview = computed(() => {
     <!-- Optionen für diesen Download -->
     <BxCard :title="t('download.options.title')">
       <div class="stack">
-        <BxToggle v-model="useDefaults" :label="t('download.options.useDefaults')" />
-        <div v-if="!useDefaults" class="bx-form-grid">
-          <div class="col-4">
-            <div class="f">
-              <div class="f-label">{{ t('download.options.mode') }}</div>
-              <BxSegmented
-                v-model="mode"
-                :options="[
-                  { value: 'audio', label: t('download.options.audio'), icon: 'music' },
-                  { value: 'video', label: t('download.options.video'), icon: 'video-player' }
-                ]"
+        <!-- Vorlagen-Auswahl -->
+        <div class="row" style="gap: 16px; align-items: flex-end; flex-wrap: wrap">
+          <div style="flex: 1; min-width: 240px">
+            <BxSelect
+              v-model="templateId"
+              :label="t('templates.useTemplate')"
+              icon="layout"
+              :options="templateOptions"
+            />
+          </div>
+          <BxBtn
+            icon="pencil"
+            variant="ghost"
+            :label="t('templates.manage')"
+            @click="router.push({ name: 'templates' })"
+          />
+        </div>
+
+        <!-- Aktive Vorlage: Zusammenfassung statt manueller Felder -->
+        <BxBanner v-if="activeTemplate" variant="info" icon="layout">
+          <strong>{{ activeTemplate.name }}</strong> —
+          <template v-if="activeTemplate.mode === 'both'">{{ t('templates.modeBoth') }},
+            {{ activeTemplate.videoContainer.toUpperCase() }} + {{ activeTemplate.audioFormat.toUpperCase() }}</template>
+          <template v-else-if="activeTemplate.mode === 'audio'">{{ t('download.options.audio') }},
+            {{ activeTemplate.audioFormat.toUpperCase() }}</template>
+          <template v-else>{{ t('download.options.video') }},
+            {{ activeTemplate.videoContainer.toUpperCase() }}</template>
+          <template v-if="activeTemplate.folder"> → {{ activeTemplate.folder }}</template>
+        </BxBanner>
+
+        <template v-else>
+          <BxToggle v-model="useDefaults" :label="t('download.options.useDefaults')" />
+          <div v-if="!useDefaults" class="bx-form-grid">
+            <div class="col-6">
+              <div class="f">
+                <div class="f-label">{{ t('download.options.mode') }}</div>
+                <BxSegmented
+                  v-model="mode"
+                  :options="[
+                    { value: 'audio', label: t('download.options.audio'), icon: 'music' },
+                    { value: 'video', label: t('download.options.video'), icon: 'video-player' },
+                    { value: 'both', label: t('templates.modeBoth'), icon: 'layout' }
+                  ]"
+                />
+              </div>
+            </div>
+            <div class="col-6">
+              <BxSelect
+                v-if="mode === 'audio'"
+                v-model="audioFormat"
+                icon="music"
+                :label="t('download.options.format')"
+                :options="audioFormatOptions"
+              />
+              <BxSelect
+                v-else-if="mode === 'video'"
+                v-model="videoQuality"
+                icon="video-player"
+                :label="t('download.options.quality')"
+                :options="videoQualityOptions"
+              />
+              <div v-else class="bx-form-grid" style="gap: 16px">
+                <div class="col-6">
+                  <BxSelect
+                    v-model="audioFormat"
+                    icon="music"
+                    :label="t('download.options.format')"
+                    :options="audioFormatOptions"
+                  />
+                </div>
+                <div class="col-6">
+                  <BxSelect
+                    v-model="videoQuality"
+                    icon="video-player"
+                    :label="t('download.options.quality')"
+                    :options="videoQualityOptions"
+                  />
+                </div>
+              </div>
+            </div>
+            <div :class="mode === 'both' ? 'col-6' : 'col-8'">
+              <BxField
+                v-model="folder"
+                :label="mode === 'both' ? t('templates.fields.videoFolder') : t('download.options.folder')"
+                icon="folder"
+                :placeholder="settingsStore.settings?.downloadFolder ?? ''"
+              >
+                <template #append>
+                  <BxBtn
+                    size="sm"
+                    variant="outline"
+                    icon="manage-folder"
+                    :label="t('settings.fields.browse')"
+                    @click="pickFolder"
+                  />
+                </template>
+              </BxField>
+            </div>
+            <div v-if="mode === 'both'" class="col-6">
+              <BxField
+                v-model="audioFolder"
+                :label="t('templates.fields.audioFolder')"
+                icon="folder"
+                :placeholder="folder || (settingsStore.settings?.downloadFolder ?? '')"
+              >
+                <template #append>
+                  <BxBtn
+                    size="sm"
+                    variant="outline"
+                    icon="manage-folder"
+                    :label="t('settings.fields.browse')"
+                    @click="pickAudioFolder"
+                  />
+                </template>
+              </BxField>
+            </div>
+            <div class="col-12">
+              <BxToggle
+                v-model="writeSubtitles"
+                :label="t('settings.fields.writeSubtitles')"
               />
             </div>
           </div>
-          <div class="col-4">
-            <BxSelect
-              v-if="mode === 'audio'"
-              v-model="audioFormat"
-              icon="music"
-              :label="t('download.options.format')"
-              :options="audioFormatOptions"
-            />
-            <BxSelect
-              v-else
-              v-model="videoQuality"
-              icon="video-player"
-              :label="t('download.options.quality')"
-              :options="videoQualityOptions"
-            />
-          </div>
-          <div class="col-4">
-            <BxField
-              v-model="folder"
-              :label="t('download.options.folder')"
-              icon="folder"
-              :placeholder="settingsStore.settings?.downloadFolder ?? ''"
-            >
-              <template #append>
-                <BxBtn
-                  size="sm"
-                  variant="outline"
-                  icon="manage-folder"
-                  :label="t('settings.fields.browse')"
-                  @click="pickFolder"
-                />
-              </template>
-            </BxField>
-          </div>
-        </div>
+        </template>
       </div>
     </BxCard>
   </div>

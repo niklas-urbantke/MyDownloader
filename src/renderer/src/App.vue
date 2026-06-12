@@ -9,6 +9,7 @@ import { showToast } from './composables/toast'
 import { useSettingsStore } from './stores/settings'
 import { useDownloadsStore } from './stores/downloads'
 import { useHistoryStore } from './stores/history'
+import { useTemplatesStore } from './stores/templates'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -17,10 +18,11 @@ const router = useRouter()
 const settingsStore = useSettingsStore()
 const downloadsStore = useDownloadsStore()
 const historyStore = useHistoryStore()
+const templatesStore = useTemplatesStore()
 
 onMounted(async () => {
   await settingsStore.load()
-  await Promise.all([downloadsStore.load(), historyStore.load()])
+  await Promise.all([downloadsStore.load(), historyStore.load(), templatesStore.load()])
 
   // Clipboard-Watcher: erkannte Video-URL als Toast mit Direkt-Aktion anbieten
   window.api.clipboard.onUrlDetected((url) => {
@@ -50,6 +52,7 @@ const navGroups = computed(() => [
       { route: 'dashboard', icon: 'grid-layout', labelKey: 'nav.dashboard' },
       { route: 'download', icon: 'download', labelKey: 'nav.download' },
       { route: 'queue', icon: 'checklist', labelKey: 'nav.queue' },
+      { route: 'templates', icon: 'layout', labelKey: 'nav.templates' },
       { route: 'history', icon: 'time', labelKey: 'nav.history' }
     ] as NavItem[]
   },
@@ -63,6 +66,13 @@ const navGroups = computed(() => [
 const breadcrumb = computed(() => {
   const name = String(route.name ?? 'dashboard')
   if (name === 'dashboard') return [{ label: t('nav.dashboard') }]
+  if (name === 'template-edit') {
+    return [
+      { label: t('nav.dashboard'), route: 'dashboard' },
+      { label: t('nav.templates'), route: 'templates' },
+      { label: route.params.id === 'new' ? t('templates.create') : t('common.edit') }
+    ]
+  }
   return [{ label: t('nav.dashboard'), route: 'dashboard' }, { label: t(`nav.${name}`) }]
 })
 

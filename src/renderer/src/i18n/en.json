@@ -14,7 +14,8 @@
     "sections": {
       "main": "Application",
       "system": "System"
-    }
+    },
+    "templates": "Templates"
   },
   "common": {
     "save": "Save",
@@ -104,7 +105,7 @@
     "pasteFromClipboard": "Paste from clipboard",
     "preview": {
       "title": "Preview",
-      "empty": "Paste a URL and click “Preview” to see details.",
+      "empty": "Paste a URL — the preview loads automatically.",
       "uploader": "Channel",
       "duration": "Duration",
       "views": "Views",
@@ -277,5 +278,33 @@
   "notifications": {
     "completed": "Download complete",
     "failed": "Download failed"
+  },
+  "templates": {
+    "title": "Templates",
+    "subtitle": "Download presets: define format, quality and folders once, reuse them anytime.",
+    "create": "New template",
+    "createTitle": "New template",
+    "editTitle": "Template: {name}",
+    "editSubtitle": "View and edit share the same form — apply changes with “Save”.",
+    "empty": "No templates yet. Create your first preset with “New template”.",
+    "manual": "Manual (no template)",
+    "useTemplate": "Template",
+    "manage": "Manage templates",
+    "modeBoth": "Both",
+    "defaultFolder": "Global download folder",
+    "nameRequired": "Please enter a name.",
+    "namePlaceholder": "e.g. music archive, 4K videos …",
+    "saved": "Template “{name}” saved",
+    "deleteTitle": "Delete template",
+    "deleteQuestion": "Really delete template “{name}”?",
+    "sections": {
+      "general": "General",
+      "folders": "Folders"
+    },
+    "fields": {
+      "name": "Name",
+      "videoFolder": "Video folder",
+      "audioFolder": "Audio folder"
+    }
   }
 }

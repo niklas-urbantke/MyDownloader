@@ -1,6 +1,7 @@
 import { app, dialog, ipcMain, shell, Notification, BrowserWindow } from 'electron'
 import { existsSync } from 'node:fs'
-import { IPC, type AppSettings, type DownloadRequest } from '@shared/types'
+import { IPC, type AppSettings, type DownloadRequest, type DownloadTemplate } from '@shared/types'
+import { listTemplates, saveTemplate, deleteTemplate } from './templates'
 import { getSettings, updateSettings } from './settings'
 import { listHistory, addHistoryEntry, removeHistoryEntry, clearHistory } from './history'
 import { getBinaryStatus, updateYtDlp } from './binaries'
@@ -86,6 +87,11 @@ export function registerIpc(): void {
   ipcMain.handle(IPC.downloadMove, (_e, id: string, direction: 'up' | 'down') =>
     queue.move(id, direction)
   )
+
+  // --- Vorlagen -----------------------------------------------------------------
+  ipcMain.handle(IPC.templatesList, () => listTemplates())
+  ipcMain.handle(IPC.templatesSave, (_e, template: DownloadTemplate) => saveTemplate(template))
+  ipcMain.handle(IPC.templatesDelete, (_e, id: string) => deleteTemplate(id))
 
   // --- Verlauf ----------------------------------------------------------------
   ipcMain.handle(IPC.historyList, () => listHistory())

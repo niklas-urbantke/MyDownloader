@@ -14,7 +14,8 @@
     "sections": {
       "main": "Anwendung",
       "system": "System"
-    }
+    },
+    "templates": "Vorlagen"
   },
   "common": {
     "save": "Speichern",
@@ -104,7 +105,7 @@
     "pasteFromClipboard": "Aus Zwischenablage",
     "preview": {
       "title": "Vorschau",
-      "empty": "Füge eine URL ein und klicke auf „Vorschau“, um Details zu sehen.",
+      "empty": "Füge eine URL ein — die Vorschau lädt automatisch.",
       "uploader": "Kanal",
       "duration": "Dauer",
       "views": "Aufrufe",
@@ -277,5 +278,33 @@
   "notifications": {
     "completed": "Download abgeschlossen",
     "failed": "Download fehlgeschlagen"
+  },
+  "templates": {
+    "title": "Vorlagen",
+    "subtitle": "Download-Presets: Format, Qualität und Speicherorte einmal festlegen, immer wieder nutzen.",
+    "create": "Neue Vorlage",
+    "createTitle": "Neue Vorlage",
+    "editTitle": "Vorlage: {name}",
+    "editSubtitle": "Ansehen und Bearbeiten nutzen dieselbe Maske — Änderungen mit „Speichern“ übernehmen.",
+    "empty": "Noch keine Vorlagen. Lege mit „Neue Vorlage“ dein erstes Preset an.",
+    "manual": "Manuell (keine Vorlage)",
+    "useTemplate": "Vorlage",
+    "manage": "Vorlagen verwalten",
+    "modeBoth": "Beides",
+    "defaultFolder": "Globaler Download-Ordner",
+    "nameRequired": "Bitte einen Namen vergeben.",
+    "namePlaceholder": "z. B. Musik-Archiv, 4K-Videos …",
+    "saved": "Vorlage „{name}“ gespeichert",
+    "deleteTitle": "Vorlage löschen",
+    "deleteQuestion": "Vorlage „{name}“ wirklich löschen?",
+    "sections": {
+      "general": "Allgemein",
+      "folders": "Speicherorte"
+    },
+    "fields": {
+      "name": "Name",
+      "videoFolder": "Video-Ordner",
+      "audioFolder": "Audio-Ordner"
+    }
   }
 }
