@@ -95,6 +95,19 @@ deb:
 
 pacman:
   artifactName: ${name}-${version}-${arch}.${ext}
+  # electron-builder-Defaults enthalten Pakete, die es in den Arch-Repos
+  # nicht mehr gibt (http-parser u. a.) — daher aktuelle Liste setzen
+  depends:
+    - gtk3
+    - nss
+    - alsa-lib
+    - libnotify
+    - libxss
+    - libxtst
+    - xdg-utils
+    - at-spi2-core
+    - util-linux-libs
+    - libsecret
 
 publish:
   provider: github
