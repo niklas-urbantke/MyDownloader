@@ -1,0 +1,49 @@
+{
+  "name": "mydownloader",
+  "productName": "MyDownloader",
+  "version": "4.0.0",
+  "description": "MyDownloader — moderner Musik- & Video-Downloader auf Basis von yt-dlp und FFmpeg",
+  "main": "./out/main/index.js",
+  "author": {
+    "name": "Niklas Urbantke"
+  },
+  "homepage": "https://github.com/niklas-urbantke/YouTube-Downloader",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/niklas-urbantke/YouTube-Downloader.git"
+  },
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "electron-vite dev",
+    "start": "electron-vite preview",
+    "build": "electron-vite build",
+    "typecheck:web": "vue-tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "fetch-binaries": "node scripts/fetch-binaries.mjs",
+    "build:mac": "npm run build && electron-builder --mac",
+    "build:win": "npm run build && electron-builder --win",
+    "build:linux": "npm run build && electron-builder --linux",
+    "release": "npm run build && electron-builder --publish always"
+  },
+  "dependencies": {
+    "@fontsource/montserrat": "^5.1.0",
+    "@fontsource/open-sans": "^5.1.0",
+    "pinia": "^2.2.6",
+    "vue": "^3.5.13",
+    "vue-i18n": "^10.0.4",
+    "vue-router": "^4.4.5"
+  },
+  "devDependencies": {
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "@types/node": "^20.17.6",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "typescript": "^5.6.3",
+    "vue-tsc": "^2.1.10"
+  }
+}

@@ -1,0 +1,270 @@
+{
+  "app": {
+    "name": "MyDownloader",
+    "tagline": "Musik & Videos herunterladen — schnell, sauber, in deinem Format."
+  },
+  "nav": {
+    "menu": "Navigation",
+    "dashboard": "Übersicht",
+    "download": "Neuer Download",
+    "queue": "Warteschlange",
+    "history": "Verlauf",
+    "settings": "Einstellungen",
+    "about": "Info",
+    "sections": {
+      "main": "Anwendung",
+      "system": "System"
+    }
+  },
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "edit": "Bearbeiten",
+    "view": "Ansehen",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "search": "Suchen",
+    "refresh": "Aktualisieren",
+    "clear": "Leeren",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "retry": "Erneut versuchen",
+    "open": "Öffnen",
+    "showInFolder": "Im Ordner zeigen",
+    "copyUrl": "URL kopieren",
+    "loading": "Lädt…",
+    "unknown": "Unbekannt",
+    "yes": "Ja",
+    "no": "Nein",
+    "all": "Alle",
+    "none": "Keine",
+    "done": "Fertig",
+    "today": "Heute",
+    "allDone": "Alles erledigt"
+  },
+  "status": {
+    "queued": "Wartet",
+    "fetching-info": "Lädt Infos",
+    "downloading": "Lädt herunter",
+    "converting": "Konvertiert",
+    "completed": "Fertig",
+    "error": "Fehler",
+    "cancelled": "Abgebrochen",
+    "paused": "Pausiert"
+  },
+  "dashboard": {
+    "title": "Übersicht",
+    "subtitle": "Dein Einstieg — alle Bereiche und der aktuelle Stand auf einen Blick.",
+    "kpi": {
+      "active": "Aktive Downloads",
+      "queued": "In Warteschlange",
+      "completedToday": "Heute fertig",
+      "total": "Downloads gesamt"
+    },
+    "groups": {
+      "download": "Herunterladen",
+      "library": "Bibliothek & Verwaltung"
+    },
+    "tiles": {
+      "download": {
+        "label": "Neuer Download",
+        "sub": "Video, Song oder ganze Playlist laden"
+      },
+      "queue": {
+        "label": "Warteschlange",
+        "sub": "Laufende und geplante Downloads"
+      },
+      "history": {
+        "label": "Verlauf",
+        "sub": "Alles, was du schon geladen hast"
+      },
+      "settings": {
+        "label": "Einstellungen",
+        "sub": "Formate, Qualität, Ordner & mehr"
+      }
+    },
+    "badges": {
+      "active": "{n} aktiv",
+      "queued": "{n} wartend",
+      "errors": "{n} Fehler",
+      "entries": "{n} Einträge",
+      "completedToday": "{n} heute",
+      "binariesMissing": "Komponenten fehlen"
+    },
+    "recent": "Zuletzt heruntergeladen"
+  },
+  "download": {
+    "title": "Neuer Download",
+    "subtitle": "URL einfügen, Vorschau prüfen, herunterladen — einzeln oder als Playlist.",
+    "urlPlaceholder": "https://www.youtube.com/watch?v=… oder Playlist-URL",
+    "probe": "Vorschau",
+    "start": "Download starten",
+    "addToQueue": "Zur Warteschlange",
+    "pasteFromClipboard": "Aus Zwischenablage",
+    "preview": {
+      "title": "Vorschau",
+      "empty": "Füge eine URL ein und klicke auf „Vorschau“, um Details zu sehen.",
+      "uploader": "Kanal",
+      "duration": "Dauer",
+      "views": "Aufrufe",
+      "playlist": "Playlist",
+      "entries": "{n} Einträge",
+      "showingFirst": "Erste {n} Einträge"
+    },
+    "options": {
+      "title": "Optionen für diesen Download",
+      "useDefaults": "Globale Einstellungen verwenden",
+      "mode": "Modus",
+      "audio": "Audio",
+      "video": "Video",
+      "format": "Format",
+      "quality": "Qualität",
+      "folder": "Zielordner"
+    },
+    "errors": {
+      "invalidUrl": "Das sieht nicht nach einer gültigen URL aus.",
+      "probeFailed": "Vorschau fehlgeschlagen: {msg}"
+    },
+    "added": "Zur Warteschlange hinzugefügt",
+    "addedMany": "{n} Downloads zur Warteschlange hinzugefügt"
+  },
+  "queue": {
+    "title": "Warteschlange",
+    "subtitle": "Alle laufenden, wartenden und abgeschlossenen Downloads dieser Sitzung.",
+    "empty": "Die Warteschlange ist leer. Starte einen neuen Download über die Übersicht.",
+    "importFile": "Aus Datei importieren",
+    "importClipboard": "Aus Zwischenablage",
+    "clearFinished": "Fertige aufräumen",
+    "cancelAll": "Alle abbrechen",
+    "showLog": "Protokoll anzeigen",
+    "log": "Protokoll",
+    "speed": "Geschwindigkeit",
+    "eta": "Verbleibend",
+    "playlistProgress": "Titel {current} von {total}",
+    "confirmCancelAll": "Wirklich alle laufenden Downloads abbrechen?"
+  },
+  "history": {
+    "title": "Verlauf",
+    "subtitle": "Alle abgeschlossenen Downloads — durchsuchbar und filterbar.",
+    "empty": "Noch keine Downloads im Verlauf.",
+    "searchPlaceholder": "Titel, Kanal oder URL durchsuchen…",
+    "filter": {
+      "all": "Alle",
+      "audio": "Audio",
+      "video": "Video",
+      "playlists": "Playlists",
+      "errors": "Fehler"
+    },
+    "columns": {
+      "when": "Datum",
+      "title": "Titel",
+      "format": "Format",
+      "status": "Status"
+    },
+    "redownload": "Erneut laden",
+    "clearAll": "Verlauf löschen",
+    "confirmClear": "Den gesamten Verlauf wirklich löschen? Die heruntergeladenen Dateien bleiben erhalten.",
+    "fileMissing": "Datei nicht mehr vorhanden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "subtitle": "Standards für alle Downloads. Einzelne Downloads können davon abweichen.",
+    "saved": "Einstellungen gespeichert",
+    "sections": {
+      "output": "Ausgabe",
+      "audio": "Audio",
+      "video": "Video",
+      "subtitles": "Untertitel",
+      "network": "Netzwerk & Leistung",
+      "advanced": "Erweitert",
+      "appearance": "Darstellung",
+      "system": "System & Wartung"
+    },
+    "fields": {
+      "downloadFolder": "Download-Ordner",
+      "browse": "Durchsuchen",
+      "mode": "Standard-Modus",
+      "modeAudio": "Audio extrahieren",
+      "modeVideo": "Video behalten",
+      "audioFormat": "Audio-Format",
+      "audioQuality": "Audio-Qualität",
+      "audioQualityBest": "0 — Beste",
+      "audioQualitySmallest": "9 — Kleinste Datei",
+      "videoContainer": "Video-Container",
+      "videoQuality": "Maximale Auflösung",
+      "videoQualityBest": "Beste verfügbare",
+      "embedThumbnail": "Thumbnail als Cover einbetten",
+      "embedMetadata": "Metadaten (Titel, Künstler …) einbetten",
+      "writeSubtitles": "Untertitel herunterladen (.srt)",
+      "subtitleLanguages": "Sprachen (Komma-getrennt)",
+      "speedLimit": "Download-Limit (MB/s)",
+      "speedLimitHint": "Leer lassen für unbegrenzt",
+      "concurrency": "Parallele Downloads",
+      "sponsorBlock": "SponsorBlock: Sponsor-Segmente aus Videos entfernen",
+      "playlistSubfolder": "Playlists in eigene Unterordner laden",
+      "filenameTemplate": "Dateinamen-Schema",
+      "filenameTitle": "Titel",
+      "filenameArtistTitle": "Künstler - Titel",
+      "filenameIndexTitle": "Nr. - Titel (Playlist-Reihenfolge)",
+      "extraArgs": "Zusätzliche yt-dlp-Argumente",
+      "extraArgsHint": "Nur für Profis — wird unverändert an yt-dlp angehängt.",
+      "theme": "Erscheinungsbild",
+      "themeLight": "Hell",
+      "themeDark": "Dunkel",
+      "themeSystem": "Systemeinstellung",
+      "locale": "Sprache",
+      "localeSystem": "Systemsprache",
+      "notifyOnComplete": "Benachrichtigung, wenn ein Download fertig ist",
+      "clipboardWatcher": "Zwischenablage auf Video-URLs überwachen"
+    },
+    "binaries": {
+      "title": "Komponenten",
+      "ytdlp": "yt-dlp",
+      "ffmpeg": "FFmpeg",
+      "available": "Vorhanden",
+      "missing": "Fehlt",
+      "version": "Version {v}",
+      "updateYtDlp": "yt-dlp aktualisieren",
+      "updated": "yt-dlp ist aktuell: {v}",
+      "updateFailed": "Update fehlgeschlagen: {msg}"
+    },
+    "importV3": {
+      "title": "Aus Version 3 importieren",
+      "description": "Übernimmt Einstellungen und Download-Verlauf aus MyDownloader v3 (settings.json / download_history.json).",
+      "action": "v3-Daten importieren",
+      "done": "{settings} Einstellungen und {history} Verlaufs-Einträge importiert"
+    }
+  },
+  "about": {
+    "title": "Info",
+    "subtitle": "Über diese Anwendung.",
+    "version": "Version {v}",
+    "stack": "Gebaut mit Electron, Vue 3, yt-dlp und FFmpeg.",
+    "features": "Funktionen",
+    "featureList": [
+      "Einzelne Videos & Songs herunterladen",
+      "Komplette Playlists mit eigenem Unterordner",
+      "Warteschlange mit parallelen Downloads",
+      "Vorschau vor dem Download",
+      "Audio: MP3, M4A, OPUS, FLAC, WAV",
+      "Video: MP4, MKV, WEBM bis 4K",
+      "Cover & Metadaten automatisch einbetten",
+      "Untertitel in mehreren Sprachen",
+      "SponsorBlock-Integration",
+      "Download-Verlauf mit Suche",
+      "Geschwindigkeits-Limit",
+      "Hell- & Dunkel-Modus, Deutsch & Englisch"
+    ],
+    "openSource": "Lizenzen & Open Source",
+    "checkUpdates": "Auf Updates prüfen"
+  },
+  "clipboard": {
+    "detected": "Video-URL in der Zwischenablage erkannt",
+    "download": "Herunterladen"
+  },
+  "notifications": {
+    "completed": "Download abgeschlossen",
+    "failed": "Download fehlgeschlagen"
+  }
+}

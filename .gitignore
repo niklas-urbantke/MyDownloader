@@ -1,3 +1,28 @@
-download_history.json
+# Dependencies
+node_modules/
 
-download_history.json
+# Build output
+out/
+dist/
+release/
+
+# Bundled external binaries (fetched via scripts/fetch-binaries.mjs)
+resources/bin/
+
+# Runtime data (dev)
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Env
+.env
+.env.local

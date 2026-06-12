@@ -1,0 +1,270 @@
+{
+  "app": {
+    "name": "MyDownloader",
+    "tagline": "Download music & videos — fast, clean, in your format."
+  },
+  "nav": {
+    "menu": "Navigation",
+    "dashboard": "Overview",
+    "download": "New download",
+    "queue": "Queue",
+    "history": "History",
+    "settings": "Settings",
+    "about": "About",
+    "sections": {
+      "main": "Application",
+      "system": "System"
+    }
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "close": "Close",
+    "confirm": "Confirm",
+    "search": "Search",
+    "refresh": "Refresh",
+    "clear": "Clear",
+    "add": "Add",
+    "remove": "Remove",
+    "retry": "Retry",
+    "open": "Open",
+    "showInFolder": "Show in folder",
+    "copyUrl": "Copy URL",
+    "loading": "Loading…",
+    "unknown": "Unknown",
+    "yes": "Yes",
+    "no": "No",
+    "all": "All",
+    "none": "None",
+    "done": "Done",
+    "today": "Today",
+    "allDone": "All done"
+  },
+  "status": {
+    "queued": "Queued",
+    "fetching-info": "Fetching info",
+    "downloading": "Downloading",
+    "converting": "Converting",
+    "completed": "Completed",
+    "error": "Error",
+    "cancelled": "Cancelled",
+    "paused": "Paused"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "subtitle": "Your starting point — all areas and the current state at a glance.",
+    "kpi": {
+      "active": "Active downloads",
+      "queued": "Queued",
+      "completedToday": "Completed today",
+      "total": "Total downloads"
+    },
+    "groups": {
+      "download": "Download",
+      "library": "Library & management"
+    },
+    "tiles": {
+      "download": {
+        "label": "New download",
+        "sub": "Grab a video, song or entire playlist"
+      },
+      "queue": {
+        "label": "Queue",
+        "sub": "Running and scheduled downloads"
+      },
+      "history": {
+        "label": "History",
+        "sub": "Everything you have downloaded"
+      },
+      "settings": {
+        "label": "Settings",
+        "sub": "Formats, quality, folders & more"
+      }
+    },
+    "badges": {
+      "active": "{n} active",
+      "queued": "{n} queued",
+      "errors": "{n} errors",
+      "entries": "{n} entries",
+      "completedToday": "{n} today",
+      "binariesMissing": "Components missing"
+    },
+    "recent": "Recently downloaded"
+  },
+  "download": {
+    "title": "New download",
+    "subtitle": "Paste a URL, check the preview, download — single item or playlist.",
+    "urlPlaceholder": "https://www.youtube.com/watch?v=… or playlist URL",
+    "probe": "Preview",
+    "start": "Start download",
+    "addToQueue": "Add to queue",
+    "pasteFromClipboard": "Paste from clipboard",
+    "preview": {
+      "title": "Preview",
+      "empty": "Paste a URL and click “Preview” to see details.",
+      "uploader": "Channel",
+      "duration": "Duration",
+      "views": "Views",
+      "playlist": "Playlist",
+      "entries": "{n} entries",
+      "showingFirst": "First {n} entries"
+    },
+    "options": {
+      "title": "Options for this download",
+      "useDefaults": "Use global settings",
+      "mode": "Mode",
+      "audio": "Audio",
+      "video": "Video",
+      "format": "Format",
+      "quality": "Quality",
+      "folder": "Destination folder"
+    },
+    "errors": {
+      "invalidUrl": "That does not look like a valid URL.",
+      "probeFailed": "Preview failed: {msg}"
+    },
+    "added": "Added to queue",
+    "addedMany": "{n} downloads added to queue"
+  },
+  "queue": {
+    "title": "Queue",
+    "subtitle": "All running, waiting and finished downloads of this session.",
+    "empty": "The queue is empty. Start a new download from the overview.",
+    "importFile": "Import from file",
+    "importClipboard": "From clipboard",
+    "clearFinished": "Clear finished",
+    "cancelAll": "Cancel all",
+    "showLog": "Show log",
+    "log": "Log",
+    "speed": "Speed",
+    "eta": "Remaining",
+    "playlistProgress": "Track {current} of {total}",
+    "confirmCancelAll": "Really cancel all running downloads?"
+  },
+  "history": {
+    "title": "History",
+    "subtitle": "All completed downloads — searchable and filterable.",
+    "empty": "No downloads in history yet.",
+    "searchPlaceholder": "Search title, channel or URL…",
+    "filter": {
+      "all": "All",
+      "audio": "Audio",
+      "video": "Video",
+      "playlists": "Playlists",
+      "errors": "Errors"
+    },
+    "columns": {
+      "when": "Date",
+      "title": "Title",
+      "format": "Format",
+      "status": "Status"
+    },
+    "redownload": "Download again",
+    "clearAll": "Clear history",
+    "confirmClear": "Really delete the entire history? Downloaded files are kept.",
+    "fileMissing": "File no longer exists"
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Defaults for all downloads. Individual downloads can override them.",
+    "saved": "Settings saved",
+    "sections": {
+      "output": "Output",
+      "audio": "Audio",
+      "video": "Video",
+      "subtitles": "Subtitles",
+      "network": "Network & performance",
+      "advanced": "Advanced",
+      "appearance": "Appearance",
+      "system": "System & maintenance"
+    },
+    "fields": {
+      "downloadFolder": "Download folder",
+      "browse": "Browse",
+      "mode": "Default mode",
+      "modeAudio": "Extract audio",
+      "modeVideo": "Keep video",
+      "audioFormat": "Audio format",
+      "audioQuality": "Audio quality",
+      "audioQualityBest": "0 — Best",
+      "audioQualitySmallest": "9 — Smallest file",
+      "videoContainer": "Video container",
+      "videoQuality": "Maximum resolution",
+      "videoQualityBest": "Best available",
+      "embedThumbnail": "Embed thumbnail as cover art",
+      "embedMetadata": "Embed metadata (title, artist …)",
+      "writeSubtitles": "Download subtitles (.srt)",
+      "subtitleLanguages": "Languages (comma-separated)",
+      "speedLimit": "Download limit (MB/s)",
+      "speedLimitHint": "Leave empty for unlimited",
+      "concurrency": "Parallel downloads",
+      "sponsorBlock": "SponsorBlock: remove sponsor segments from videos",
+      "playlistSubfolder": "Download playlists into their own subfolders",
+      "filenameTemplate": "Filename scheme",
+      "filenameTitle": "Title",
+      "filenameArtistTitle": "Artist - Title",
+      "filenameIndexTitle": "No. - Title (playlist order)",
+      "extraArgs": "Additional yt-dlp arguments",
+      "extraArgsHint": "Experts only — appended to yt-dlp verbatim.",
+      "theme": "Appearance",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System setting",
+      "locale": "Language",
+      "localeSystem": "System language",
+      "notifyOnComplete": "Notify when a download finishes",
+      "clipboardWatcher": "Watch clipboard for video URLs"
+    },
+    "binaries": {
+      "title": "Components",
+      "ytdlp": "yt-dlp",
+      "ffmpeg": "FFmpeg",
+      "available": "Available",
+      "missing": "Missing",
+      "version": "Version {v}",
+      "updateYtDlp": "Update yt-dlp",
+      "updated": "yt-dlp is up to date: {v}",
+      "updateFailed": "Update failed: {msg}"
+    },
+    "importV3": {
+      "title": "Import from version 3",
+      "description": "Imports settings and download history from MyDownloader v3 (settings.json / download_history.json).",
+      "action": "Import v3 data",
+      "done": "Imported {settings} settings and {history} history entries"
+    }
+  },
+  "about": {
+    "title": "About",
+    "subtitle": "About this application.",
+    "version": "Version {v}",
+    "stack": "Built with Electron, Vue 3, yt-dlp and FFmpeg.",
+    "features": "Features",
+    "featureList": [
+      "Download single videos & songs",
+      "Entire playlists with their own subfolder",
+      "Queue with parallel downloads",
+      "Preview before downloading",
+      "Audio: MP3, M4A, OPUS, FLAC, WAV",
+      "Video: MP4, MKV, WEBM up to 4K",
+      "Auto-embed cover art & metadata",
+      "Subtitles in multiple languages",
+      "SponsorBlock integration",
+      "Download history with search",
+      "Speed limiting",
+      "Light & dark mode, German & English"
+    ],
+    "openSource": "Licenses & open source",
+    "checkUpdates": "Check for updates"
+  },
+  "clipboard": {
+    "detected": "Video URL detected in clipboard",
+    "download": "Download"
+  },
+  "notifications": {
+    "completed": "Download complete",
+    "failed": "Download failed"
+  }
+}
