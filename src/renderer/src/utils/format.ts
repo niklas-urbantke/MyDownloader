@@ -62,3 +62,31 @@ export function isHttpUrl(value: string): boolean {
     return false
   }
 }
+
+export interface CombiUrl {
+  /** Kanonische URL nur für das einzelne Video */
+  videoUrl: string
+  /** Kanonische URL für die gesamte Playlist */
+  playlistUrl: string
+}
+
+/**
+ * Erkennt YouTube-"Combi-Links" (watch?v=… UND list=…), bei denen unklar ist,
+ * ob das einzelne Video oder die ganze Playlist gemeint ist (Issue #2).
+ */
+export function analyzeCombiUrl(value: string): CombiUrl | null {
+  try {
+    const u = new URL(value.trim())
+    if (!/(^|\.)youtube\.com$/.test(u.hostname) && u.hostname !== 'youtu.be') return null
+    const videoId =
+      u.hostname === 'youtu.be' ? u.pathname.slice(1) : (u.searchParams.get('v') ?? '')
+    const listId = u.searchParams.get('list') ?? ''
+    if (!videoId || !listId) return null
+    return {
+      videoUrl: `https://www.youtube.com/watch?v=${videoId}`,
+      playlistUrl: `https://www.youtube.com/playlist?list=${listId}`
+    }
+  } catch {
+    return null
+  }
+}

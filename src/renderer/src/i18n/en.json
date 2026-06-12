@@ -127,7 +127,13 @@
       "probeFailed": "Preview failed: {msg}"
     },
     "added": "Added to queue",
-    "addedMany": "{n} downloads added to queue"
+    "addedMany": "{n} downloads added to queue",
+    "combi": {
+      "title": "Video or playlist?",
+      "question": "This link contains a single video AND a playlist. What should be downloaded?",
+      "video": "Just this video",
+      "playlist": "Entire playlist"
+    }
   },
   "queue": {
     "title": "Queue",

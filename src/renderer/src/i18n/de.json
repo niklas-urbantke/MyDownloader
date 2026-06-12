@@ -127,7 +127,13 @@
       "probeFailed": "Vorschau fehlgeschlagen: {msg}"
     },
     "added": "Zur Warteschlange hinzugefügt",
-    "addedMany": "{n} Downloads zur Warteschlange hinzugefügt"
+    "addedMany": "{n} Downloads zur Warteschlange hinzugefügt",
+    "combi": {
+      "title": "Video oder Playlist?",
+      "question": "Dieser Link enthält ein einzelnes Video UND eine Playlist. Was soll geladen werden?",
+      "video": "Nur dieses Video",
+      "playlist": "Ganze Playlist"
+    }
   },
   "queue": {
     "title": "Warteschlange",

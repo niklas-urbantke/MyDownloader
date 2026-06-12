@@ -16,8 +16,9 @@ import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '../stores/settings'
 import { useDownloadsStore } from '../stores/downloads'
 import { useDownloadOptionsStore } from '../stores/downloadOptions'
+import BxDialog from '../components/BxDialog.vue'
 import { showToast } from '../composables/toast'
-import { formatDuration, formatCount, isHttpUrl } from '../utils/format'
+import { formatDuration, formatCount, isHttpUrl, analyzeCombiUrl, type CombiUrl } from '../utils/format'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -57,6 +58,28 @@ const videoQualityOptions = computed(() => [
 
 const urlValid = computed(() => isHttpUrl(url.value))
 
+// --- Combi-Link (Video + Playlist in einer URL): Nutzer entscheiden lassen ---
+const combi = ref<CombiUrl | null>(null)
+let afterCombiChoice: (() => void | Promise<void>) | null = null
+
+/** true = Dialog geöffnet, Aktion wird nach der Wahl fortgesetzt */
+function interceptCombi(continueWith: () => void | Promise<void>): boolean {
+  const found = analyzeCombiUrl(url.value)
+  if (!found) return false
+  combi.value = found
+  afterCombiChoice = continueWith
+  return true
+}
+
+async function chooseCombi(which: 'video' | 'playlist'): Promise<void> {
+  if (!combi.value) return
+  url.value = which === 'video' ? combi.value.videoUrl : combi.value.playlistUrl
+  combi.value = null
+  const next = afterCombiChoice
+  afterCombiChoice = null
+  await next?.()
+}
+
 function buildRequest(): DownloadRequest {
   const request: DownloadRequest = { url: url.value.trim() }
   if (info.value) request.knownTitle = info.value.title
@@ -77,6 +100,7 @@ async function probe(): Promise<void> {
     probeError.value = t('download.errors.invalidUrl')
     return
   }
+  if (interceptCombi(probe)) return
   probing.value = true
   probeError.value = ''
   info.value = null
@@ -96,6 +120,7 @@ async function start(goToQueue: boolean): Promise<void> {
     probeError.value = t('download.errors.invalidUrl')
     return
   }
+  if (interceptCombi(() => start(goToQueue))) return
   const request = buildRequest()
   // "Download starten" legt sofort los; "Zur Warteschlange" wartet auf Queue-Start
   request.startNow = goToQueue
@@ -236,6 +261,26 @@ const playlistPreview = computed(() => {
         </div>
       </template>
     </BxCard>
+
+    <!-- Combi-Link: Video oder ganze Playlist? -->
+    <BxDialog :open="!!combi" :title="t('download.combi.title')" @close="combi = null">
+      {{ t('download.combi.question') }}
+      <template #actions>
+        <BxBtn variant="ghost" :label="t('common.cancel')" @click="combi = null" />
+        <BxBtn
+          variant="outline"
+          icon="video-player"
+          :label="t('download.combi.video')"
+          @click="chooseCombi('video')"
+        />
+        <BxBtn
+          variant="cta"
+          icon="checklist"
+          :label="t('download.combi.playlist')"
+          @click="chooseCombi('playlist')"
+        />
+      </template>
+    </BxDialog>
 
     <!-- Optionen für diesen Download -->
     <BxCard :title="t('download.options.title')">
