@@ -1,14 +1,26 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from './components/AppIcon.vue'
 import AppLogo from './components/AppLogo.vue'
 import ToastHost from './components/ToastHost.vue'
+import { useSettingsStore } from './stores/settings'
+import { useDownloadsStore } from './stores/downloads'
+import { useHistoryStore } from './stores/history'
 
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+
+const settingsStore = useSettingsStore()
+const downloadsStore = useDownloadsStore()
+const historyStore = useHistoryStore()
+
+onMounted(async () => {
+  await settingsStore.load()
+  await Promise.all([downloadsStore.load(), historyStore.load()])
+})
 
 // Sidenav ist standardmäßig eingeklappt — Inhalt nutzt die volle Breite.
 const navOpen = ref(false)
@@ -104,8 +116,23 @@ function go(name: string): void {
             <span v-else class="here">{{ crumb.label }}</span>
           </template>
         </div>
-        <!-- Platz für globale Aktionen (Download-Indikator folgt mit der Engine) -->
-        <div id="header-actions" class="row" />
+        <div class="row" style="gap: 10px">
+          <button
+            v-if="downloadsStore.activeItems.length > 0"
+            class="bx-header-chip"
+            type="button"
+            @click="go('queue')"
+          >
+            <AppIcon name="download" />
+            <span>{{
+              t('dashboard.badges.active', { n: downloadsStore.activeItems.length })
+            }}</span>
+          </button>
+          <button class="bx-header-chip" type="button" @click="go('download')">
+            <AppIcon name="add" />
+            <span>{{ t('nav.download') }}</span>
+          </button>
+        </div>
       </header>
 
       <main class="bx-page">

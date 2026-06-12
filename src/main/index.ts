@@ -23,15 +23,29 @@ function createWindow(): BrowserWindow {
 
   win.on('ready-to-show', () => win.show())
 
+  // Smoke-Test-Hook: MD_SCREENSHOT=<pfad.png> macht einen Screenshot und beendet.
+  const screenshotPath = process.env['MD_SCREENSHOT']
+  if (screenshotPath) {
+    win.webContents.once('did-finish-load', () => {
+      setTimeout(async () => {
+        const image = await win.webContents.capturePage()
+        const { writeFileSync } = await import('node:fs')
+        writeFileSync(screenshotPath, image.toPNG())
+        app.quit()
+      }, 2500)
+    })
+  }
+
   win.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
     return { action: 'deny' }
   })
 
+  const hash = process.env['MD_ROUTE']
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    win.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    win.loadURL(process.env['ELECTRON_RENDERER_URL'] + (hash ? `#${hash}` : ''))
   } else {
-    win.loadFile(join(__dirname, '../renderer/index.html'))
+    win.loadFile(join(__dirname, '../renderer/index.html'), hash ? { hash } : undefined)
   }
 
   return win

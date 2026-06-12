@@ -690,3 +690,10 @@
 }
 .bx-header-chip:hover { border-color: var(--marine); background: #fff; }
 .bx-header-chip .bxfr { font-size: 15px; }
+
+/* native select-Pfeile ausblenden — das Batix arrow-down-Icon übernimmt */
+.f-control select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
