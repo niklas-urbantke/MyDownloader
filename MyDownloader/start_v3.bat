@@ -26,7 +26,7 @@ pip show yt-dlp >nul 2>&1
 if errorlevel 1 (
     echo [INFO] Installiere benoetigte Pakete...
     echo.
-    pip install -r requirements_v3.txt
+    pip install -r requirements.txt
     echo.
     if errorlevel 1 (
         echo [FEHLER] Installation fehlgeschlagen!
