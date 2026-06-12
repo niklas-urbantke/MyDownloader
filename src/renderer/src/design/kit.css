@@ -94,7 +94,7 @@
 /* ---- header (top bar) ---- */
 .bx-header {
   height: 64px;
-  background: #fff;
+  background: var(--surface);
   border-bottom: 1px solid var(--marine-10);
   display: flex;
   align-items: center;
@@ -142,7 +142,7 @@
   color: var(--fg1);
   outline: none;
 }
-.bx-header-search:focus { border-color: var(--marine); background-color: #fff; }
+.bx-header-search:focus { border-color: var(--marine); background-color: var(--surface); }
 
 .bx-header-icon {
   width: 40px; height: 40px;
@@ -199,7 +199,7 @@
 
 /* ---- card primitive ---- */
 .bx-card {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--marine-10);
   border-radius: 12px;
   overflow: hidden;
@@ -261,7 +261,7 @@
   border-radius: 8px;
   display: flex; align-items: center; gap: 10px;
   padding: 0 14px;
-  background: #fff;
+  background: var(--surface);
   font: 400 14px var(--font-body);
   color: var(--fg1);
   transition: border-color 0.12s, background 0.12s;
@@ -306,7 +306,7 @@
 .chip .bxfr { font-size: 12px; }
 .chip--apple { background: var(--apple-20); color: var(--apple-dark); }
 .chip--marine { background: var(--marine); color: #fff; }
-.chip--outline { background: #fff; border-color: var(--marine-40); }
+.chip--outline { background: var(--surface); border-color: var(--marine-40); }
 .chip--neg { background: #FBE9EC; color: #8B0010; }
 .chip--neutral { background: var(--anthrazit-10); color: var(--fg1); }
 
@@ -391,7 +391,7 @@
 @media (max-width: 560px)  { .bx-tiles { grid-template-columns: 1fr; } }
 
 .bx-tile {
-  background: #fff;
+  background: var(--surface);
   border: 1px solid var(--marine-10);
   border-radius: 12px;
   padding: 20px 20px 16px;
@@ -544,7 +544,7 @@
 }
 .bx-seg button:hover { color: var(--marine); }
 .bx-seg button.active {
-  background: #fff;
+  background: var(--surface);
   color: var(--marine);
   box-shadow: var(--shadow-1);
 }
@@ -577,7 +577,7 @@
 }
 @keyframes bx-fade { from { opacity: 0; } }
 .bx-dialog {
-  background: #fff; border-radius: 12px;
+  background: var(--surface); border-radius: 12px;
   box-shadow: var(--shadow-24);
   min-width: 360px; max-width: 520px; width: 100%;
   margin: 24px;
@@ -631,7 +631,7 @@
 .toggle::after {
   content: ""; position: absolute;
   width: 18px; height: 18px; border-radius: 50%;
-  background: #fff; top: 2px; left: 2px;
+  background: var(--surface); top: 2px; left: 2px;
   transition: left .15s;
   box-shadow: var(--shadow-1);
 }
@@ -688,7 +688,7 @@
   cursor: pointer;
   transition: border-color .15s, background .15s;
 }
-.bx-header-chip:hover { border-color: var(--marine); background: #fff; }
+.bx-header-chip:hover { border-color: var(--marine); background: var(--surface); }
 .bx-header-chip .bxfr { font-size: 15px; }
 
 /* native select-Pfeile ausblenden — das Batix arrow-down-Icon übernimmt */
@@ -697,3 +697,71 @@
   -webkit-appearance: none;
   cursor: pointer;
 }
+
+/* =========================================================
+   DARK MODE — von den Batix-Tokens abgeleitete dunkle Variante
+   (aktiviert über <html data-theme="dark">)
+   ========================================================= */
+[data-theme='dark'] {
+  /* Marine wird als Text-/Akzentfarbe lesbar aufgehellt */
+  --marine:       #A9C4EC;
+  --marine-dark:  #0B1A30;
+  --marine-80:    #8FAFDC;
+  --marine-60:    #7E96BE;
+  --marine-40:    #41598C;
+  --marine-20:    #2E4670;
+  --marine-10:    #24385A;
+  --marine-05:    #1B2C47;
+
+  --apple-20:     #2C3B1C;
+
+  --anthrazit-10: #1F2A3C;
+
+  --surface:      #16243A;
+  --bg-page:      #0E1726;
+  --bg-soft:      #1B2C47;
+  --bg-muted:     #1F2A3C;
+  --fg1:          #E6EBF2;
+  --fg2:          #9FB0C5;
+  --fg3:          #5F7187;
+  --border-1:     #2E4670;
+  --border-2:     #41598C;
+  --separator:    #24385A;
+
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.3);
+  --shadow-4: 0 6px 16px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-8: 0 16px 32px rgba(0, 0, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.35);
+  --shadow-24: 0 32px 64px rgba(0, 0, 0, 0.6), 0 12px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* Gefüllte Marine-Flächen behalten im Dark Mode dunkles Marine */
+[data-theme='dark'] .bx-nav { background: #0B1A30; }
+[data-theme='dark'] .btn--primary {
+  background: #2F5DA8;
+  border-color: #2F5DA8;
+  color: #fff;
+}
+[data-theme='dark'] .btn--primary:hover { background: #3A6FC4; border-color: #3A6FC4; }
+[data-theme='dark'] .btn--danger { background: #B3162B; border-color: #B3162B; }
+[data-theme='dark'] .chip--marine { background: #2F5DA8; color: #fff; }
+[data-theme='dark'] .chip--neg { background: #3D1620; color: #FF9AA8; }
+[data-theme='dark'] .chip--apple { color: #B5E15C; }
+[data-theme='dark'] .bx-avatar { background: #2F5DA8; }
+[data-theme='dark'] .bx-toast { background: #1B2C47; }
+[data-theme='dark'] .bx-tile-badge--new { background: #2C3B1C; color: #B5E15C; }
+[data-theme='dark'] .bx-tile-badge--todo { background: #3A2F12; color: #E8B84B; }
+[data-theme='dark'] .bx-tile-badge--overdue { background: #3D1620; color: #FF9AA8; }
+[data-theme='dark'] .bx-banner--warn { background: #3A2F12; }
+[data-theme='dark'] .bx-banner--warn .bxfr,
+[data-theme='dark'] .bx-banner--warn strong { color: #E8B84B; }
+[data-theme='dark'] .bx-banner { background: #2C3B1C; color: var(--fg1); }
+[data-theme='dark'] .bx-banner strong,
+[data-theme='dark'] .bx-banner .bxfr { color: #B5E15C; }
+[data-theme='dark'] .bx-banner--info { background: var(--marine-05); }
+[data-theme='dark'] .bx-banner--info .bxfr,
+[data-theme='dark'] .bx-banner--info strong { color: var(--marine); }
+[data-theme='dark'] .bx-dialog-scrim { background: rgba(0, 0, 0, 0.55); }
+[data-theme='dark'] .chip--warn { background: #3A2F12; color: #E8B84B; }
+[data-theme='dark'] .toggle { background: #41598C; }
+[data-theme='dark'] .toggle.on { background: #2F5DA8; }

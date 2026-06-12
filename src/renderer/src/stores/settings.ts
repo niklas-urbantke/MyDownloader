@@ -19,10 +19,12 @@ export const useSettingsStore = defineStore('settings', () => {
   let saveTimer: ReturnType<typeof setTimeout> | null = null
 
   async function load(): Promise<void> {
+    const firstLoad = !loaded.value
     settings.value = await window.api.settings.get()
     loaded.value = true
     applyTheme(settings.value.theme)
     applyLocale(settings.value.locale)
+    if (!firstLoad) return
 
     // Änderungen automatisch (debounced) persistieren
     watch(

@@ -6,6 +6,7 @@ import { listHistory, addHistoryEntry, removeHistoryEntry, clearHistory } from '
 import { getBinaryStatus, updateYtDlp } from './binaries'
 import { probeUrl } from './ytdlp'
 import { DownloadQueue } from './queue'
+import { importV3Data } from './importV3'
 
 function broadcast(channel: string, ...args: unknown[]): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -13,8 +14,31 @@ function broadcast(channel: string, ...args: unknown[]): void {
   }
 }
 
+/** Gesamtfortschritt aller aktiven Downloads in Dock/Taskbar anzeigen */
+function updateDockProgress(): void {
+  const active = queue
+    .list()
+    .filter((i) => i.status === 'downloading' || i.status === 'converting')
+  const win = BrowserWindow.getAllWindows()[0]
+  if (!win) return
+  if (active.length === 0) {
+    win.setProgressBar(-1)
+    return
+  }
+  const known = active.filter((i) => i.progress.percent >= 0)
+  if (known.length === 0) {
+    win.setProgressBar(2) // unbestimmt
+    return
+  }
+  const avg = known.reduce((sum, i) => sum + i.progress.percent, 0) / known.length / 100
+  win.setProgressBar(Math.min(0.99, Math.max(0, avg)))
+}
+
 export const queue = new DownloadQueue({
-  onItemChanged: (item) => broadcast(IPC.downloadChanged, item),
+  onItemChanged: (item) => {
+    broadcast(IPC.downloadChanged, item)
+    updateDockProgress()
+  },
   onLogLine: (id, line) => broadcast(IPC.downloadLogLine, { id, line }),
   onItemFinished: (item) => {
     addHistoryEntry(item)
@@ -64,6 +88,7 @@ export function registerIpc(): void {
   // --- System -----------------------------------------------------------------
   ipcMain.handle(IPC.binariesStatus, () => getBinaryStatus())
   ipcMain.handle(IPC.binariesUpdateYtDlp, () => updateYtDlp())
+  ipcMain.handle(IPC.importV3, () => importV3Data())
   ipcMain.handle(IPC.appInfo, () => ({
     version: app.getVersion(),
     platform: process.platform,

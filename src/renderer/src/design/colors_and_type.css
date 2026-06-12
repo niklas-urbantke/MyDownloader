@@ -57,6 +57,7 @@
   --fg2: var(--anthrazit-70);           /* secondary text */
   --fg3: var(--anthrazit-40);           /* placeholder / disabled */
   --fg-on-primary: var(--white);
+  --surface:    #FFFFFF;
   --bg-page:    var(--white);
   --bg-soft:    var(--marine-05);       /* hovers, soft cards */
   --bg-muted:   var(--anthrazit-10);

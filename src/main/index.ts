@@ -2,6 +2,7 @@ import { app, shell, BrowserWindow } from 'electron'
 import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpc, queue } from './ipc'
+import { startClipboardWatcher } from './clipboard'
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -23,16 +24,22 @@ function createWindow(): BrowserWindow {
 
   win.on('ready-to-show', () => win.show())
 
-  // Smoke-Test-Hook: MD_SCREENSHOT=<pfad.png> macht einen Screenshot und beendet.
+  // Smoke-Test-Hooks:
+  //   MD_SCREENSHOT=<pfad.png>  Screenshot machen und beenden
+  //   MD_SCREENSHOT_DELAY=<ms>  Wartezeit vor dem Screenshot (Default 2500)
+  //   MD_E2E_URL=<url>          beim Start einen Download in die Queue legen
   const screenshotPath = process.env['MD_SCREENSHOT']
   if (screenshotPath) {
+    const delay = Number.parseInt(process.env['MD_SCREENSHOT_DELAY'] ?? '2500', 10)
     win.webContents.once('did-finish-load', () => {
+      const e2eUrl = process.env['MD_E2E_URL']
+      if (e2eUrl) queue.add({ url: e2eUrl })
       setTimeout(async () => {
         const image = await win.webContents.capturePage()
         const { writeFileSync } = await import('node:fs')
         writeFileSync(screenshotPath, image.toPNG())
         app.quit()
-      }, 2500)
+      }, delay)
     })
   }
 
@@ -63,6 +70,7 @@ if (!gotLock) {
     })
 
     registerIpc()
+    startClipboardWatcher()
     createWindow()
 
     app.on('activate', () => {

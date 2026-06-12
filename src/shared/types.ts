@@ -215,6 +215,7 @@ export const IPC = {
   // System
   binariesStatus: 'binaries:status',
   binariesUpdateYtDlp: 'binaries:update-ytdlp',
+  importV3: 'import:v3',
   appInfo: 'app:info',
   openPath: 'shell:open-path',
   showInFolder: 'shell:show-in-folder',

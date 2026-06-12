@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import AppIcon from './components/AppIcon.vue'
 import AppLogo from './components/AppLogo.vue'
 import ToastHost from './components/ToastHost.vue'
+import { showToast } from './composables/toast'
 import { useSettingsStore } from './stores/settings'
 import { useDownloadsStore } from './stores/downloads'
 import { useHistoryStore } from './stores/history'
@@ -20,6 +21,17 @@ const historyStore = useHistoryStore()
 onMounted(async () => {
   await settingsStore.load()
   await Promise.all([downloadsStore.load(), historyStore.load()])
+
+  // Clipboard-Watcher: erkannte Video-URL als Toast mit Direkt-Aktion anbieten
+  window.api.clipboard.onUrlDetected((url) => {
+    showToast(t('clipboard.detected'), 'info', {
+      actionLabel: t('clipboard.download'),
+      onAction: () => {
+        void downloadsStore.add({ url })
+        router.push({ name: 'queue' })
+      }
+    })
+  })
 })
 
 // Sidenav ist standardmäßig eingeklappt — Inhalt nutzt die volle Breite.

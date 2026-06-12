@@ -66,6 +66,8 @@ const api = {
     updateYtDlp: (): Promise<{ ok: boolean; message: string }> =>
       ipcRenderer.invoke(IPC.binariesUpdateYtDlp),
     appInfo: (): Promise<AppInfo> => ipcRenderer.invoke(IPC.appInfo),
+    importV3: (): Promise<{ ok: boolean; settingsImported: number; historyImported: number }> =>
+      ipcRenderer.invoke(IPC.importV3),
     openPath: (path: string): Promise<string> => ipcRenderer.invoke(IPC.openPath, path),
     showInFolder: (path: string): Promise<boolean> => ipcRenderer.invoke(IPC.showInFolder, path),
     openExternal: (url: string): Promise<void> => ipcRenderer.invoke(IPC.openExternal, url)

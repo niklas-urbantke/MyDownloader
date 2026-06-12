@@ -21,6 +21,25 @@ const settings = computed(() => store.settings)
 
 const binaries = ref<BinaryStatus | null>(null)
 const updatingYtDlp = ref(false)
+const importing = ref(false)
+
+async function runImportV3(): Promise<void> {
+  importing.value = true
+  try {
+    const result = await window.api.system.importV3()
+    if (result.ok) {
+      showToast(
+        t('settings.importV3.done', {
+          settings: result.settingsImported,
+          history: result.historyImported
+        })
+      )
+      await store.load()
+    }
+  } finally {
+    importing.value = false
+  }
+}
 
 onMounted(async () => {
   binaries.value = await window.api.system.binaries()
@@ -318,6 +337,24 @@ const concurrencyProxy = computed({
         <BxBanner v-if="binaries && (!binaries.ytDlp.available || !binaries.ffmpeg.available)" variant="warn">
           {{ t('dashboard.badges.binariesMissing') }}
         </BxBanner>
+      </div>
+    </BxCard>
+
+    <!-- v3-Import -->
+    <BxCard :title="t('settings.importV3.title')">
+      <div class="stack">
+        <p class="t-body2" style="margin: 0; color: var(--fg2)">
+          {{ t('settings.importV3.description') }}
+        </p>
+        <div class="row">
+          <BxBtn
+            icon="upload"
+            variant="outline"
+            :label="t('settings.importV3.action')"
+            :disabled="importing"
+            @click="runImportV3"
+          />
+        </div>
       </div>
     </BxCard>
   </div>
