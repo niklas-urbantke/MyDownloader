@@ -96,8 +96,9 @@ async function main() {
   }
 
   if (force || !(await exists(ffDest))) {
+    // Hinweis: die ffmpeg-static-Assets haben auch für Windows KEINE .exe-Endung
     await download(
-      `https://github.com/eugeneware/ffmpeg-static/releases/download/${FFMPEG_STATIC_RELEASE}/${ffAsset}${platform === 'win32' ? '.exe' : ''}`,
+      `https://github.com/eugeneware/ffmpeg-static/releases/download/${FFMPEG_STATIC_RELEASE}/${ffAsset}`,
       ffDest
     )
   } else {

@@ -44,6 +44,11 @@ jobs:
         if: runner.os == 'Linux'
         run: node scripts/fetch-binaries.mjs --platform linux --arch x64
 
+      - name: Install packaging tools (Linux)
+        if: runner.os == 'Linux'
+        # bsdtar wird vom pacman-Target benötigt
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools rpm
+
       - name: Build bundles
         run: npm run build
 
