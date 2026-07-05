@@ -34,6 +34,8 @@ export function defaultSettings(): AppSettings {
     clipboardWatcher: false,
     sidebarOpen: true,
     onboardingDone: false,
+    closeToTray: true,
+    autoUpdate: 'notify',
     useAccountCookies: false,
     spotifyClientId: ''
   }

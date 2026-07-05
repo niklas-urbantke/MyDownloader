@@ -21,6 +21,8 @@ import {
 } from './subscriptions'
 import { getSpotifyPlaylist, spotifyLogin, spotifyLogout, spotifyStatus } from './spotify'
 import { computeStats } from './stats'
+import { checkForUpdates, downloadUpdate, installUpdate } from './updater'
+import { installUrbUpdate } from './urbupdate'
 import type { Subscription } from '@shared/types'
 
 function broadcast(channel: string, ...args: unknown[]): void {
@@ -182,6 +184,12 @@ export function registerIpc(): void {
 
   // --- Statistiken (Issue #36) ------------------------------------------------------
   ipcMain.handle(IPC.statsCompute, () => computeStats())
+
+  // --- Updates (Issues #33 / #37) -----------------------------------------------------
+  ipcMain.handle(IPC.updateCheck, () => checkForUpdates())
+  ipcMain.handle(IPC.updateDownload, () => downloadUpdate())
+  ipcMain.handle(IPC.updateInstall, () => installUpdate())
+  ipcMain.handle(IPC.urbupdateInstall, () => installUrbUpdate())
 
   // --- System -----------------------------------------------------------------
   ipcMain.handle(IPC.binariesStatus, () => getBinaryStatus())

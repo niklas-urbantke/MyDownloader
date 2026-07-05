@@ -278,7 +278,13 @@
       "targetLufs": "Ziel-Lautheit (LUFS)",
       "targetLufsHint": "Standard: -14 LUFS (Streaming-üblich)",
       "fetchLyrics": "Songtexte automatisch einbetten",
-      "fetchLyricsHint": "Sucht Lyrics über LRCLIB; synchronisierte Texte werden zusätzlich als .lrc gespeichert."
+      "fetchLyricsHint": "Sucht Lyrics über LRCLIB; synchronisierte Texte werden zusätzlich als .lrc gespeichert.",
+      "closeToTray": "Schließen minimiert in den System-Tray",
+      "closeToTrayHint": "Downloads laufen im Hintergrund weiter; Beenden über das Tray-Menü.",
+      "autoUpdate": "Automatische Updates",
+      "autoUpdateAuto": "Automatisch herunterladen",
+      "autoUpdateNotify": "Nur benachrichtigen",
+      "autoUpdateOff": "Deaktiviert"
     },
     "binaries": {
       "title": "Komponenten",
@@ -338,7 +344,17 @@
       "Hell- & Dunkel-Modus, Deutsch & Englisch"
     ],
     "openSource": "Lizenzen & Open Source",
-    "checkUpdates": "Auf Updates prüfen"
+    "checkUpdates": "Auf Updates prüfen",
+    "updates": {
+      "title": "Updates",
+      "checking": "Suche nach Updates…",
+      "upToDate": "Du bist auf dem neuesten Stand",
+      "available": "Version {v} verfügbar",
+      "download": "Herunterladen",
+      "readyToInstall": "Version {v} bereit zur Installation",
+      "installNow": "Neu starten & installieren",
+      "fromFile": "Update aus .urbupdate-Datei…"
+    }
   },
   "clipboard": {
     "detected": "Video-URL in der Zwischenablage erkannt",
@@ -470,5 +486,9 @@
     "back": "Zurück",
     "skip": "Überspringen",
     "finish": "Fertig"
+  },
+  "dragdrop": {
+    "hint": "Links oder .txt-Dateien hier ablegen — sie landen in der Warteschlange",
+    "nothing": "Keine gültigen Links gefunden"
   }
 }

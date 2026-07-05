@@ -3,6 +3,36 @@ import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { registerIpc, queue } from './ipc'
 import { startClipboardWatcher } from './clipboard'
+import { getSettings } from './settings'
+import { setupTray, isQuitting } from './tray'
+import { setupAutoUpdater } from './updater'
+
+/**
+ * Deep-Links (Issue #34): mydownloader://download?url=<encoded>
+ * Fügt die übergebene URL der Warteschlange hinzu und holt das Fenster nach vorn.
+ */
+function handleDeepLink(link: string): void {
+  try {
+    const parsed = new URL(link)
+    if (parsed.protocol !== 'mydownloader:') return
+    const target = parsed.searchParams.get('url')
+    if (target && /^https?:\/\//.test(target)) {
+      queue.add({ url: target })
+    }
+    const [win] = BrowserWindow.getAllWindows()
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.show()
+      win.focus()
+    }
+  } catch {
+    /* ungültiger Link — ignorieren */
+  }
+}
+
+function deepLinkFromArgv(argv: string[]): string | null {
+  return argv.find((a) => a.startsWith('mydownloader://')) ?? null
+}
 
 function createWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -23,6 +53,14 @@ function createWindow(): BrowserWindow {
   })
 
   win.on('ready-to-show', () => win.show())
+
+  // Schließen minimiert in den Tray, wenn aktiviert (Issue #14)
+  win.on('close', (event) => {
+    if (getSettings().closeToTray && !isQuitting()) {
+      event.preventDefault()
+      win.hide()
+    }
+  })
 
   // Smoke-Test-Hooks:
   //   MD_SCREENSHOT=<pfad.png>  Screenshot machen und beenden
@@ -62,6 +100,9 @@ const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
   app.quit()
 } else {
+  // Protokoll-Handler registrieren (Issue #34)
+  app.setAsDefaultProtocolClient('mydownloader')
+
   app.whenReady().then(() => {
     electronApp.setAppUserModelId('com.niklasurbantke.mydownloader')
 
@@ -71,20 +112,38 @@ if (!gotLock) {
 
     registerIpc()
     startClipboardWatcher()
-    createWindow()
+    const win = createWindow()
+    setupTray(queue, () => BrowserWindow.getAllWindows()[0] ?? null)
+    setupAutoUpdater()
+
+    // Deep-Link aus dem Erststart-Aufruf (Windows/Linux)
+    const initialLink = deepLinkFromArgv(process.argv)
+    if (initialLink) {
+      win.webContents.once('did-finish-load', () => handleDeepLink(initialLink))
+    }
 
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
   })
 
-  app.on('second-instance', () => {
+  // Zweite Instanz: Deep-Link übernehmen und Fenster fokussieren
+  app.on('second-instance', (_event, argv) => {
+    const link = deepLinkFromArgv(argv)
+    if (link) {
+      handleDeepLink(link)
+      return
+    }
     const [win] = BrowserWindow.getAllWindows()
     if (win) {
       if (win.isMinimized()) win.restore()
+      win.show()
       win.focus()
     }
   })
+
+  // macOS liefert Deep-Links über open-url
+  app.on('open-url', (_event, url) => handleDeepLink(url))
 
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit()

@@ -173,6 +173,11 @@ const localeOptions = computed(() => [
   { value: 'en', label: 'English' },
   { value: 'system', label: t('settings.fields.localeSystem') }
 ])
+const autoUpdateOptions = computed(() => [
+  { value: 'auto', label: t('settings.fields.autoUpdateAuto') },
+  { value: 'notify', label: t('settings.fields.autoUpdateNotify') },
+  { value: 'off', label: t('settings.fields.autoUpdateOff') }
+])
 
 const concurrencyProxy = computed({
   get: () => String(settings.value?.concurrency ?? 2),
@@ -432,6 +437,22 @@ const concurrencyProxy = computed({
           <BxToggle
             v-model="settings.clipboardWatcher"
             :label="t('settings.fields.clipboardWatcher')"
+          />
+        </div>
+        <!-- Tray & Auto-Updates (Issues #14 / #33) -->
+        <div class="col-6">
+          <BxToggle
+            v-model="settings.closeToTray"
+            :label="t('settings.fields.closeToTray')"
+            :hint="t('settings.fields.closeToTrayHint')"
+          />
+        </div>
+        <div class="col-6">
+          <BxSelect
+            v-model="settings.autoUpdate"
+            :label="t('settings.fields.autoUpdate')"
+            icon="cloud-download"
+            :options="autoUpdateOptions"
           />
         </div>
       </div>

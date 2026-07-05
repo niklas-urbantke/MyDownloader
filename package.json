@@ -30,6 +30,8 @@
   "dependencies": {
     "@fontsource/montserrat": "^5.1.0",
     "@fontsource/open-sans": "^5.1.0",
+    "adm-zip": "^0.5.18",
+    "electron-updater": "^6.8.9",
     "pinia": "^2.2.6",
     "vue": "^3.5.13",
     "vue-i18n": "^10.0.4",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
+    "@types/adm-zip": "^0.5.8",
     "@types/node": "^20.17.6",
     "@vitejs/plugin-vue": "^5.2.0",
     "electron": "^39.8.10",

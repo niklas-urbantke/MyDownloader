@@ -15,7 +15,8 @@ import {
   type SpotifyPlaylist,
   type SpotifyStatus,
   type StatsSummary,
-  type AccountStatus
+  type AccountStatus,
+  type UpdateEventPayload
 } from '../shared/types'
 
 /**
@@ -78,6 +79,19 @@ const api = {
 
   stats: {
     compute: (): Promise<StatsSummary> => ipcRenderer.invoke(IPC.statsCompute)
+  },
+
+  updates: {
+    check: (): Promise<void> => ipcRenderer.invoke(IPC.updateCheck),
+    download: (): Promise<void> => ipcRenderer.invoke(IPC.updateDownload),
+    install: (): Promise<void> => ipcRenderer.invoke(IPC.updateInstall),
+    installUrbUpdate: (): Promise<{ ok: boolean; message: string }> =>
+      ipcRenderer.invoke(IPC.urbupdateInstall),
+    onEvent: (cb: (payload: UpdateEventPayload) => void): (() => void) => {
+      const listener = (_e: unknown, payload: UpdateEventPayload): void => cb(payload)
+      ipcRenderer.on(IPC.updateEvent, listener)
+      return () => ipcRenderer.removeListener(IPC.updateEvent, listener)
+    }
   },
 
   downloads: {

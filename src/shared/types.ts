@@ -60,6 +60,10 @@ export interface AppSettings {
   sidebarOpen: boolean
   /** Einrichtungsassistent wurde abgeschlossen (Issue #31) */
   onboardingDone: boolean
+  /** Fenster-Schließen minimiert in den System-Tray (Issue #14) */
+  closeToTray: boolean
+  /** Auto-Updates: automatisch laden / nur benachrichtigen / aus (Issue #33) */
+  autoUpdate: 'auto' | 'notify' | 'off'
   /** Angemeldete Konto-Cookies an yt-dlp durchreichen (Issue #13) */
   useAccountCookies: boolean
   /** Spotify-API Client-ID des Nutzers (Issue #35) */
@@ -291,6 +295,18 @@ export interface StatsSummary {
 }
 
 // ---------------------------------------------------------------------------
+// Updates (Issues #33 / #37)
+// ---------------------------------------------------------------------------
+
+export interface UpdateEventPayload {
+  status: 'checking' | 'available' | 'not-available' | 'downloading' | 'downloaded' | 'error'
+  version?: string
+  notes?: string
+  percent?: number
+  message?: string
+}
+
+// ---------------------------------------------------------------------------
 // Konto (Issue #13)
 // ---------------------------------------------------------------------------
 
@@ -404,6 +420,12 @@ export const IPC = {
   spotifyGetPlaylist: 'spotify:get-playlist',
   // Statistiken (Issue #36)
   statsCompute: 'stats:compute',
+  // Updates (Issues #33 / #37)
+  updateCheck: 'update:check',
+  updateDownload: 'update:download',
+  updateInstall: 'update:install',
+  updateEvent: 'update:event',
+  urbupdateInstall: 'urbupdate:install',
   // System
   binariesStatus: 'binaries:status',
   binariesUpdateYtDlp: 'binaries:update-ytdlp',

@@ -99,10 +99,67 @@ const breadcrumb = computed(() => {
 function go(name: string): void {
   router.push({ name })
 }
+
+// --- Drag & Drop für Links und URL-Listen (Issue #17) ---
+const dragOver = ref(false)
+let dragDepth = 0
+
+function onDragEnter(e: DragEvent): void {
+  e.preventDefault()
+  dragDepth++
+  dragOver.value = true
+}
+
+function onDragLeave(): void {
+  dragDepth--
+  if (dragDepth <= 0) {
+    dragDepth = 0
+    dragOver.value = false
+  }
+}
+
+const pickUrls = (text: string): string[] =>
+  text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => /^https?:\/\//.test(l))
+
+async function onDrop(e: DragEvent): Promise<void> {
+  e.preventDefault()
+  dragDepth = 0
+  dragOver.value = false
+  const dt = e.dataTransfer
+  if (!dt) return
+
+  const urls: string[] = []
+  const dropped = dt.getData('text/uri-list') || dt.getData('text/plain')
+  if (dropped) urls.push(...pickUrls(dropped))
+  // Textdateien mit einer URL pro Zeile → Batch-Import
+  for (const file of Array.from(dt.files ?? [])) {
+    if (file.name.toLowerCase().endsWith('.txt') || file.type === 'text/plain') {
+      urls.push(...pickUrls(await file.text()))
+    }
+  }
+
+  const unique = [...new Set(urls)]
+  if (unique.length === 0) {
+    showToast(t('dragdrop.nothing'), 'info')
+    return
+  }
+  await downloadsStore.addMany(unique.map((url) => ({ url })))
+  showToast(t('download.addedMany', { n: unique.length }))
+  router.push({ name: 'queue' })
+}
 </script>
 
 <template>
-  <div class="bx-root">
+  <div
+    class="bx-root"
+    @dragenter="onDragEnter"
+    @dragover.prevent
+    @dragleave="onDragLeave"
+    @drop="onDrop"
+  >
     <!-- Sidenav: standardmäßig komplett ausgeblendet (Breite 0) -->
     <nav class="bx-nav" :class="{ open: navOpen }">
       <div class="bx-nav-brand">
@@ -182,5 +239,36 @@ function go(name: string): void {
 
     <ToastHost />
     <OnboardingDialog :open="showOnboarding" @close="showOnboarding = false" />
+
+    <!-- Drop-Zone-Overlay (Issue #17) -->
+    <div v-if="dragOver" class="drop-overlay">
+      <div class="drop-overlay-inner">
+        <AppIcon name="download" :size="48" />
+        <p>{{ t('dragdrop.hint') }}</p>
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 48, 99, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.drop-overlay-inner {
+  background: var(--bg1, #fff);
+  color: var(--marine, #003063);
+  border: 3px dashed var(--marine, #003063);
+  border-radius: 16px;
+  padding: 48px 64px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+</style>
