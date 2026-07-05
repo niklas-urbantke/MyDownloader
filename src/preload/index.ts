@@ -10,7 +10,12 @@ import {
   type HistoryEntry,
   type MediaInfo,
   type MusicBrainzSuggestion,
-  type TrackTags
+  type TrackTags,
+  type Subscription,
+  type SpotifyPlaylist,
+  type SpotifyStatus,
+  type StatsSummary,
+  type AccountStatus
 } from '../shared/types'
 
 /**
@@ -35,7 +40,44 @@ const api = {
   },
 
   media: {
-    probe: (url: string): Promise<MediaInfo> => ipcRenderer.invoke(IPC.mediaProbe, url)
+    probe: (url: string): Promise<MediaInfo> => ipcRenderer.invoke(IPC.mediaProbe, url),
+    previewUrl: (url: string): Promise<string | null> =>
+      ipcRenderer.invoke(IPC.mediaPreviewUrl, url)
+  },
+
+  subscriptions: {
+    list: (): Promise<Subscription[]> => ipcRenderer.invoke(IPC.subsList),
+    add: (
+      url: string,
+      options: { folder?: string; templateId?: string; intervalMinutes?: number }
+    ): Promise<Subscription> => ipcRenderer.invoke(IPC.subsAdd, url, options),
+    update: (patch: Partial<Subscription> & { id: string }): Promise<void> =>
+      ipcRenderer.invoke(IPC.subsUpdate, patch),
+    remove: (id: string): Promise<void> => ipcRenderer.invoke(IPC.subsRemove, id),
+    checkNow: (id: string): Promise<number> => ipcRenderer.invoke(IPC.subsCheckNow, id),
+    onChanged: (cb: (subs: Subscription[]) => void): (() => void) => {
+      const listener = (_e: unknown, subs: Subscription[]): void => cb(subs)
+      ipcRenderer.on(IPC.subsChanged, listener)
+      return () => ipcRenderer.removeListener(IPC.subsChanged, listener)
+    }
+  },
+
+  account: {
+    status: (): Promise<AccountStatus> => ipcRenderer.invoke(IPC.accountStatus),
+    login: (): Promise<AccountStatus> => ipcRenderer.invoke(IPC.accountLogin),
+    logout: (): Promise<AccountStatus> => ipcRenderer.invoke(IPC.accountLogout)
+  },
+
+  spotify: {
+    status: (): Promise<SpotifyStatus> => ipcRenderer.invoke(IPC.spotifyStatus),
+    login: (): Promise<SpotifyStatus> => ipcRenderer.invoke(IPC.spotifyLogin),
+    logout: (): Promise<SpotifyStatus> => ipcRenderer.invoke(IPC.spotifyLogout),
+    getPlaylist: (url: string): Promise<SpotifyPlaylist | null> =>
+      ipcRenderer.invoke(IPC.spotifyGetPlaylist, url)
+  },
+
+  stats: {
+    compute: (): Promise<StatsSummary> => ipcRenderer.invoke(IPC.statsCompute)
   },
 
   downloads: {

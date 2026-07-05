@@ -32,7 +32,10 @@ export function defaultSettings(): AppSettings {
     locale: 'system',
     notifyOnComplete: true,
     clipboardWatcher: false,
-    sidebarOpen: true
+    sidebarOpen: true,
+    onboardingDone: false,
+    useAccountCookies: false,
+    spotifyClientId: ''
   }
 }
 

@@ -22,6 +22,21 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/HistoryView.vue')
   },
   {
+    path: '/subscriptions',
+    name: 'subscriptions',
+    component: () => import('../views/SubscriptionsView.vue')
+  },
+  {
+    path: '/spotify',
+    name: 'spotify',
+    component: () => import('../views/SpotifyView.vue')
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    component: () => import('../views/StatsView.vue')
+  },
+  {
     path: '/templates',
     name: 'templates',
     component: () => import('../views/TemplatesView.vue')

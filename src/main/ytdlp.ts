@@ -3,6 +3,14 @@ import { promisify } from 'node:util'
 import { dirname } from 'node:path'
 import type { AppSettings, DownloadRequest, MediaInfo, PlaylistEntryInfo } from '@shared/types'
 import { getYtDlpPath, getFfmpegPath } from './binaries'
+import { getSettings } from './settings'
+import { activeCookieFile } from './accounts'
+
+/** Konto-Cookies an yt-dlp durchreichen, falls aktiviert (Issue #13) */
+function cookieArgs(): string[] {
+  const file = activeCookieFile(getSettings().useAccountCookies)
+  return file ? ['--cookies', file] : []
+}
 
 const execFileP = promisify(execFile)
 
@@ -111,6 +119,7 @@ export async function buildDownloadCommand(
   const args: string[] = []
 
   args.push(...jsRuntimeArgs())
+  args.push(...cookieArgs())
 
   // Fortschritt maschinenlesbar, eine Zeile pro Update
   args.push(
@@ -223,8 +232,8 @@ export async function probeUrl(url: string): Promise<MediaInfo> {
 
   const { stdout } = await execFileP(
     bin,
-    [...jsRuntimeArgs(), '-J', '--flat-playlist', '--no-warnings', '--', url],
-    { timeout: 60000, maxBuffer: 64 * 1024 * 1024, env: ytDlpEnv() }
+    [...jsRuntimeArgs(), ...cookieArgs(), '-J', '--flat-playlist', '--no-warnings', '--', url],
+    { timeout: 120000, maxBuffer: 64 * 1024 * 1024, env: ytDlpEnv() }
   )
   const info = JSON.parse(stdout) as RawInfo
 
@@ -257,5 +266,33 @@ export async function probeUrl(url: string): Promise<MediaInfo> {
     viewCount: typeof info.view_count === 'number' ? info.view_count : null,
     chapterCount: Array.isArray(info.chapters) ? info.chapters.length : 0,
     isPlaylist: false
+  }
+}
+
+/**
+ * Liefert eine direkte Audio-Stream-URL für die Hörprobe (Issue #29) —
+ * kein Download, der Renderer spielt die URL in einem <audio>-Element ab.
+ */
+export async function previewStreamUrl(url: string): Promise<string | null> {
+  const bin = await getYtDlpPath()
+  if (!bin) throw new YtDlpMissingError()
+  try {
+    const { stdout } = await execFileP(
+      bin,
+      [
+        ...jsRuntimeArgs(),
+        ...cookieArgs(),
+        '-g',
+        '-f',
+        'bestaudio[abr<=128]/bestaudio/best',
+        '--no-warnings',
+        '--',
+        url
+      ],
+      { timeout: 60000, maxBuffer: 4 * 1024 * 1024, env: ytDlpEnv() }
+    )
+    return stdout.split(/\r?\n/).find((l) => l.startsWith('http')) ?? null
+  } catch {
+    return null
   }
 }

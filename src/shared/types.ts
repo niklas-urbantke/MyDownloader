@@ -58,6 +58,12 @@ export interface AppSettings {
   clipboardWatcher: boolean
   /** Seitenleiste beim Start eingeblendet lassen */
   sidebarOpen: boolean
+  /** Einrichtungsassistent wurde abgeschlossen (Issue #31) */
+  onboardingDone: boolean
+  /** Angemeldete Konto-Cookies an yt-dlp durchreichen (Issue #13) */
+  useAccountCookies: boolean
+  /** Spotify-API Client-ID des Nutzers (Issue #35) */
+  spotifyClientId: string
 }
 
 // ---------------------------------------------------------------------------
@@ -224,6 +230,76 @@ export interface HistoryEntry {
 }
 
 // ---------------------------------------------------------------------------
+// Playlist-Abos (Issue #21)
+// ---------------------------------------------------------------------------
+
+export interface Subscription {
+  id: string
+  url: string
+  title: string
+  enabled: boolean
+  /** Zielordner (leer = globaler Download-Ordner) */
+  folder: string
+  /** Vorlage für neue Downloads ('' = globale Einstellungen) */
+  templateId: string
+  /** Prüfintervall in Minuten */
+  intervalMinutes: number
+  lastCheckedAt: string | null
+  /** Bereits bekannte Video-IDs — nur Neues wird geladen */
+  knownVideoIds: string[]
+  /** Zuletzt gefundene neue Titel (Anzeige) */
+  lastNewCount: number
+}
+
+// ---------------------------------------------------------------------------
+// Spotify-Import (Issue #35)
+// ---------------------------------------------------------------------------
+
+export interface SpotifyStatus {
+  configured: boolean
+  loggedIn: boolean
+  displayName: string | null
+}
+
+export interface SpotifyTrack {
+  artist: string
+  title: string
+  album: string | null
+  durationSeconds: number | null
+}
+
+export interface SpotifyPlaylist {
+  title: string
+  owner: string | null
+  tracks: SpotifyTrack[]
+}
+
+// ---------------------------------------------------------------------------
+// Statistiken (Issue #36)
+// ---------------------------------------------------------------------------
+
+export interface StatsSummary {
+  totalDownloads: number
+  completed: number
+  errors: number
+  /** Gesamtgröße aller noch vorhandenen Dateien in Bytes */
+  totalBytes: number
+  /** Anzahl pro Monat, älteste zuerst — [{ month: '2026-01', count }] */
+  perMonth: { month: string; count: number }[]
+  topUploaders: { name: string; count: number }[]
+  formats: { format: string; count: number }[]
+}
+
+// ---------------------------------------------------------------------------
+// Konto (Issue #13)
+// ---------------------------------------------------------------------------
+
+export interface AccountStatus {
+  loggedIn: boolean
+  cookieFile: string | null
+}
+
+// ---------------------------------------------------------------------------
 // Metadaten (Tag-Editor, Issue #25)
 // ---------------------------------------------------------------------------
 
@@ -276,6 +352,8 @@ export const IPC = {
   settingsPickFolder: 'settings:pick-folder',
   // Media-Infos
   mediaProbe: 'media:probe',
+  /** Direkte Stream-URL für die Hörprobe (Issue #29) */
+  mediaPreviewUrl: 'media:preview-url',
   // Downloads
   downloadAdd: 'download:add',
   downloadAddMany: 'download:add-many',
@@ -308,6 +386,24 @@ export const IPC = {
   historyList: 'history:list',
   historyClear: 'history:clear',
   historyRemove: 'history:remove',
+  // Playlist-Abos (Issue #21)
+  subsList: 'subs:list',
+  subsAdd: 'subs:add',
+  subsUpdate: 'subs:update',
+  subsRemove: 'subs:remove',
+  subsCheckNow: 'subs:check-now',
+  subsChanged: 'subs:changed',
+  // Konto (Issue #13)
+  accountStatus: 'account:status',
+  accountLogin: 'account:login',
+  accountLogout: 'account:logout',
+  // Spotify (Issue #35)
+  spotifyStatus: 'spotify:status',
+  spotifyLogin: 'spotify:login',
+  spotifyLogout: 'spotify:logout',
+  spotifyGetPlaylist: 'spotify:get-playlist',
+  // Statistiken (Issue #36)
+  statsCompute: 'stats:compute',
   // System
   binariesStatus: 'binaries:status',
   binariesUpdateYtDlp: 'binaries:update-ytdlp',

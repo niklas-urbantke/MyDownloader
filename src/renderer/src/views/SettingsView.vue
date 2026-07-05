@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { BinaryStatus } from '@shared/types'
+import type { AccountStatus, BinaryStatus, SpotifyStatus } from '@shared/types'
 import PageHead from '../components/PageHead.vue'
 import BxCard from '../components/BxCard.vue'
 import BxBtn from '../components/BxBtn.vue'
@@ -43,7 +43,55 @@ async function runImportV3(): Promise<void> {
 
 onMounted(async () => {
   binaries.value = await window.api.system.binaries()
+  account.value = await window.api.account.status()
+  spotify.value = await window.api.spotify.status()
 })
+
+// --- Konto (Issue #13) ---
+const account = ref<AccountStatus | null>(null)
+const accountBusy = ref(false)
+
+async function accountLogin(): Promise<void> {
+  accountBusy.value = true
+  try {
+    account.value = await window.api.account.login()
+    if (account.value.loggedIn) showToast(t('settings.account.loggedIn'))
+  } finally {
+    accountBusy.value = false
+  }
+}
+
+async function accountLogout(): Promise<void> {
+  accountBusy.value = true
+  try {
+    account.value = await window.api.account.logout()
+  } finally {
+    accountBusy.value = false
+  }
+}
+
+// --- Spotify (Issue #35) ---
+const spotify = ref<SpotifyStatus | null>(null)
+const spotifyBusy = ref(false)
+
+async function spotifyLogin(): Promise<void> {
+  spotifyBusy.value = true
+  try {
+    spotify.value = await window.api.spotify.login()
+    if (spotify.value.loggedIn) showToast(t('spotify.loggedIn'))
+  } finally {
+    spotifyBusy.value = false
+  }
+}
+
+async function spotifyLogout(): Promise<void> {
+  spotify.value = await window.api.spotify.logout()
+}
+
+// --- Onboarding erneut starten (Issue #31) ---
+function restartOnboarding(): void {
+  if (settings.value) settings.value.onboardingDone = false
+}
 
 async function updateYtDlp(): Promise<void> {
   updatingYtDlp.value = true
@@ -389,6 +437,91 @@ const concurrencyProxy = computed({
       </div>
     </BxCard>
 
+    <!-- YouTube-Konto (Issue #13) -->
+    <BxCard :title="t('settings.account.title')">
+      <div class="stack">
+        <p class="t-body2" style="margin: 0; color: var(--fg2)">
+          {{ t('settings.account.description') }}
+        </p>
+        <div class="row" style="gap: 12px; flex-wrap: wrap; align-items: center">
+          <BxChip
+            :variant="account?.loggedIn ? 'apple' : 'neutral'"
+            :icon="account?.loggedIn ? 'check-in-circle' : 'male-user'"
+          >
+            {{ account?.loggedIn ? t('settings.account.statusLoggedIn') : t('settings.account.statusLoggedOut') }}
+          </BxChip>
+          <span class="spacer" />
+          <BxBtn
+            v-if="!account?.loggedIn"
+            icon="male-user"
+            variant="cta"
+            :label="t('settings.account.login')"
+            :disabled="accountBusy"
+            @click="accountLogin"
+          />
+          <BxBtn
+            v-else
+            icon="cancel"
+            variant="outline"
+            :label="t('settings.account.logout')"
+            :disabled="accountBusy"
+            @click="accountLogout"
+          />
+        </div>
+        <BxToggle
+          v-model="settings.useAccountCookies"
+          :label="t('settings.account.useCookies')"
+          :hint="t('settings.account.useCookiesHint')"
+          :disabled="!account?.loggedIn"
+        />
+      </div>
+    </BxCard>
+
+    <!-- Spotify (Issue #35) -->
+    <BxCard :title="t('settings.spotify.title')">
+      <div class="stack">
+        <p class="t-body2" style="margin: 0; color: var(--fg2)">
+          {{ t('settings.spotify.description') }}
+        </p>
+        <BxField
+          v-model="settings.spotifyClientId"
+          :label="t('settings.spotify.clientId')"
+          icon="key"
+          :hint="t('settings.spotify.clientIdHint')"
+          placeholder="z. B. 5f2a…"
+        />
+        <div class="row" style="gap: 12px; flex-wrap: wrap; align-items: center">
+          <BxChip
+            :variant="spotify?.loggedIn ? 'apple' : 'neutral'"
+            :icon="spotify?.loggedIn ? 'check-in-circle' : 'music'"
+          >
+            {{
+              spotify?.loggedIn
+                ? t('spotify.connectedAs', { name: spotify.displayName ?? 'Spotify' })
+                : t('settings.spotify.statusLoggedOut')
+            }}
+          </BxChip>
+          <span class="spacer" />
+          <BxBtn
+            v-if="!spotify?.loggedIn"
+            icon="link"
+            variant="cta"
+            :label="t('spotify.login')"
+            :disabled="spotifyBusy || !settings.spotifyClientId.trim()"
+            @click="spotifyLogin"
+          />
+          <BxBtn
+            v-else
+            icon="cancel"
+            variant="outline"
+            :label="t('settings.account.logout')"
+            :disabled="spotifyBusy"
+            @click="spotifyLogout"
+          />
+        </div>
+      </div>
+    </BxCard>
+
     <!-- System & Wartung -->
     <BxCard :title="t('settings.binaries.title')">
       <div class="stack">
@@ -436,13 +569,19 @@ const concurrencyProxy = computed({
         <p class="t-body2" style="margin: 0; color: var(--fg2)">
           {{ t('settings.importV3.description') }}
         </p>
-        <div class="row">
+        <div class="row" style="gap: 12px; flex-wrap: wrap">
           <BxBtn
             icon="upload"
             variant="outline"
             :label="t('settings.importV3.action')"
             :disabled="importing"
             @click="runImportV3"
+          />
+          <BxBtn
+            icon="replay"
+            variant="ghost"
+            :label="t('settings.restartOnboarding')"
+            @click="restartOnboarding"
           />
         </div>
       </div>

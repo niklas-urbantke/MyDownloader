@@ -7,9 +7,21 @@ import type { TrackTags } from '@shared/types'
 import { getSettings, updateSettings } from './settings'
 import { listHistory, addHistoryEntry, removeHistoryEntry, clearHistory } from './history'
 import { getBinaryStatus, updateYtDlp } from './binaries'
-import { probeUrl } from './ytdlp'
+import { probeUrl, previewStreamUrl } from './ytdlp'
 import { DownloadQueue } from './queue'
 import { importV3Data } from './importV3'
+import { accountStatus, exportCookies, loginYouTube, logoutYouTube } from './accounts'
+import {
+  addSubscription,
+  checkSubscription,
+  listSubscriptions,
+  removeSubscription,
+  startSubscriptionScheduler,
+  updateSubscription
+} from './subscriptions'
+import { getSpotifyPlaylist, spotifyLogin, spotifyLogout, spotifyStatus } from './spotify'
+import { computeStats } from './stats'
+import type { Subscription } from '@shared/types'
 
 function broadcast(channel: string, ...args: unknown[]): void {
   for (const win of BrowserWindow.getAllWindows()) {
@@ -88,6 +100,7 @@ export function registerIpc(): void {
 
   // --- Medien-Infos ----------------------------------------------------------
   ipcMain.handle(IPC.mediaProbe, async (_e, url: string) => probeUrl(url))
+  ipcMain.handle(IPC.mediaPreviewUrl, async (_e, url: string) => previewStreamUrl(url))
 
   // --- Downloads --------------------------------------------------------------
   ipcMain.handle(IPC.downloadAdd, (_e, request: DownloadRequest) => queue.add(request))
@@ -134,6 +147,41 @@ export function registerIpc(): void {
   ipcMain.handle(IPC.historyList, () => listHistory())
   ipcMain.handle(IPC.historyRemove, (_e, id: string) => removeHistoryEntry(id))
   ipcMain.handle(IPC.historyClear, () => clearHistory())
+
+  // --- Playlist-Abos (Issue #21) -------------------------------------------------
+  startSubscriptionScheduler(queue, (subs) => broadcast(IPC.subsChanged, subs))
+  ipcMain.handle(IPC.subsList, () => listSubscriptions())
+  ipcMain.handle(
+    IPC.subsAdd,
+    (_e, url: string, options: { folder?: string; templateId?: string; intervalMinutes?: number }) =>
+      addSubscription(url, options)
+  )
+  ipcMain.handle(IPC.subsUpdate, (_e, patch: Partial<Subscription> & { id: string }) =>
+    updateSubscription(patch)
+  )
+  ipcMain.handle(IPC.subsRemove, (_e, id: string) => removeSubscription(id))
+  ipcMain.handle(IPC.subsCheckNow, (_e, id: string) => checkSubscription(id))
+
+  // --- Konto (Issue #13) ----------------------------------------------------------
+  ipcMain.handle(IPC.accountStatus, () => accountStatus())
+  ipcMain.handle(IPC.accountLogin, async () => {
+    const status = await loginYouTube(BrowserWindow.getAllWindows()[0])
+    return status
+  })
+  ipcMain.handle(IPC.accountLogout, () => logoutYouTube())
+  // Beim Start einmal frisch exportieren, falls angemeldet
+  void accountStatus().then((s) => {
+    if (s.loggedIn) void exportCookies()
+  })
+
+  // --- Spotify (Issue #35) ---------------------------------------------------------
+  ipcMain.handle(IPC.spotifyStatus, () => spotifyStatus())
+  ipcMain.handle(IPC.spotifyLogin, () => spotifyLogin())
+  ipcMain.handle(IPC.spotifyLogout, () => spotifyLogout())
+  ipcMain.handle(IPC.spotifyGetPlaylist, (_e, url: string) => getSpotifyPlaylist(url))
+
+  // --- Statistiken (Issue #36) ------------------------------------------------------
+  ipcMain.handle(IPC.statsCompute, () => computeStats())
 
   // --- System -----------------------------------------------------------------
   ipcMain.handle(IPC.binariesStatus, () => getBinaryStatus())

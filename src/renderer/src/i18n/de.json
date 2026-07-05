@@ -15,7 +15,10 @@
       "main": "Anwendung",
       "system": "System"
     },
-    "templates": "Vorlagen"
+    "templates": "Vorlagen",
+    "subscriptions": "Abos",
+    "spotify": "Spotify-Import",
+    "stats": "Statistiken"
   },
   "common": {
     "save": "Speichern",
@@ -111,7 +114,10 @@
       "views": "Aufrufe",
       "playlist": "Playlist",
       "entries": "{n} Einträge",
-      "showingFirst": "Erste {n} Einträge"
+      "showingFirst": "Erste {n} Einträge",
+      "listen": "Hörprobe",
+      "stopListen": "Stopp",
+      "previewFailed": "Hörprobe nicht verfügbar"
     },
     "options": {
       "title": "Optionen für diesen Download",
@@ -147,6 +153,13 @@
       "chaptersFound": "{n} Kapitel erkannt — jede wird eine eigene Datei.",
       "scheduledAt": "Später starten",
       "scheduledAtHint": "Leer lassen für sofortigen Start."
+    },
+    "channel": {
+      "detected": "Kanal erkannt",
+      "videos": "Videos",
+      "shorts": "Shorts",
+      "streams": "Livestreams",
+      "all": "Alles"
     }
   },
   "queue": {
@@ -283,7 +296,26 @@
       "description": "Übernimmt Einstellungen und Download-Verlauf aus MyDownloader v3 (settings.json / download_history.json).",
       "action": "v3-Daten importieren",
       "done": "{settings} Einstellungen und {history} Verlaufs-Einträge importiert"
-    }
+    },
+    "account": {
+      "title": "YouTube-Konto",
+      "description": "Melde dich mit deinem Google-Konto an, um altersbeschränkte Inhalte (18+) und Mitglieder-Videos laden zu können. Die Anmeldung läuft in einem echten Browserfenster; gespeichert werden nur die Cookies — lokal auf diesem Gerät.",
+      "statusLoggedIn": "Angemeldet",
+      "statusLoggedOut": "Nicht angemeldet",
+      "login": "Mit Google anmelden",
+      "logout": "Abmelden",
+      "loggedIn": "Konto verbunden",
+      "useCookies": "Konto-Cookies für Downloads verwenden",
+      "useCookiesHint": "Erforderlich für 18+-Inhalte. Die Cookies werden nur an yt-dlp auf diesem Gerät übergeben."
+    },
+    "spotify": {
+      "title": "Spotify",
+      "description": "Für den Spotify-Import brauchst du eine eigene (kostenlose) App auf developer.spotify.com. Lege dort eine App an, trage als Redirect-URI http://127.0.0.1:8988/callback ein und füge die Client-ID hier ein. Danach kann sich jeder Nutzer mit seinem eigenen Spotify-Konto anmelden.",
+      "clientId": "Client-ID",
+      "clientIdHint": "Aus deinem Spotify-Developer-Dashboard. Ein Client-Secret wird nicht benötigt (PKCE).",
+      "statusLoggedOut": "Nicht verbunden"
+    },
+    "restartOnboarding": "Einrichtungsassistent starten"
   },
   "about": {
     "title": "Info",
@@ -363,5 +395,80 @@
     "saved": "Metadaten gespeichert",
     "saveFailed": "Speichern fehlgeschlagen: {msg}",
     "saveAll": "Auf alle Dateien anwenden"
+  },
+  "subscriptions": {
+    "title": "Playlist-Abos",
+    "subtitle": "Abonnierte Playlists und Kanäle werden automatisch auf neue Videos geprüft — nur Neues wird geladen.",
+    "addTitle": "Neues Abo",
+    "add": "Abonnieren",
+    "added": "Abo angelegt — nur neue Videos werden künftig geladen.",
+    "addFailed": "Abo konnte nicht angelegt werden: {msg}",
+    "empty": "Noch keine Abos. Füge oben eine Playlist- oder Kanal-URL hinzu.",
+    "fields": {
+      "url": "Playlist- oder Kanal-URL",
+      "urlPlaceholder": "https://www.youtube.com/playlist?list=… oder Kanal-URL",
+      "interval": "Prüfintervall"
+    },
+    "interval": {
+      "hourly": "Stündlich",
+      "sixHours": "Alle 6 Stunden",
+      "twelveHours": "Alle 12 Stunden",
+      "daily": "Täglich"
+    },
+    "enabled": "Aktiv",
+    "pausedChip": "Pausiert",
+    "newChip": "{n} neu",
+    "knownVideos": "bekannte Videos",
+    "lastChecked": "zuletzt geprüft {when}",
+    "checkNow": "Jetzt prüfen",
+    "foundNew": "{n} neue Titel gefunden und zur Warteschlange hinzugefügt",
+    "nothingNew": "Keine neuen Titel",
+    "deleteTitle": "Abo löschen",
+    "deleteQuestion": "Abo „{name}“ wirklich löschen? Bereits geladene Dateien bleiben erhalten."
+  },
+  "spotify": {
+    "title": "Spotify-Import",
+    "subtitle": "Spotify-Playlists, -Alben und -Titel als Audio-Downloads übernehmen.",
+    "setupHint": "Zuerst in den Einstellungen eine Spotify Client-ID hinterlegen und anmelden.",
+    "loginHint": "Mit deinem Spotify-Konto anmelden, um Playlists zu laden.",
+    "login": "Mit Spotify anmelden",
+    "loggedIn": "Bei Spotify angemeldet",
+    "connectedAs": "Verbunden als {name}",
+    "urlPlaceholder": "https://open.spotify.com/playlist/… oder Album-/Track-Link",
+    "load": "Playlist laden",
+    "loadFailed": "Playlist konnte nicht geladen werden.",
+    "tracks": "{n} Titel",
+    "import": "{n} Titel herunterladen",
+    "columns": {
+      "track": "Titel",
+      "query": "YouTube-Suchanfrage",
+      "duration": "Dauer"
+    }
+  },
+  "stats": {
+    "title": "Statistiken",
+    "subtitle": "Dein Download-Verlauf in Zahlen — komplett lokal berechnet.",
+    "kpi": {
+      "total": "Downloads gesamt",
+      "completed": "Erfolgreich",
+      "successRate": "Erfolgsquote",
+      "totalSize": "Gesamtgröße"
+    },
+    "perMonth": "Downloads pro Monat (12 Monate)",
+    "topUploaders": "Top-Künstler & Kanäle",
+    "formats": "Formate",
+    "noData": "Noch keine Daten"
+  },
+  "onboarding": {
+    "title": "Willkommen bei MyDownloader",
+    "welcome": "Schön, dass du da bist!",
+    "welcomeText": "In vier kurzen Schritten richten wir die wichtigsten Einstellungen ein. Alles lässt sich später jederzeit ändern.",
+    "folderTitle": "Wohin sollen Downloads gespeichert werden?",
+    "formatTitle": "Was lädst du am häufigsten?",
+    "appearanceTitle": "Wie soll die App aussehen?",
+    "next": "Weiter",
+    "back": "Zurück",
+    "skip": "Überspringen",
+    "finish": "Fertig"
   }
 }

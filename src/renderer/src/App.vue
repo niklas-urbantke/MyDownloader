@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import AppIcon from './components/AppIcon.vue'
 import AppLogo from './components/AppLogo.vue'
 import ToastHost from './components/ToastHost.vue'
+import OnboardingDialog from './components/OnboardingDialog.vue'
 import { showToast } from './composables/toast'
 import { useSettingsStore } from './stores/settings'
 import { useDownloadsStore } from './stores/downloads'
@@ -30,6 +31,15 @@ onMounted(async () => {
     if (settingsStore.settings) settingsStore.settings.sidebarOpen = open
   })
 
+  // Einrichtungsassistent beim ersten Start (Issue #31)
+  showOnboarding.value = !(settingsStore.settings?.onboardingDone ?? true)
+  watch(
+    () => settingsStore.settings?.onboardingDone,
+    (done) => {
+      if (done === false) showOnboarding.value = true
+    }
+  )
+
   // Clipboard-Watcher: erkannte Video-URL als Toast mit Direkt-Aktion anbieten
   window.api.clipboard.onUrlDetected((url) => {
     showToast(t('clipboard.detected'), 'info', {
@@ -44,6 +54,7 @@ onMounted(async () => {
 
 // Sidenav-Zustand kommt aus den Einstellungen (Default: eingeblendet, Issue #12)
 const navOpen = ref(true)
+const showOnboarding = ref(false)
 
 interface NavItem {
   route: string
@@ -59,7 +70,10 @@ const navGroups = computed(() => [
       { route: 'download', icon: 'download', labelKey: 'nav.download' },
       { route: 'queue', icon: 'checklist', labelKey: 'nav.queue' },
       { route: 'templates', icon: 'layout', labelKey: 'nav.templates' },
-      { route: 'history', icon: 'time', labelKey: 'nav.history' }
+      { route: 'subscriptions', icon: 'reload', labelKey: 'nav.subscriptions' },
+      { route: 'spotify', icon: 'music', labelKey: 'nav.spotify' },
+      { route: 'history', icon: 'time', labelKey: 'nav.history' },
+      { route: 'stats', icon: 'statistic', labelKey: 'nav.stats' }
     ] as NavItem[]
   },
   {
@@ -167,5 +181,6 @@ function go(name: string): void {
     </div>
 
     <ToastHost />
+    <OnboardingDialog :open="showOnboarding" @close="showOnboarding = false" />
   </div>
 </template>

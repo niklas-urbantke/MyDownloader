@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import type { AppSettings, DownloadRequest, DownloadTemplate, MediaInfo } from '@shared/types'
@@ -20,7 +20,14 @@ import { useTemplatesStore } from '../stores/templates'
 import BxDialog from '../components/BxDialog.vue'
 import BxBanner from '../components/BxBanner.vue'
 import { showToast } from '../composables/toast'
-import { formatDuration, formatCount, isHttpUrl, analyzeCombiUrl, type CombiUrl } from '../utils/format'
+import {
+  formatDuration,
+  formatCount,
+  isHttpUrl,
+  analyzeCombiUrl,
+  analyzeChannelUrl,
+  type CombiUrl
+} from '../utils/format'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -101,6 +108,63 @@ const videoQualityOptions = computed(() => [
 
 const urlValid = computed(() => isHttpUrl(url.value))
 
+// --- Kanal-Downloads (Issue #9): Tab wählen (Videos/Shorts/Livestreams) ---
+const channel = computed(() => analyzeChannelUrl(url.value))
+const channelTab = ref<'videos' | 'shorts' | 'streams' | 'all'>('videos')
+const channelTabOptions = computed(() => [
+  { value: 'videos', label: t('download.channel.videos'), icon: 'video-player' },
+  { value: 'shorts', label: t('download.channel.shorts'), icon: 'play' },
+  { value: 'streams', label: t('download.channel.streams'), icon: 'record' },
+  { value: 'all', label: t('download.channel.all'), icon: 'checklist' }
+])
+
+/** Effektive Ziel-URL: bei Kanälen mit gewähltem Tab */
+function targetUrl(): string {
+  const ch = channel.value
+  if (!ch) return url.value.trim()
+  return channelTab.value === 'all' ? ch.base : `${ch.base}/${channelTab.value}`
+}
+
+// --- Hörprobe (Issue #29) ---
+const previewingUrl = ref('')
+const previewLoadingUrl = ref('')
+let audioEl: HTMLAudioElement | null = null
+
+function stopPreview(): void {
+  audioEl?.pause()
+  audioEl = null
+  previewingUrl.value = ''
+}
+
+async function togglePreview(target: string): Promise<void> {
+  if (previewingUrl.value === target) {
+    stopPreview()
+    return
+  }
+  stopPreview()
+  previewLoadingUrl.value = target
+  try {
+    const stream = await window.api.media.previewUrl(target)
+    if (!stream) {
+      showToast(t('download.preview.previewFailed'), 'error')
+      return
+    }
+    audioEl = new Audio(stream)
+    previewingUrl.value = target
+    // Hörprobe: nach 30 Sekunden automatisch stoppen
+    audioEl.addEventListener('timeupdate', () => {
+      if (audioEl && audioEl.currentTime > 30) stopPreview()
+    })
+    audioEl.addEventListener('ended', stopPreview)
+    audioEl.addEventListener('error', stopPreview)
+    void audioEl.play()
+  } finally {
+    previewLoadingUrl.value = ''
+  }
+}
+
+onUnmounted(stopPreview)
+
 // --- Combi-Link (Video + Playlist in einer URL): Nutzer entscheiden lassen ---
 const combi = ref<CombiUrl | null>(null)
 let afterCombiChoice: (() => void | Promise<void>) | null = null
@@ -166,7 +230,7 @@ function expandQualities(
  * mit zusätzlichen Qualitätsstufen entsprechend mehr.
  */
 function buildRequests(): DownloadRequest[] {
-  const base: DownloadRequest = { url: url.value.trim() }
+  const base: DownloadRequest = { url: targetUrl() }
   if (info.value) base.knownTitle = info.value.title
 
   let requests: DownloadRequest[]
@@ -254,7 +318,7 @@ async function probe(): Promise<void> {
   probeError.value = ''
   info.value = null
   try {
-    info.value = await window.api.media.probe(url.value.trim())
+    info.value = await window.api.media.probe(targetUrl())
   } catch (err) {
     probeError.value = t('download.errors.probeFailed', {
       msg: err instanceof Error ? err.message.split('\n')[0] : String(err)
@@ -313,6 +377,11 @@ const playlistPreview = computed(() => {
           :error="probeError || undefined"
           @enter="probe"
         />
+        <!-- Kanal erkannt: Tab wählen (Issue #9) -->
+        <div v-if="channel" class="row" style="gap: 12px; align-items: center; flex-wrap: wrap">
+          <BxChip icon="male-user" variant="marine">{{ t('download.channel.detected') }}</BxChip>
+          <BxSegmented v-model="channelTab" :options="channelTabOptions" />
+        </div>
         <div class="row" style="flex-wrap: wrap">
           <BxBtn
             icon="search"
@@ -375,6 +444,20 @@ const playlistPreview = computed(() => {
               <BxChip v-if="info.viewCount" icon="line-chart" variant="neutral">
                 {{ formatCount(info.viewCount, locale) }} {{ t('download.preview.views') }}
               </BxChip>
+              <BxChip v-if="info.chapterCount > 0" icon="checklist" variant="outline">
+                {{ t('download.extras.chaptersFound', { n: info.chapterCount }) }}
+              </BxChip>
+            </div>
+            <!-- Hörprobe (Issue #29) -->
+            <div class="row">
+              <BxBtn
+                :icon="previewingUrl === info.url ? 'stop' : 'play'"
+                variant="outline"
+                size="sm"
+                :label="previewingUrl === info.url ? t('download.preview.stopListen') : t('download.preview.listen')"
+                :disabled="previewLoadingUrl === info.url"
+                @click="togglePreview(info.url)"
+              />
             </div>
           </div>
         </div>
@@ -396,6 +479,17 @@ const playlistPreview = computed(() => {
             <tr v-for="(entry, i) in playlistPreview" :key="entry.id" style="cursor: default">
               <td style="width: 40px; color: var(--fg2)">{{ i + 1 }}</td>
               <td>{{ entry.title }}</td>
+              <td style="width: 50px">
+                <BxBtn
+                  v-if="entry.url"
+                  :icon="previewingUrl === entry.url ? 'stop' : 'play'"
+                  variant="ghost"
+                  size="sm"
+                  :title="t('download.preview.listen')"
+                  :disabled="previewLoadingUrl === entry.url"
+                  @click="togglePreview(entry.url)"
+                />
+              </td>
               <td style="width: 90px; color: var(--fg2); text-align: right">
                 {{ formatDuration(entry.durationSeconds) }}
               </td>

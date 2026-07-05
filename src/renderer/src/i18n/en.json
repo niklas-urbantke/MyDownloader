@@ -15,7 +15,10 @@
       "main": "Application",
       "system": "System"
     },
-    "templates": "Templates"
+    "templates": "Templates",
+    "subscriptions": "Subscriptions",
+    "spotify": "Spotify import",
+    "stats": "Statistics"
   },
   "common": {
     "save": "Save",
@@ -111,7 +114,10 @@
       "views": "Views",
       "playlist": "Playlist",
       "entries": "{n} entries",
-      "showingFirst": "First {n} entries"
+      "showingFirst": "First {n} entries",
+      "listen": "Preview",
+      "stopListen": "Stop",
+      "previewFailed": "Preview not available"
     },
     "options": {
       "title": "Options for this download",
@@ -147,6 +153,13 @@
       "chaptersFound": "{n} chapters detected — each becomes its own file.",
       "scheduledAt": "Start later",
       "scheduledAtHint": "Leave empty to start immediately."
+    },
+    "channel": {
+      "detected": "Channel detected",
+      "videos": "Videos",
+      "shorts": "Shorts",
+      "streams": "Live streams",
+      "all": "Everything"
     }
   },
   "queue": {
@@ -283,7 +296,26 @@
       "description": "Imports settings and download history from MyDownloader v3 (settings.json / download_history.json).",
       "action": "Import v3 data",
       "done": "Imported {settings} settings and {history} history entries"
-    }
+    },
+    "account": {
+      "title": "YouTube account",
+      "description": "Log in with your Google account to download age-restricted (18+) and members-only videos. Login happens in a real browser window; only the cookies are stored — locally on this device.",
+      "statusLoggedIn": "Logged in",
+      "statusLoggedOut": "Not logged in",
+      "login": "Log in with Google",
+      "logout": "Log out",
+      "loggedIn": "Account connected",
+      "useCookies": "Use account cookies for downloads",
+      "useCookiesHint": "Required for 18+ content. Cookies are only passed to yt-dlp on this device."
+    },
+    "spotify": {
+      "title": "Spotify",
+      "description": "The Spotify import needs your own (free) app on developer.spotify.com. Create an app there, set http://127.0.0.1:8988/callback as the redirect URI and paste the client ID here. Every user then logs in with their own Spotify account.",
+      "clientId": "Client ID",
+      "clientIdHint": "From your Spotify developer dashboard. No client secret needed (PKCE).",
+      "statusLoggedOut": "Not connected"
+    },
+    "restartOnboarding": "Start setup assistant"
   },
   "about": {
     "title": "About",
@@ -363,5 +395,80 @@
     "saved": "Metadata saved",
     "saveFailed": "Saving failed: {msg}",
     "saveAll": "Apply to all files"
+  },
+  "subscriptions": {
+    "title": "Playlist subscriptions",
+    "subtitle": "Subscribed playlists and channels are checked for new videos automatically — only new items get downloaded.",
+    "addTitle": "New subscription",
+    "add": "Subscribe",
+    "added": "Subscription created — only new videos will be downloaded from now on.",
+    "addFailed": "Could not create subscription: {msg}",
+    "empty": "No subscriptions yet. Add a playlist or channel URL above.",
+    "fields": {
+      "url": "Playlist or channel URL",
+      "urlPlaceholder": "https://www.youtube.com/playlist?list=… or channel URL",
+      "interval": "Check interval"
+    },
+    "interval": {
+      "hourly": "Hourly",
+      "sixHours": "Every 6 hours",
+      "twelveHours": "Every 12 hours",
+      "daily": "Daily"
+    },
+    "enabled": "Active",
+    "pausedChip": "Paused",
+    "newChip": "{n} new",
+    "knownVideos": "known videos",
+    "lastChecked": "last checked {when}",
+    "checkNow": "Check now",
+    "foundNew": "{n} new items found and added to the queue",
+    "nothingNew": "Nothing new",
+    "deleteTitle": "Delete subscription",
+    "deleteQuestion": "Really delete subscription “{name}”? Downloaded files are kept."
+  },
+  "spotify": {
+    "title": "Spotify import",
+    "subtitle": "Import Spotify playlists, albums and tracks as audio downloads.",
+    "setupHint": "First add a Spotify client ID in the settings and log in.",
+    "loginHint": "Log in with your Spotify account to load playlists.",
+    "login": "Log in with Spotify",
+    "loggedIn": "Logged in to Spotify",
+    "connectedAs": "Connected as {name}",
+    "urlPlaceholder": "https://open.spotify.com/playlist/… or album/track link",
+    "load": "Load playlist",
+    "loadFailed": "Could not load the playlist.",
+    "tracks": "{n} tracks",
+    "import": "Download {n} tracks",
+    "columns": {
+      "track": "Track",
+      "query": "YouTube search query",
+      "duration": "Duration"
+    }
+  },
+  "stats": {
+    "title": "Statistics",
+    "subtitle": "Your download history in numbers — computed entirely locally.",
+    "kpi": {
+      "total": "Total downloads",
+      "completed": "Completed",
+      "successRate": "Success rate",
+      "totalSize": "Total size"
+    },
+    "perMonth": "Downloads per month (12 months)",
+    "topUploaders": "Top artists & channels",
+    "formats": "Formats",
+    "noData": "No data yet"
+  },
+  "onboarding": {
+    "title": "Welcome to MyDownloader",
+    "welcome": "Great to have you here!",
+    "welcomeText": "Four quick steps to set up the essentials. Everything can be changed later.",
+    "folderTitle": "Where should downloads be saved?",
+    "formatTitle": "What do you download most?",
+    "appearanceTitle": "How should the app look?",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip",
+    "finish": "Done"
   }
 }

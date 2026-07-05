@@ -59,7 +59,12 @@ interface InternalItem {
 }
 
 function looksLikePlaylist(url: string): boolean {
-  return /[?&]list=/.test(url) || /\/playlist\b/.test(url)
+  return (
+    /[?&]list=/.test(url) ||
+    /\/playlist\b/.test(url) ||
+    // Ganze Kanäle verhalten sich wie Playlists (Issue #9)
+    /youtube\.com\/(@[^/]+|channel\/|c\/|user\/)/i.test(url)
+  )
 }
 
 function emptyProgress(): DownloadProgress {

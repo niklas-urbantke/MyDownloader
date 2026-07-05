@@ -71,6 +71,24 @@ export interface CombiUrl {
 }
 
 /**
+ * Erkennt YouTube-Kanal-URLs (Issue #9). Liefert die Basis-URL ohne Tab,
+ * damit die UI Videos/Shorts/Livestreams gezielt anbieten kann.
+ */
+export function analyzeChannelUrl(value: string): { base: string } | null {
+  try {
+    const u = new URL(value.trim())
+    if (!/(^|\.)youtube\.com$/.test(u.hostname)) return null
+    const m = /^\/(@[^/]+|channel\/[^/]+|c\/[^/]+|user\/[^/]+)(\/(videos|shorts|streams|featured))?\/?$/.exec(
+      u.pathname
+    )
+    if (!m) return null
+    return { base: `https://www.youtube.com/${m[1]}` }
+  } catch {
+    return null
+  }
+}
+
+/**
  * Erkennt YouTube-"Combi-Links" (watch?v=… UND list=…), bei denen unklar ist,
  * ob das einzelne Video oder die ganze Playlist gemeint ist (Issue #2).
  */
