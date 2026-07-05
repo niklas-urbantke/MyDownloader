@@ -284,7 +284,8 @@
       "autoUpdate": "Automatische Updates",
       "autoUpdateAuto": "Automatisch herunterladen",
       "autoUpdateNotify": "Nur benachrichtigen",
-      "autoUpdateOff": "Deaktiviert"
+      "autoUpdateOff": "Deaktiviert",
+      "themeColorful": "Bunt"
     },
     "binaries": {
       "title": "Komponenten",
@@ -344,7 +345,7 @@
       "System-Tray, Drag & Drop, Deep-Links",
       "Auto-Updates & .urbupdate-Dateien",
       "Statistiken, Verlauf, Vorlagen, Onboarding",
-      "Hell- & Dunkel-Modus, Deutsch & Englisch"
+      "Hell-, Dunkel- & Bunt-Modus, Deutsch & Englisch"
     ],
     "openSource": "Lizenzen & Open Source",
     "checkUpdates": "Auf Updates prüfen",

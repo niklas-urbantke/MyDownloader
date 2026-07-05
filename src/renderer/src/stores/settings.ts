@@ -4,6 +4,7 @@ import type { AppSettings } from '@shared/types'
 import { applyLocale } from '../i18n'
 
 function applyTheme(theme: AppSettings['theme']): void {
+  // 'colorful' ist ein eigenständiges Theme; 'system' folgt dem OS (hell/dunkel)
   const resolved =
     theme === 'system'
       ? window.matchMedia('(prefers-color-scheme: dark)').matches

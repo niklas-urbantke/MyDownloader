@@ -35,9 +35,11 @@ function deepLinkFromArgv(argv: string[]): string | null {
 }
 
 function createWindow(): BrowserWindow {
+  // Test-Hook: größere Fensterhöhe für Ganzseiten-Screenshots (MD_WIN_HEIGHT)
+  const testHeight = Number.parseInt(process.env['MD_WIN_HEIGHT'] ?? '', 10)
   const win = new BrowserWindow({
     width: 1320,
-    height: 880,
+    height: Number.isFinite(testHeight) && testHeight > 0 ? testHeight : 880,
     minWidth: 1000,
     minHeight: 680,
     show: false,
@@ -73,6 +75,12 @@ function createWindow(): BrowserWindow {
       const e2eUrl = process.env['MD_E2E_URL']
       if (e2eUrl) queue.add({ url: e2eUrl, startNow: true })
       setTimeout(async () => {
+        // Optional herauszoomen, damit lange Seiten komplett passen (MD_ZOOM=0.6)
+        const zoom = Number.parseFloat(process.env['MD_ZOOM'] ?? '')
+        if (Number.isFinite(zoom) && zoom > 0) {
+          win.webContents.setZoomFactor(zoom)
+          await new Promise((r) => setTimeout(r, 500))
+        }
         const image = await win.webContents.capturePage()
         const { writeFileSync } = await import('node:fs')
         writeFileSync(screenshotPath, image.toPNG())

@@ -30,3 +30,4 @@ Desktop.ini
 # Python (Reste der v3)
 __pycache__/
 *.pyc
+release-dl/

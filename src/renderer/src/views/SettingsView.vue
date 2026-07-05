@@ -166,6 +166,7 @@ const concurrencyOptions = ['1', '2', '3', '4', '5'].map((v) => ({ value: v, lab
 const themeOptions = computed(() => [
   { value: 'light', label: t('settings.fields.themeLight'), icon: 'sun' },
   { value: 'dark', label: t('settings.fields.themeDark'), icon: 'moon' },
+  { value: 'colorful', label: t('settings.fields.themeColorful'), icon: 'color-palette' },
   { value: 'system', label: t('settings.fields.themeSystem'), icon: 'sun-moon' }
 ])
 const localeOptions = computed(() => [

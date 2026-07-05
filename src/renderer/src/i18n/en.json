@@ -284,7 +284,8 @@
       "autoUpdate": "Automatic updates",
       "autoUpdateAuto": "Download automatically",
       "autoUpdateNotify": "Notify only",
-      "autoUpdateOff": "Disabled"
+      "autoUpdateOff": "Disabled",
+      "themeColorful": "Colorful"
     },
     "binaries": {
       "title": "Components",
@@ -344,7 +345,7 @@
       "System tray, drag & drop, deep links",
       "Auto-updates & .urbupdate files",
       "Statistics, history, templates, onboarding",
-      "Light & dark mode, German & English"
+      "Light, dark & colorful mode, German & English"
     ],
     "openSource": "Licenses & open source",
     "checkUpdates": "Check for updates",

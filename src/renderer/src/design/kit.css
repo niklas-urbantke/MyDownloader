@@ -793,3 +793,136 @@
   pointer-events: none;
 }
 .f-control--select .f-deco--arrow { left: auto; right: 14px; }
+
+/* =========================================================
+   BUNT / COLORFUL THEME — heller, farbenfroher Modus
+   (aktiviert über <html data-theme="colorful">)
+   Basis bleibt hell & gut lesbar; Akzente werden vielfarbig.
+   ========================================================= */
+[data-theme='colorful'] {
+  /* Primär → lebendiges Violett/Indigo */
+  --marine:       #6D28D9;
+  --marine-dark:  #4C1D95;
+  --marine-80:    #7C3AED;
+  --marine-60:    #A78BFA;
+  --marine-40:    #C4B5FD;
+  --marine-20:    #DDD6FE;
+  --marine-10:    #ECE7FE;
+  --marine-05:    #F6F2FF;
+
+  /* Akzent/CTA → kräftiges Pink/Magenta */
+  --apple:        #DB2777;
+  --apple-dark:   #9D174D;
+  --apple-80:     #EC4899;
+  --apple-60:     #F472B6;
+  --apple-40:     #F9A8D4;
+  --apple-20:     #FCE7F3;
+
+  --q-primary:   var(--marine);
+  --q-secondary: var(--apple);
+  --q-info:      #0EA5E9;
+  --q-warning:   #F59E0B;
+  --q-negative:  #E11D48;
+
+  /* Text in warmem Dunkel-Violett statt reinem Grau */
+  --anthrazit:    #2E1065;
+  --anthrazit-70: #5B4A82;
+  --anthrazit-40: #9D8EC0;
+  --anthrazit-10: #F1ECFB;
+
+  --fg1: #2E1065;
+  --fg2: #6A5B93;
+  --fg3: #A99CC6;
+
+  --surface:   #FFFFFF;
+  --bg-page:   #FBF7FF;
+  --bg-soft:   #F6F2FF;
+  --bg-muted:  #F1ECFB;
+  --border-1:  #E4DBFB;
+  --border-2:  #C4B5FD;
+  --separator: #ECE7FE;
+
+  --shadow-1: 0 1px 2px rgba(109, 40, 217, 0.10), 0 1px 3px rgba(219, 39, 119, 0.06);
+  --shadow-2: 0 2px 6px rgba(109, 40, 217, 0.12), 0 1px 4px rgba(219, 39, 119, 0.06);
+  --shadow-4: 0 6px 16px rgba(109, 40, 217, 0.14), 0 2px 6px rgba(219, 39, 119, 0.08);
+  --shadow-8: 0 16px 32px rgba(109, 40, 217, 0.18), 0 4px 10px rgba(219, 39, 119, 0.10);
+  --shadow-24: 0 32px 64px rgba(109, 40, 217, 0.22), 0 12px 24px rgba(219, 39, 119, 0.12);
+}
+
+/* Farbenfroher Seitenhintergrund (mehrfarbiger, sehr zarter Verlauf) */
+[data-theme='colorful'] .bx-root {
+  background:
+    radial-gradient(1100px 600px at 0% 0%, #F3ECFF 0%, transparent 55%),
+    radial-gradient(1000px 700px at 100% 0%, #FFEAF4 0%, transparent 55%),
+    radial-gradient(1100px 800px at 100% 100%, #E6F7FF 0%, transparent 55%),
+    radial-gradient(900px 700px at 0% 100%, #FFF3E2 0%, transparent 55%),
+    #FBF7FF;
+}
+
+/* Regenbogen-Nav: kräftiger vertikaler Verlauf */
+[data-theme='colorful'] .bx-nav {
+  background: linear-gradient(180deg, #7C3AED 0%, #9333EA 38%, #C026D3 70%, #DB2777 100%);
+}
+[data-theme='colorful'] .bx-nav-item.active {
+  background: rgba(255, 255, 255, 0.20);
+  color: #fff;
+  box-shadow: inset 3px 0 0 #FDE047;
+}
+[data-theme='colorful'] .bx-nav-item:hover { background: rgba(255,255,255,.14); }
+[data-theme='colorful'] .bx-nav-section-label { color: rgba(255,255,255,0.72); }
+
+/* Buttons kräftiger */
+[data-theme='colorful'] .btn--cta {
+  background: linear-gradient(135deg, #DB2777 0%, #F43F5E 100%);
+  border-color: transparent;
+}
+[data-theme='colorful'] .btn--cta:hover { filter: brightness(1.05); }
+[data-theme='colorful'] .btn--primary {
+  background: linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%);
+  border-color: transparent;
+}
+
+/* Karten mit dünnem, buntem oberen Rand */
+[data-theme='colorful'] .bx-card {
+  border-top: 3px solid transparent;
+  border-image: linear-gradient(90deg, #7C3AED, #C026D3, #DB2777, #F59E0B) 1;
+}
+
+/* Tile-Icons rotieren durch eine bunte Palette */
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+1) .bx-tile-icon { background: #EDE9FE; color: #7C3AED; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+2) .bx-tile-icon { background: #FCE7F3; color: #DB2777; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+3) .bx-tile-icon { background: #E0F2FE; color: #0EA5E9; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+4) .bx-tile-icon { background: #DCFCE7; color: #16A34A; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+5) .bx-tile-icon { background: #FEF3C7; color: #D97706; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+6) .bx-tile-icon { background: #FFE4E6; color: #E11D48; }
+
+/* Stat-Kacheln: Werte bunt durchrotieren */
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+1) .bx-stat-value { color: #7C3AED; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+2) .bx-stat-value { color: #DB2777; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+3) .bx-stat-value { color: #0EA5E9; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+4) .bx-stat-value { color: #16A34A; }
+
+/* Chips vielfarbig */
+[data-theme='colorful'] .chip--marine { background: linear-gradient(135deg, #7C3AED, #C026D3); color: #fff; }
+[data-theme='colorful'] .chip--apple  { background: #FCE7F3; color: #9D174D; }
+[data-theme='colorful'] .chip--neutral { background: #EDE9FE; color: #5B21B6; }
+[data-theme='colorful'] .chip--warn   { background: #FEF3C7; color: #B45309; }
+[data-theme='colorful'] .chip--neg    { background: #FFE4E6; color: #BE123C; }
+
+/* Tile-Badges bunt */
+[data-theme='colorful'] .bx-tile-badge--meta { background: #E0F2FE; color: #0369A1; }
+[data-theme='colorful'] .bx-tile-badge--new  { background: #DCFCE7; color: #15803D; }
+[data-theme='colorful'] .bx-tile-badge--todo { background: #FEF3C7; color: #B45309; }
+
+/* Progressbar bunt */
+[data-theme='colorful'] .bx-progress-bar {
+  background: linear-gradient(90deg, #7C3AED, #C026D3, #DB2777);
+}
+
+/* Toggle-Akzent */
+[data-theme='colorful'] .toggle.on { background: linear-gradient(135deg, #7C3AED, #DB2777); }
+
+/* Banner farbig */
+[data-theme='colorful'] .bx-banner--info { background: #EDE9FE; border-left-color: #7C3AED; }
+[data-theme='colorful'] .bx-banner--info .bxfr,
+[data-theme='colorful'] .bx-banner--info strong { color: #6D28D9; }

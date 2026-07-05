@@ -11,7 +11,7 @@ export type AudioFormat = 'mp3' | 'm4a' | 'opus' | 'flac' | 'wav'
 export type VideoContainer = 'mp4' | 'mkv' | 'webm'
 export type VideoQuality = 'best' | '2160' | '1440' | '1080' | '720' | '480'
 export type DownloadMode = 'audio' | 'video'
-export type ThemeName = 'light' | 'dark' | 'system'
+export type ThemeName = 'light' | 'dark' | 'colorful' | 'system'
 export type LocaleName = 'de' | 'en' | 'system'
 
 export interface AppSettings {
