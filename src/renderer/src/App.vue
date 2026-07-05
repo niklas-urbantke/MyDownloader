@@ -78,8 +78,10 @@ const navGroups = computed(() => [
   },
   {
     label: t('nav.sections.system'),
-    // Info bewusst nur im Footer — keine Dopplung in der Liste (Issue #5)
-    items: [{ route: 'settings', icon: 'setting', labelKey: 'nav.settings' }] as NavItem[]
+    items: [
+      { route: 'settings', icon: 'setting', labelKey: 'nav.settings' },
+      { route: 'about', icon: 'help-in-circle', labelKey: 'nav.about' }
+    ] as NavItem[]
   }
 ])
 
@@ -179,12 +181,6 @@ async function onDrop(e: DragEvent): Promise<void> {
             <AppIcon :name="item.icon" />
             <span class="label">{{ t(item.labelKey) }}</span>
           </div>
-        </div>
-      </div>
-      <div class="bx-nav-footer">
-        <div class="bx-nav-item" @click="go('about')">
-          <AppIcon name="help-in-circle" />
-          <span class="label">{{ t('nav.about') }}</span>
         </div>
       </div>
     </nav>

@@ -3,14 +3,16 @@
    ========================================================= */
 
 /* ---- root layout ---- */
+/* Feste Viewport-Höhe: nur der Inhalt (.bx-page) scrollt, die Seitenleiste
+   bleibt immer auf gleicher Höhe stehen. */
 .bx-root {
   background: var(--marine-05);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   font-family: var(--font-body);
   color: var(--fg1);
   display: grid;
   grid-template-columns: auto 1fr;
-  min-height: 100vh;
 }
 
 /* ============ SIDENAV ============
@@ -89,19 +91,18 @@
 }
 
 /* ============ MAIN ============ */
-.bx-main { display: flex; flex-direction: column; min-width: 0; }
+.bx-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 
 /* ---- header (top bar) ---- */
 .bx-header {
   height: 64px;
+  flex-shrink: 0;
   background: var(--surface);
   border-bottom: 1px solid var(--marine-10);
   display: flex;
   align-items: center;
   padding: 0 24px;
   gap: 14px;
-  position: sticky;
-  top: 0;
   z-index: 5;
   box-shadow: var(--shadow-1);
 }
@@ -390,6 +391,12 @@
 @media (max-width: 880px)  { .bx-tiles { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px)  { .bx-tiles { grid-template-columns: 1fr; } }
 
+/* Anwendungs-Kacheln (mit Titel + Beschreibung) brauchen mehr Breite, damit
+   lange Titel wie „Warteschlange“ nicht unter den Pfeil laufen. */
+.bx-tile-group .bx-tiles {
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
 .bx-tile {
   background: var(--surface);
   border: 1px solid var(--marine-10);
@@ -436,6 +443,8 @@
   font-size: 1.05rem;
   color: var(--marine);
   line-height: 1.2;
+  /* Lange Einzelwörter umbrechen statt unter den Pfeil überlaufen */
+  overflow-wrap: anywhere;
 }
 .bx-tile-sub {
   font-size: 0.8rem;
@@ -800,11 +809,12 @@
 .f-control--select .f-deco--arrow { left: auto; right: 14px; }
 
 /* =========================================================
-   BUNT / COLORFUL THEME — heller, farbenfroher Modus
-   (aktiviert über <html data-theme="colorful">)
-   Basis bleibt hell & gut lesbar; Akzente werden vielfarbig.
+   BUNTE THEMES — heller, farbenfroher Modus
+   'colorful' = mit Farbverläufen, 'flat' = solide Farben ohne Verläufe.
+   Beide teilen sich Palette und die solide-bunten Akzente.
    ========================================================= */
-[data-theme='colorful'] {
+[data-theme='colorful'],
+[data-theme='flat'] {
   /* Primär → lebendiges Violett/Indigo */
   --marine:       #6D28D9;
   --marine-dark:  #4C1D95;
@@ -854,6 +864,71 @@
   --shadow-24: 0 32px 64px rgba(109, 40, 217, 0.22), 0 12px 24px rgba(219, 39, 119, 0.12);
 }
 
+/* ---------- Gemeinsame bunte Akzente (beide Themes) ---------- */
+[data-theme='colorful'] .bx-nav-item.active,
+[data-theme='flat'] .bx-nav-item.active {
+  background: rgba(255, 255, 255, 0.20);
+  color: #fff;
+  box-shadow: inset 3px 0 0 #FDE047;
+}
+[data-theme='colorful'] .bx-nav-item:hover,
+[data-theme='flat'] .bx-nav-item:hover { background: rgba(255,255,255,.14); }
+[data-theme='colorful'] .bx-nav-section-label,
+[data-theme='flat'] .bx-nav-section-label { color: rgba(255,255,255,0.72); }
+[data-theme='colorful'] .btn--cta:hover,
+[data-theme='flat'] .btn--cta:hover { filter: brightness(1.05); }
+
+/* Tile-Icons rotieren durch eine bunte Palette (solide, für beide) */
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+1) .bx-tile-icon,
+[data-theme='flat'] .bx-tiles > *:nth-child(6n+1) .bx-tile-icon { background: #EDE9FE; color: #7C3AED; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+2) .bx-tile-icon,
+[data-theme='flat'] .bx-tiles > *:nth-child(6n+2) .bx-tile-icon { background: #FCE7F3; color: #DB2777; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+3) .bx-tile-icon,
+[data-theme='flat'] .bx-tiles > *:nth-child(6n+3) .bx-tile-icon { background: #E0F2FE; color: #0EA5E9; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+4) .bx-tile-icon,
+[data-theme='flat'] .bx-tiles > *:nth-child(6n+4) .bx-tile-icon { background: #DCFCE7; color: #16A34A; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+5) .bx-tile-icon,
+[data-theme='flat'] .bx-tiles > *:nth-child(6n+5) .bx-tile-icon { background: #FEF3C7; color: #D97706; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(6n+6) .bx-tile-icon,
+[data-theme='flat'] .bx-tiles > *:nth-child(6n+6) .bx-tile-icon { background: #FFE4E6; color: #E11D48; }
+
+/* Stat-Kacheln: Werte bunt durchrotieren */
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+1) .bx-stat-value,
+[data-theme='flat'] .bx-tiles > *:nth-child(4n+1) .bx-stat-value { color: #7C3AED; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+2) .bx-stat-value,
+[data-theme='flat'] .bx-tiles > *:nth-child(4n+2) .bx-stat-value { color: #DB2777; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+3) .bx-stat-value,
+[data-theme='flat'] .bx-tiles > *:nth-child(4n+3) .bx-stat-value { color: #0EA5E9; }
+[data-theme='colorful'] .bx-tiles > *:nth-child(4n+4) .bx-stat-value,
+[data-theme='flat'] .bx-tiles > *:nth-child(4n+4) .bx-stat-value { color: #16A34A; }
+
+/* Chips vielfarbig (solide, für beide) */
+[data-theme='colorful'] .chip--apple,
+[data-theme='flat'] .chip--apple  { background: #FCE7F3; color: #9D174D; }
+[data-theme='colorful'] .chip--neutral,
+[data-theme='flat'] .chip--neutral { background: #EDE9FE; color: #5B21B6; }
+[data-theme='colorful'] .chip--warn,
+[data-theme='flat'] .chip--warn   { background: #FEF3C7; color: #B45309; }
+[data-theme='colorful'] .chip--neg,
+[data-theme='flat'] .chip--neg    { background: #FFE4E6; color: #BE123C; }
+
+/* Tile-Badges bunt */
+[data-theme='colorful'] .bx-tile-badge--meta,
+[data-theme='flat'] .bx-tile-badge--meta { background: #E0F2FE; color: #0369A1; }
+[data-theme='colorful'] .bx-tile-badge--new,
+[data-theme='flat'] .bx-tile-badge--new  { background: #DCFCE7; color: #15803D; }
+[data-theme='colorful'] .bx-tile-badge--todo,
+[data-theme='flat'] .bx-tile-badge--todo { background: #FEF3C7; color: #B45309; }
+
+/* Banner farbig */
+[data-theme='colorful'] .bx-banner--info,
+[data-theme='flat'] .bx-banner--info { background: #EDE9FE; border-left-color: #7C3AED; }
+[data-theme='colorful'] .bx-banner--info .bxfr,
+[data-theme='colorful'] .bx-banner--info strong,
+[data-theme='flat'] .bx-banner--info .bxfr,
+[data-theme='flat'] .bx-banner--info strong { color: #6D28D9; }
+
+/* ---------- COLORFUL: mit Farbverläufen ---------- */
 /* Farbenfroher Seitenhintergrund (mehrfarbiger, sehr zarter Verlauf) */
 [data-theme='colorful'] .bx-root {
   background:
@@ -863,71 +938,41 @@
     radial-gradient(900px 700px at 0% 100%, #FFF3E2 0%, transparent 55%),
     #FBF7FF;
 }
-
 /* Regenbogen-Nav: kräftiger vertikaler Verlauf */
 [data-theme='colorful'] .bx-nav {
   background: linear-gradient(180deg, #7C3AED 0%, #9333EA 38%, #C026D3 70%, #DB2777 100%);
 }
-[data-theme='colorful'] .bx-nav-item.active {
-  background: rgba(255, 255, 255, 0.20);
-  color: #fff;
-  box-shadow: inset 3px 0 0 #FDE047;
-}
-[data-theme='colorful'] .bx-nav-item:hover { background: rgba(255,255,255,.14); }
-[data-theme='colorful'] .bx-nav-section-label { color: rgba(255,255,255,0.72); }
-
-/* Buttons kräftiger */
 [data-theme='colorful'] .btn--cta {
   background: linear-gradient(135deg, #DB2777 0%, #F43F5E 100%);
   border-color: transparent;
 }
-[data-theme='colorful'] .btn--cta:hover { filter: brightness(1.05); }
 [data-theme='colorful'] .btn--primary {
   background: linear-gradient(135deg, #6D28D9 0%, #7C3AED 100%);
   border-color: transparent;
 }
-
-/* Karten mit dünnem, buntem oberen Rand */
 [data-theme='colorful'] .bx-card {
   border-top: 3px solid transparent;
   border-image: linear-gradient(90deg, #7C3AED, #C026D3, #DB2777, #F59E0B) 1;
 }
-
-/* Tile-Icons rotieren durch eine bunte Palette */
-[data-theme='colorful'] .bx-tiles > *:nth-child(6n+1) .bx-tile-icon { background: #EDE9FE; color: #7C3AED; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(6n+2) .bx-tile-icon { background: #FCE7F3; color: #DB2777; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(6n+3) .bx-tile-icon { background: #E0F2FE; color: #0EA5E9; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(6n+4) .bx-tile-icon { background: #DCFCE7; color: #16A34A; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(6n+5) .bx-tile-icon { background: #FEF3C7; color: #D97706; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(6n+6) .bx-tile-icon { background: #FFE4E6; color: #E11D48; }
-
-/* Stat-Kacheln: Werte bunt durchrotieren */
-[data-theme='colorful'] .bx-tiles > *:nth-child(4n+1) .bx-stat-value { color: #7C3AED; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(4n+2) .bx-stat-value { color: #DB2777; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(4n+3) .bx-stat-value { color: #0EA5E9; }
-[data-theme='colorful'] .bx-tiles > *:nth-child(4n+4) .bx-stat-value { color: #16A34A; }
-
-/* Chips vielfarbig */
 [data-theme='colorful'] .chip--marine { background: linear-gradient(135deg, #7C3AED, #C026D3); color: #fff; }
-[data-theme='colorful'] .chip--apple  { background: #FCE7F3; color: #9D174D; }
-[data-theme='colorful'] .chip--neutral { background: #EDE9FE; color: #5B21B6; }
-[data-theme='colorful'] .chip--warn   { background: #FEF3C7; color: #B45309; }
-[data-theme='colorful'] .chip--neg    { background: #FFE4E6; color: #BE123C; }
-
-/* Tile-Badges bunt */
-[data-theme='colorful'] .bx-tile-badge--meta { background: #E0F2FE; color: #0369A1; }
-[data-theme='colorful'] .bx-tile-badge--new  { background: #DCFCE7; color: #15803D; }
-[data-theme='colorful'] .bx-tile-badge--todo { background: #FEF3C7; color: #B45309; }
-
-/* Progressbar bunt */
-[data-theme='colorful'] .bx-progress-bar {
-  background: linear-gradient(90deg, #7C3AED, #C026D3, #DB2777);
-}
-
-/* Toggle-Akzent */
+[data-theme='colorful'] .bx-progress-bar { background: linear-gradient(90deg, #7C3AED, #C026D3, #DB2777); }
 [data-theme='colorful'] .toggle.on { background: linear-gradient(135deg, #7C3AED, #DB2777); }
 
-/* Banner farbig */
-[data-theme='colorful'] .bx-banner--info { background: #EDE9FE; border-left-color: #7C3AED; }
-[data-theme='colorful'] .bx-banner--info .bxfr,
-[data-theme='colorful'] .bx-banner--info strong { color: #6D28D9; }
+/* ---------- FLAT: solide Farben, keine Verläufe ---------- */
+[data-theme='flat'] .bx-root { background: #F4EFFF; }
+[data-theme='flat'] .bx-nav { background: #6D28D9; }
+[data-theme='flat'] .btn--cta { background: #DB2777; border-color: #DB2777; }
+[data-theme='flat'] .btn--cta:hover { background: #BE185D; border-color: #BE185D; }
+[data-theme='flat'] .btn--primary { background: #6D28D9; border-color: #6D28D9; }
+[data-theme='flat'] .btn--primary:hover { background: #5B21B6; border-color: #5B21B6; }
+[data-theme='flat'] .chip--marine { background: #6D28D9; color: #fff; }
+[data-theme='flat'] .bx-progress-bar { background: #7C3AED; }
+[data-theme='flat'] .toggle.on { background: #7C3AED; }
+/* Karten-Oberkante bunt durchrotieren (solide) für Extra-Farbe */
+[data-theme='flat'] .bx-card { border-top: 3px solid #7C3AED; }
+[data-theme='flat'] .stack > .bx-card:nth-child(6n+2),
+[data-theme='flat'] .bx-tiles > .bx-card:nth-child(6n+2) { border-top-color: #DB2777; }
+[data-theme='flat'] .stack > .bx-card:nth-child(6n+3) { border-top-color: #0EA5E9; }
+[data-theme='flat'] .stack > .bx-card:nth-child(6n+4) { border-top-color: #16A34A; }
+[data-theme='flat'] .stack > .bx-card:nth-child(6n+5) { border-top-color: #D97706; }
+[data-theme='flat'] .stack > .bx-card:nth-child(6n+6) { border-top-color: #E11D48; }

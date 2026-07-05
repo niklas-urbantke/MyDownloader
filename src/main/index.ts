@@ -91,6 +91,15 @@ function createWindow(): BrowserWindow {
             await new Promise((r) => setTimeout(r, 500))
           }
         }
+        // Optional den Inhaltsbereich scrollen (MD_SCROLL=<px>|'bottom')
+        const scroll = process.env['MD_SCROLL']
+        if (scroll) {
+          const y = scroll === 'bottom' ? 100000 : Number.parseInt(scroll, 10) || 0
+          await win.webContents
+            .executeJavaScript(`document.querySelector(".bx-page")?.scrollTo(0, ${y})`)
+            .catch(() => undefined)
+          await new Promise((r) => setTimeout(r, 400))
+        }
         // Optional herauszoomen, damit lange Seiten komplett passen (MD_ZOOM=0.6)
         const zoom = Number.parseFloat(process.env['MD_ZOOM'] ?? '')
         if (Number.isFinite(zoom) && zoom > 0) {

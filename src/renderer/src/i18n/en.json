@@ -285,7 +285,8 @@
       "autoUpdateAuto": "Download automatically",
       "autoUpdateNotify": "Notify only",
       "autoUpdateOff": "Disabled",
-      "themeColorful": "Colorful"
+      "themeColorful": "Colorful",
+      "themeFlat": "Flat"
     },
     "binaries": {
       "title": "Components",
