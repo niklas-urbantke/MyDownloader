@@ -31,3 +31,4 @@ Desktop.ini
 __pycache__/
 *.pyc
 release-dl/
+*.urbupdate
