@@ -26,6 +26,8 @@ const api = {
     get: (): Promise<AppSettings> => ipcRenderer.invoke(IPC.settingsGet),
     set: (patch: Partial<AppSettings>): Promise<AppSettings> =>
       ipcRenderer.invoke(IPC.settingsSet, patch),
+    /** Synchron abschicken ohne auf Antwort zu warten (für beforeunload) */
+    flush: (patch: Partial<AppSettings>): void => ipcRenderer.send(IPC.settingsFlush, patch),
     pickFolder: (defaultPath?: string): Promise<string | null> =>
       ipcRenderer.invoke(IPC.settingsPickFolder, defaultPath)
   },

@@ -24,7 +24,8 @@ export function defaultSettings(): AppSettings {
     theme: 'system',
     locale: 'system',
     notifyOnComplete: true,
-    clipboardWatcher: false
+    clipboardWatcher: false,
+    sidebarOpen: true
   }
 }
 

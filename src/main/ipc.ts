@@ -47,7 +47,16 @@ export const queue = new DownloadQueue({
     const settings = getSettings()
     if (settings.notifyOnComplete && Notification.isSupported()) {
       if (item.status === 'completed') {
-        new Notification({ title: 'MyDownloader', body: `✓ ${item.title}` }).show()
+        const count =
+          item.isPlaylist && item.outputFiles.length > 1 ? ` (${item.outputFiles.length})` : ''
+        const n = new Notification({ title: 'MyDownloader', body: `✓ ${item.title}${count}` })
+        // Klick öffnet die fertige Datei im Dateimanager (bzw. den Zielordner)
+        n.on('click', () => {
+          const file = item.outputFiles.at(-1)
+          if (file && existsSync(file)) shell.showItemInFolder(file)
+          else void shell.openPath(item.destination)
+        })
+        n.show()
       } else if (item.status === 'error') {
         new Notification({ title: 'MyDownloader', body: `✗ ${item.title}` }).show()
       }
@@ -59,6 +68,11 @@ export function registerIpc(): void {
   // --- Settings -------------------------------------------------------------
   ipcMain.handle(IPC.settingsGet, () => getSettings())
   ipcMain.handle(IPC.settingsSet, (_e, patch: Partial<AppSettings>) => updateSettings(patch))
+  // Fire-and-forget beim Schließen: der Renderer kann nicht mehr auf eine
+  // Antwort warten, die Änderung darf aber nicht verloren gehen (Issue #7)
+  ipcMain.on(IPC.settingsFlush, (_e, patch: Partial<AppSettings>) => {
+    updateSettings(patch)
+  })
   ipcMain.handle(IPC.settingsPickFolder, async (_e, defaultPath?: string) => {
     const result = await dialog.showOpenDialog({
       properties: ['openDirectory', 'createDirectory'],

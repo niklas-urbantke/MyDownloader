@@ -21,6 +21,7 @@ const downloads = useDownloadsStore()
 
 const search = ref('')
 const filter = ref('all')
+const period = ref('all')
 const confirmClear = ref(false)
 
 const filterOptions = computed(() => [
@@ -31,9 +32,32 @@ const filterOptions = computed(() => [
   { value: 'errors', label: t('history.filter.errors'), icon: 'attention' }
 ])
 
+const periodOptions = computed(() => [
+  { value: 'all', label: t('history.period.all') },
+  { value: 'today', label: t('history.period.today') },
+  { value: 'week', label: t('history.period.week') },
+  { value: 'month', label: t('history.period.month') }
+])
+
+const periodStart = computed<number>(() => {
+  const now = new Date()
+  switch (period.value) {
+    case 'today':
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    case 'week':
+      return now.getTime() - 7 * 24 * 60 * 60 * 1000
+    case 'month':
+      return now.getTime() - 30 * 24 * 60 * 60 * 1000
+    default:
+      return 0
+  }
+})
+
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase()
+  const since = periodStart.value
   return history.entries.filter((e) => {
+    if (since > 0 && new Date(e.timestamp).getTime() < since) return false
     if (filter.value === 'audio' && (e.mode !== 'audio' || e.status !== 'completed')) return false
     if (filter.value === 'video' && (e.mode !== 'video' || e.status !== 'completed')) return false
     if (filter.value === 'playlists' && !e.isPlaylist) return false
@@ -94,6 +118,7 @@ async function clearAll(): Promise<void> {
         <BxField v-model="search" icon="search" :placeholder="t('history.searchPlaceholder')" />
       </div>
       <BxSegmented v-model="filter" :options="filterOptions" />
+      <BxSegmented v-model="period" :options="periodOptions" />
     </div>
 
     <div v-if="filtered.length === 0" class="bx-card">

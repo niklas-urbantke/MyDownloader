@@ -42,6 +42,8 @@ export interface AppSettings {
   locale: LocaleName
   notifyOnComplete: boolean
   clipboardWatcher: boolean
+  /** Seitenleiste beim Start eingeblendet lassen */
+  sidebarOpen: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -214,6 +216,8 @@ export const IPC = {
   // Settings
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
+  /** Fire-and-forget-Variante für den Fensterschluss (kein Antwort-Roundtrip) */
+  settingsFlush: 'settings:flush',
   settingsPickFolder: 'settings:pick-folder',
   // Media-Infos
   mediaProbe: 'media:probe',

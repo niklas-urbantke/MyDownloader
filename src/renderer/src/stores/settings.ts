@@ -35,11 +35,22 @@ export const useSettingsStore = defineStore('settings', () => {
         applyLocale(val.locale)
         if (saveTimer) clearTimeout(saveTimer)
         saveTimer = setTimeout(() => {
+          saveTimer = null
           void window.api.settings.set({ ...val })
         }, 400)
       },
       { deep: true }
     )
+
+    // Beim Schließen darf keine debounced Änderung verloren gehen (Issue #7):
+    // ausstehende Saves sofort und ohne Antwort-Roundtrip rausschicken.
+    window.addEventListener('pagehide', () => {
+      if (saveTimer && settings.value) {
+        clearTimeout(saveTimer)
+        saveTimer = null
+        window.api.settings.flush({ ...settings.value })
+      }
+    })
 
     window
       .matchMedia('(prefers-color-scheme: dark)')

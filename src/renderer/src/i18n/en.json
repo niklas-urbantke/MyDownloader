@@ -168,6 +168,12 @@
       "playlists": "Playlists",
       "errors": "Errors"
     },
+    "period": {
+      "all": "All time",
+      "today": "Today",
+      "week": "7 days",
+      "month": "30 days"
+    },
     "columns": {
       "when": "Date",
       "title": "Title",

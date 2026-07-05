@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from './components/AppIcon.vue'
@@ -24,6 +24,12 @@ onMounted(async () => {
   await settingsStore.load()
   await Promise.all([downloadsStore.load(), historyStore.load(), templatesStore.load()])
 
+  // Seitenleiste standardmäßig eingeblendet; Zustand wird gemerkt (Issue #12)
+  navOpen.value = settingsStore.settings?.sidebarOpen ?? true
+  watch(navOpen, (open) => {
+    if (settingsStore.settings) settingsStore.settings.sidebarOpen = open
+  })
+
   // Clipboard-Watcher: erkannte Video-URL als Toast mit Direkt-Aktion anbieten
   window.api.clipboard.onUrlDetected((url) => {
     showToast(t('clipboard.detected'), 'info', {
@@ -36,8 +42,8 @@ onMounted(async () => {
   })
 })
 
-// Sidenav ist standardmäßig eingeklappt — Inhalt nutzt die volle Breite.
-const navOpen = ref(false)
+// Sidenav-Zustand kommt aus den Einstellungen (Default: eingeblendet, Issue #12)
+const navOpen = ref(true)
 
 interface NavItem {
   route: string
