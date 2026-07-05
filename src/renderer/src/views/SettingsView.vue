@@ -83,8 +83,37 @@ const videoQualityOptions = computed(() => [
 const filenameOptions = computed(() => [
   { value: 'title', label: t('settings.fields.filenameTitle') },
   { value: 'artist-title', label: t('settings.fields.filenameArtistTitle') },
-  { value: 'index-title', label: t('settings.fields.filenameIndexTitle') }
+  { value: 'index-title', label: t('settings.fields.filenameIndexTitle') },
+  { value: 'custom', label: t('settings.fields.filenameCustom') }
 ])
+
+// Live-Vorschau des eigenen Schemas (Issue #28)
+const customPreview = computed(() => {
+  const raw = settings.value?.customFilenameTemplate ?? ''
+  const sample = raw
+    .replace(/\{artist\}/g, 'Künstler')
+    .replace(/\{album\}/g, 'Album')
+    .replace(/\{title\}/g, 'Titel')
+    .replace(/\{track\}/g, '01')
+    .replace(/\{year\}/g, '2026')
+    .replace(/\{playlist\}/g, 'Playlist')
+  return `${sample || '…'}.mp3`
+})
+
+const normalizeOptions = computed(() => [
+  { value: 'off', label: t('settings.fields.normalizeOff') },
+  { value: 'replaygain', label: t('settings.fields.normalizeReplaygain') },
+  { value: 'loudnorm', label: t('settings.fields.normalizeLoudnorm') }
+])
+
+const lufsProxy = computed({
+  get: () => String(settings.value?.targetLufs ?? -14),
+  set: (v: string) => {
+    if (!settings.value) return
+    const n = Number.parseFloat(v.replace(',', '.'))
+    if (Number.isFinite(n) && n <= -5 && n >= -30) settings.value.targetLufs = n
+  }
+})
 const concurrencyOptions = ['1', '2', '3', '4', '5'].map((v) => ({ value: v, label: v }))
 const themeOptions = computed(() => [
   { value: 'light', label: t('settings.fields.themeLight'), icon: 'sun' },
@@ -149,6 +178,15 @@ const concurrencyProxy = computed({
             :options="filenameOptions"
           />
         </div>
+        <div v-if="settings.filenameTemplate === 'custom'" class="col-12">
+          <BxField
+            v-model="settings.customFilenameTemplate"
+            :label="t('settings.fields.customFilenameTemplate')"
+            icon="pencil-line"
+            placeholder="{artist}/{album}/{track} - {title}"
+            :hint="t('settings.fields.customFilenamePreview', { preview: customPreview })"
+          />
+        </div>
         <div class="col-12">
           <BxToggle
             v-model="settings.playlistSubfolder"
@@ -182,6 +220,32 @@ const concurrencyProxy = computed({
         </div>
         <div class="col-6">
           <BxToggle v-model="settings.embedMetadata" :label="t('settings.fields.embedMetadata')" />
+        </div>
+        <!-- Lautstärke-Normalisierung (Issue #26) -->
+        <div class="col-6">
+          <BxSelect
+            v-model="settings.normalizeAudio"
+            :label="t('settings.fields.normalizeAudio')"
+            icon="setting-horizontal"
+            :options="normalizeOptions"
+          />
+        </div>
+        <div class="col-6">
+          <BxField
+            v-model="lufsProxy"
+            :label="t('settings.fields.targetLufs')"
+            icon="line-chart"
+            :hint="t('settings.fields.targetLufsHint')"
+            :disabled="settings.normalizeAudio === 'off'"
+          />
+        </div>
+        <!-- Songtexte (Issue #27) -->
+        <div class="col-12">
+          <BxToggle
+            v-model="settings.fetchLyrics"
+            :label="t('settings.fields.fetchLyrics')"
+            :hint="t('settings.fields.fetchLyricsHint')"
+          />
         </div>
       </div>
     </BxCard>

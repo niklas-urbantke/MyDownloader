@@ -254,7 +254,18 @@
       "scheduleEnabled": "Only download within a time window",
       "scheduleHint": "The queue then only downloads between start and end (e.g. at night). Manually started downloads always run immediately.",
       "scheduleFrom": "Window start",
-      "scheduleTo": "Window end"
+      "scheduleTo": "Window end",
+      "filenameCustom": "Custom scheme…",
+      "customFilenameTemplate": "Custom file scheme",
+      "customFilenamePreview": "Preview: {preview} — placeholders: {'{'}artist{'}'} {'{'}album{'}'} {'{'}title{'}'} {'{'}track{'}'} {'{'}year{'}'} {'{'}playlist{'}'}",
+      "normalizeAudio": "Loudness normalization",
+      "normalizeOff": "Off",
+      "normalizeReplaygain": "ReplayGain tags (non-destructive)",
+      "normalizeLoudnorm": "loudnorm re-encode (EBU R128)",
+      "targetLufs": "Target loudness (LUFS)",
+      "targetLufsHint": "Default: -14 LUFS (streaming standard)",
+      "fetchLyrics": "Embed lyrics automatically",
+      "fetchLyricsHint": "Looks up lyrics via LRCLIB; synced lyrics are also saved as .lrc files."
     },
     "binaries": {
       "title": "Components",
@@ -332,5 +343,25 @@
       "videoFolder": "Video folder",
       "audioFolder": "Audio folder"
     }
+  },
+  "metadata": {
+    "title": "Edit metadata",
+    "file": "File",
+    "fields": {
+      "title": "Title",
+      "artist": "Artist",
+      "album": "Album",
+      "albumArtist": "Album artist",
+      "track": "Track no.",
+      "genre": "Genre",
+      "year": "Year"
+    },
+    "pickCover": "Choose cover…",
+    "searchMusicBrainz": "Search MusicBrainz",
+    "noSuggestions": "No matches on MusicBrainz.",
+    "apply": "Apply",
+    "saved": "Metadata saved",
+    "saveFailed": "Saving failed: {msg}",
+    "saveAll": "Apply to all files"
   }
 }

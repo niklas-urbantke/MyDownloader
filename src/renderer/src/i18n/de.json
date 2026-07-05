@@ -254,7 +254,18 @@
       "scheduleEnabled": "Downloads nur im Zeitfenster ausführen",
       "scheduleHint": "Die Warteschlange lädt dann nur zwischen Beginn und Ende (z. B. nachts). Manuell gestartete Downloads laufen immer sofort.",
       "scheduleFrom": "Fenster-Beginn",
-      "scheduleTo": "Fenster-Ende"
+      "scheduleTo": "Fenster-Ende",
+      "filenameCustom": "Eigenes Schema…",
+      "customFilenameTemplate": "Eigenes Datei-Schema",
+      "customFilenamePreview": "Vorschau: {preview} — Platzhalter: {'{'}artist{'}'} {'{'}album{'}'} {'{'}title{'}'} {'{'}track{'}'} {'{'}year{'}'} {'{'}playlist{'}'}",
+      "normalizeAudio": "Lautstärke-Normalisierung",
+      "normalizeOff": "Aus",
+      "normalizeReplaygain": "ReplayGain-Tags (nicht-destruktiv)",
+      "normalizeLoudnorm": "loudnorm-Re-Encode (EBU R128)",
+      "targetLufs": "Ziel-Lautheit (LUFS)",
+      "targetLufsHint": "Standard: -14 LUFS (Streaming-üblich)",
+      "fetchLyrics": "Songtexte automatisch einbetten",
+      "fetchLyricsHint": "Sucht Lyrics über LRCLIB; synchronisierte Texte werden zusätzlich als .lrc gespeichert."
     },
     "binaries": {
       "title": "Komponenten",
@@ -332,5 +343,25 @@
       "videoFolder": "Video-Ordner",
       "audioFolder": "Audio-Ordner"
     }
+  },
+  "metadata": {
+    "title": "Metadaten bearbeiten",
+    "file": "Datei",
+    "fields": {
+      "title": "Titel",
+      "artist": "Künstler",
+      "album": "Album",
+      "albumArtist": "Album-Künstler",
+      "track": "Track-Nr.",
+      "genre": "Genre",
+      "year": "Jahr"
+    },
+    "pickCover": "Cover auswählen…",
+    "searchMusicBrainz": "Bei MusicBrainz suchen",
+    "noSuggestions": "Keine Treffer bei MusicBrainz.",
+    "apply": "Übernehmen",
+    "saved": "Metadaten gespeichert",
+    "saveFailed": "Speichern fehlgeschlagen: {msg}",
+    "saveAll": "Auf alle Dateien anwenden"
   }
 }

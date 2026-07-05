@@ -9,6 +9,7 @@ import BxChip from '../components/BxChip.vue'
 import BxField from '../components/BxField.vue'
 import BxSegmented from '../components/BxSegmented.vue'
 import BxDialog from '../components/BxDialog.vue'
+import MetadataDialog from '../components/MetadataDialog.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { useHistoryStore } from '../stores/history'
 import { useDownloadsStore } from '../stores/downloads'
@@ -97,6 +98,17 @@ async function clearAll(): Promise<void> {
   await history.clear()
   confirmClear.value = false
 }
+
+// --- Metadaten-Editor (Issue #25) ---
+const AUDIO_RE = /\.(mp3|m4a|opus|flac|wav)$/i
+const metaFiles = ref<string[]>([])
+
+const audioFilesOf = (entry: HistoryEntry): string[] =>
+  entry.outputFiles.filter((f) => AUDIO_RE.test(f))
+
+function editTags(entry: HistoryEntry): void {
+  metaFiles.value = audioFilesOf(entry)
+}
 </script>
 
 <template>
@@ -180,6 +192,14 @@ async function clearAll(): Promise<void> {
                   @click="redownload(entry)"
                 />
                 <BxBtn
+                  v-if="audioFilesOf(entry).length > 0"
+                  icon="pencil"
+                  variant="ghost"
+                  size="sm"
+                  :title="t('metadata.title')"
+                  @click="editTags(entry)"
+                />
+                <BxBtn
                   icon="link"
                   variant="ghost"
                   size="sm"
@@ -200,6 +220,8 @@ async function clearAll(): Promise<void> {
       </table>
     </BxCard>
   </div>
+
+  <MetadataDialog :open="metaFiles.length > 0" :files="metaFiles" @close="metaFiles = []" />
 
   <BxDialog :open="confirmClear" :title="t('history.clearAll')" @close="confirmClear = false">
     {{ t('history.confirmClear') }}

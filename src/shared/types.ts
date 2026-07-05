@@ -42,8 +42,16 @@ export interface AppSettings {
   extraArgs: string
   /** Playlist-Einträge in Unterordner mit Playlist-Namen */
   playlistSubfolder: boolean
-  /** Dateinamen-Schema: 'title' | 'artist-title' | 'index-title' */
-  filenameTemplate: 'title' | 'artist-title' | 'index-title'
+  /** Dateinamen-Schema: 'custom' nutzt customFilenameTemplate (Issue #28) */
+  filenameTemplate: 'title' | 'artist-title' | 'index-title' | 'custom'
+  /** Eigenes Schema mit Platzhaltern {artist} {album} {title} {track} {year} {playlist} */
+  customFilenameTemplate: string
+  /** Lautstärke-Normalisierung nach Audio-Downloads (Issue #26) */
+  normalizeAudio: 'off' | 'replaygain' | 'loudnorm'
+  /** Ziel-Lautheit in LUFS (Standard -14) */
+  targetLufs: number
+  /** Songtexte automatisch suchen und einbetten (Issue #27) */
+  fetchLyrics: boolean
   theme: ThemeName
   locale: LocaleName
   notifyOnComplete: boolean
@@ -216,6 +224,29 @@ export interface HistoryEntry {
 }
 
 // ---------------------------------------------------------------------------
+// Metadaten (Tag-Editor, Issue #25)
+// ---------------------------------------------------------------------------
+
+export interface TrackTags {
+  title: string
+  artist: string
+  album: string
+  albumArtist: string
+  track: string
+  genre: string
+  date: string
+  comment: string
+}
+
+export interface MusicBrainzSuggestion {
+  title: string
+  artist: string
+  album: string | null
+  date: string | null
+  score: number
+}
+
+// ---------------------------------------------------------------------------
 // Binaries / System
 // ---------------------------------------------------------------------------
 
@@ -268,6 +299,11 @@ export const IPC = {
   templatesList: 'templates:list',
   templatesSave: 'templates:save',
   templatesDelete: 'templates:delete',
+  // Metadaten (Issue #25)
+  metaReadTags: 'meta:read-tags',
+  metaWriteTags: 'meta:write-tags',
+  metaSearchMusicBrainz: 'meta:search-musicbrainz',
+  metaPickImage: 'meta:pick-image',
   // Verlauf
   historyList: 'history:list',
   historyClear: 'history:clear',

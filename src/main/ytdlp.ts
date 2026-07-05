@@ -41,7 +41,31 @@ export function splitArgs(line: string): string[] {
   return out.filter((a) => a.length > 0)
 }
 
+/** Platzhalter des eigenen Schemas → yt-dlp-Output-Template-Felder (Issue #28) */
+const CUSTOM_PLACEHOLDERS: Record<string, string> = {
+  '{artist}': '%(artist,creator,channel,uploader|Unbekannter Künstler)s',
+  '{album}': '%(album,playlist_title|Unbekanntes Album)s',
+  '{title}': '%(title)s',
+  '{track}': '%(track_number,playlist_index|0)s',
+  '{year}': '%(release_year,upload_date>%Y|0000)s',
+  '{playlist}': '%(playlist_title,playlist_id|)s'
+}
+
+export function customTemplateToYtDlp(template: string): string {
+  // Führende Slashes/Parent-Verweise entschärfen — das Schema ist immer
+  // relativ zum Download-Ordner
+  let cleaned = template.trim().replace(/^[/\\]+/, '').replaceAll('..', '')
+  if (!cleaned) cleaned = '{title}'
+  for (const [ph, field] of Object.entries(CUSTOM_PLACEHOLDERS)) {
+    cleaned = cleaned.replaceAll(ph, field)
+  }
+  return cleaned
+}
+
 function outputTemplate(settings: AppSettings, isPlaylist: boolean, suffix = ''): string {
+  if (settings.filenameTemplate === 'custom') {
+    return `${customTemplateToYtDlp(settings.customFilenameTemplate)}${suffix}.%(ext)s`
+  }
   let name: string
   switch (settings.filenameTemplate) {
     case 'artist-title':

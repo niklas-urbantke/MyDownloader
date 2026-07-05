@@ -8,7 +8,9 @@ import {
   type DownloadRequest,
   type DownloadTemplate,
   type HistoryEntry,
-  type MediaInfo
+  type MediaInfo,
+  type MusicBrainzSuggestion,
+  type TrackTags
 } from '../shared/types'
 
 /**
@@ -76,6 +78,19 @@ const api = {
     save: (template: DownloadTemplate): Promise<DownloadTemplate> =>
       ipcRenderer.invoke(IPC.templatesSave, template),
     remove: (id: string): Promise<void> => ipcRenderer.invoke(IPC.templatesDelete, id)
+  },
+
+  metadata: {
+    read: (file: string): Promise<TrackTags> => ipcRenderer.invoke(IPC.metaReadTags, file),
+    write: (
+      file: string,
+      tags: TrackTags,
+      coverPath: string | null
+    ): Promise<{ ok: boolean; message: string }> =>
+      ipcRenderer.invoke(IPC.metaWriteTags, file, tags, coverPath),
+    searchMusicBrainz: (artist: string, title: string): Promise<MusicBrainzSuggestion[]> =>
+      ipcRenderer.invoke(IPC.metaSearchMusicBrainz, artist, title),
+    pickImage: (): Promise<string | null> => ipcRenderer.invoke(IPC.metaPickImage)
   },
 
   history: {

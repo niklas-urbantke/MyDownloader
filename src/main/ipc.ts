@@ -2,6 +2,8 @@ import { app, dialog, ipcMain, shell, Notification, BrowserWindow } from 'electr
 import { existsSync } from 'node:fs'
 import { IPC, type AppSettings, type DownloadRequest, type DownloadTemplate } from '@shared/types'
 import { listTemplates, saveTemplate, deleteTemplate } from './templates'
+import { readTags, writeTags, searchMusicBrainz } from './metadata'
+import type { TrackTags } from '@shared/types'
 import { getSettings, updateSettings } from './settings'
 import { listHistory, addHistoryEntry, removeHistoryEntry, clearHistory } from './history'
 import { getBinaryStatus, updateYtDlp } from './binaries'
@@ -111,6 +113,22 @@ export function registerIpc(): void {
   ipcMain.handle(IPC.templatesList, () => listTemplates())
   ipcMain.handle(IPC.templatesSave, (_e, template: DownloadTemplate) => saveTemplate(template))
   ipcMain.handle(IPC.templatesDelete, (_e, id: string) => deleteTemplate(id))
+
+  // --- Metadaten (Issue #25) ----------------------------------------------------
+  ipcMain.handle(IPC.metaReadTags, (_e, file: string) => readTags(file))
+  ipcMain.handle(IPC.metaWriteTags, (_e, file: string, tags: TrackTags, cover: string | null) =>
+    writeTags(file, tags, cover)
+  )
+  ipcMain.handle(IPC.metaSearchMusicBrainz, (_e, artist: string, title: string) =>
+    searchMusicBrainz(artist, title)
+  )
+  ipcMain.handle(IPC.metaPickImage, async () => {
+    const result = await dialog.showOpenDialog({
+      properties: ['openFile'],
+      filters: [{ name: 'Bilder', extensions: ['jpg', 'jpeg', 'png', 'webp'] }]
+    })
+    return result.canceled ? null : (result.filePaths[0] ?? null)
+  })
 
   // --- Verlauf ----------------------------------------------------------------
   ipcMain.handle(IPC.historyList, () => listHistory())

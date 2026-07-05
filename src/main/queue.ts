@@ -11,6 +11,7 @@ import type {
 import { getSettings } from './settings'
 import { buildDownloadCommand, probeUrl, ytDlpEnv, PROGRESS_PREFIX, OUTPUT_PREFIX } from './ytdlp'
 import { JsonStore } from './store'
+import { isAudioFile, postprocessAudioFile } from './postprocess'
 
 const MAX_LOG_LINES = 2000
 
@@ -469,7 +470,7 @@ export class DownloadQueue {
         this.finish(entry, 'cancelled')
       } else if (code === 0) {
         item.progress.percent = 100
-        this.finish(entry, 'completed')
+        void this.runPostprocess(entry).then(() => this.finish(entry, 'completed'))
       } else {
         item.errorMessage = errorLines.at(-1) ?? `yt-dlp exited with code ${code}`
         this.finish(entry, 'error')
@@ -526,6 +527,30 @@ export class DownloadQueue {
         }
       }
       this.log(item.id, line)
+    }
+  }
+
+  /** Audio-Nachbearbeitung (Normalisierung, Lyrics — Issues #26/#27) */
+  private async runPostprocess(entry: InternalItem): Promise<void> {
+    const { item } = entry
+    if (item.mode !== 'audio') return
+    const settings = getSettings()
+    if (settings.normalizeAudio === 'off' && !settings.fetchLyrics) return
+    const files = item.outputFiles.filter(isAudioFile)
+    if (files.length === 0) return
+    item.status = 'converting'
+    this.emit(item.id)
+    for (const file of files) {
+      try {
+        await postprocessAudioFile(
+          file,
+          settings,
+          { title: item.title, artist: item.uploader },
+          (line) => this.log(item.id, line)
+        )
+      } catch (err) {
+        this.log(item.id, `[postprocess] ${String(err)}`)
+      }
     }
   }
 
