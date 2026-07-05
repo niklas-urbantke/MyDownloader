@@ -87,19 +87,40 @@ export async function installUrbUpdate(): Promise<{ ok: boolean; message: string
       return { ok: false, message: 'Prüfsumme stimmt nicht — Archiv beschädigt?' }
     }
 
-    // --- Linux AppImage: sich selbst ersetzen und neu starten ---
+    // --- Linux AppImage ---
     if (process.platform === 'linux' && asset.type === 'appimage') {
+      // Direkt gestartete AppImage: sich selbst ersetzen und neu starten.
       const current = process.env['APPIMAGE']
-      if (!current) {
-        return { ok: false, message: 'Nur als AppImage unterstützt (APPIMAGE nicht gesetzt)' }
+      if (current) {
+        try {
+          const tmp = `${current}.update`
+          writeFileSync(tmp, data)
+          chmodSync(tmp, 0o755)
+          renameSync(tmp, current)
+          app.relaunch({ execPath: current })
+          app.quit()
+          return { ok: true, message: 'Update installiert — App startet neu' }
+        } catch {
+          // z. B. schreibgeschützter Ort — unten auf „in Ordner ablegen“ zurückfallen
+        }
       }
-      const tmp = `${current}.update`
-      writeFileSync(tmp, data)
-      chmodSync(tmp, 0o755)
-      renameSync(tmp, current)
-      app.relaunch({ execPath: current })
-      app.quit()
-      return { ok: true, message: 'Update installiert — App startet neu' }
+
+      // Kein APPIMAGE (App läuft extrahiert/integriert, z. B. über GearLever):
+      // Es gibt keine AppImage-Datei zum Ersetzen. Neue Version ablegen und
+      // den Ordner öffnen, damit sie über den AppImage-Manager übernommen wird.
+      const downloads = app.getPath('downloads')
+      mkdirSync(downloads, { recursive: true })
+      const target = join(downloads, asset.file)
+      writeFileSync(target, data)
+      chmodSync(target, 0o755)
+      void shell.openPath(downloads)
+      return {
+        ok: true,
+        message:
+          `Neue Version nach „${target}“ gespeichert. Die App läuft nicht direkt als ` +
+          `AppImage (z. B. über GearLever integriert) — bitte diese Datei über deinen ` +
+          `AppImage-Manager aktualisieren oder die integrierte AppImage damit ersetzen.`
+      }
     }
 
     // --- Windows: Installer entpacken und starten ---
