@@ -1,6 +1,7 @@
-import { app, shell, BrowserWindow } from 'electron'
+import { app, shell, BrowserWindow, nativeImage } from 'electron'
 import { join } from 'node:path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+import appIcon from '../../build/icons/512x512.png?asset'
 import { registerIpc, queue } from './ipc'
 import { startClipboardWatcher } from './clipboard'
 import { getSettings } from './settings'
@@ -45,6 +46,8 @@ function createWindow(): BrowserWindow {
     show: false,
     autoHideMenuBar: true,
     title: 'MyDownloader',
+    // Fenster-/Taskbar-Icon zur Laufzeit (v. a. Linux/X11, wo es sonst fehlt)
+    icon: nativeImage.createFromPath(appIcon),
     backgroundColor: '#F2F5F9',
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
@@ -75,6 +78,19 @@ function createWindow(): BrowserWindow {
       const e2eUrl = process.env['MD_E2E_URL']
       if (e2eUrl) queue.add({ url: e2eUrl, startNow: true })
       setTimeout(async () => {
+        // Optional die CTA-Schaltfläche eines Dialogs mehrfach klicken
+        // (z. B. Onboarding „Weiter“) — MD_CLICK_CTA=<anzahl>
+        const clicks = Number.parseInt(process.env['MD_CLICK_CTA'] ?? '', 10)
+        if (Number.isFinite(clicks) && clicks > 0) {
+          for (let i = 0; i < clicks; i++) {
+            await win.webContents
+              .executeJavaScript(
+                'document.querySelector(".bx-dialog-actions .btn--cta")?.click()'
+              )
+              .catch(() => undefined)
+            await new Promise((r) => setTimeout(r, 500))
+          }
+        }
         // Optional herauszoomen, damit lange Seiten komplett passen (MD_ZOOM=0.6)
         const zoom = Number.parseFloat(process.env['MD_ZOOM'] ?? '')
         if (Number.isFinite(zoom) && zoom > 0) {

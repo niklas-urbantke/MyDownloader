@@ -128,8 +128,8 @@ async function save(applyAlbumToAll = false): Promise<void> {
 </script>
 
 <template>
-  <BxDialog :open="open" :title="t('metadata.title')" @close="emit('close')">
-    <div class="stack" style="min-width: 520px">
+  <BxDialog :open="open" :title="t('metadata.title')" wide @close="emit('close')">
+    <div class="stack" style="min-width: 0">
       <BxSelect
         v-if="files.length > 1"
         v-model="selectedFile"

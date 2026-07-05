@@ -584,6 +584,11 @@
   overflow: hidden;
   animation: bx-dialog-in 0.22s var(--ease-decelerate);
 }
+/* Formularlastige Dialoge brauchen mehr Breite, damit der Inhalt (min-width
+   ~520px) samt Body-Padding nicht rechts abgeschnitten wird. */
+.bx-dialog--wide { max-width: 680px; }
+/* Sehr langer Dialog-Inhalt bleibt scrollbar statt aus dem Fenster zu laufen */
+.bx-dialog-body { max-height: 78vh; overflow: auto; }
 @keyframes bx-dialog-in { from { transform: translateY(12px) scale(0.98); opacity: 0; } }
 .bx-dialog-head {
   padding: 18px 24px 12px;

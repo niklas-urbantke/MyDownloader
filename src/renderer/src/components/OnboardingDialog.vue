@@ -66,8 +66,8 @@ void props
 </script>
 
 <template>
-  <BxDialog :open="open" :title="t('onboarding.title')" @close="finish">
-    <div v-if="settings" class="stack stack--lg" style="min-width: 520px; min-height: 300px">
+  <BxDialog :open="open" :title="t('onboarding.title')" wide @close="finish">
+    <div v-if="settings" class="stack stack--lg" style="min-width: 0; min-height: 300px">
       <!-- Schritt 1: Willkommen + Komponenten-Check -->
       <template v-if="step === 0">
         <div class="row" style="gap: 16px; align-items: center">

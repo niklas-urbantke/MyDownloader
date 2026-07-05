@@ -63,7 +63,10 @@ portable:
   artifactName: ${productName}-${version}-portable.${ext}
 
 linux:
-  icon: build/icon.png
+  # Verzeichnis mit Standard-Größen (16–512), damit Desktop-Umgebungen das
+  # Icon im hicolor-Theme finden — ein einzelnes 1024er-PNG wird von den
+  # meisten DEs nicht gefunden (Logo fehlte bei deb/pacman/AppImage).
+  icon: build/icons
   category: AudioVideo
   synopsis: Moderner Musik- & Video-Downloader
   description: >-
