@@ -121,7 +121,9 @@
       "video": "Video",
       "format": "Format",
       "quality": "Quality",
-      "folder": "Destination folder"
+      "folder": "Destination folder",
+      "extraQualities": "Additional quality levels",
+      "extraQualitiesHint": "Each additional level creates a separate download with a quality suffix in the filename."
     },
     "errors": {
       "invalidUrl": "That does not look like a valid URL.",
@@ -134,6 +136,17 @@
       "question": "This link contains a single video AND a playlist. What should be downloaded?",
       "video": "Just this video",
       "playlist": "Entire playlist"
+    },
+    "extras": {
+      "title": "Extras for this download",
+      "sectionFrom": "Section from",
+      "sectionTo": "Section to",
+      "sectionHint": "Leave empty to download the whole video. Format: ss, mm:ss or hh:mm:ss.",
+      "splitChapters": "Split into chapters",
+      "splitChaptersHint": "Creates one file per chapter (if the video has chapters).",
+      "chaptersFound": "{n} chapters detected — each becomes its own file.",
+      "scheduledAt": "Start later",
+      "scheduledAtHint": "Leave empty to start immediately."
     }
   },
   "queue": {
@@ -154,7 +167,10 @@
     "speed": "Speed",
     "eta": "Remaining",
     "playlistProgress": "Track {current} of {total}",
-    "confirmCancelAll": "Really cancel all running downloads?"
+    "confirmCancelAll": "Really cancel all running downloads?",
+    "scheduledFor": "Scheduled: {when}",
+    "pauseItem": "Pause download",
+    "resumeItem": "Resume"
   },
   "history": {
     "title": "History",
@@ -234,7 +250,11 @@
       "locale": "Language",
       "localeSystem": "System language",
       "notifyOnComplete": "Notify when a download finishes",
-      "clipboardWatcher": "Watch clipboard for video URLs"
+      "clipboardWatcher": "Watch clipboard for video URLs",
+      "scheduleEnabled": "Only download within a time window",
+      "scheduleHint": "The queue then only downloads between start and end (e.g. at night). Manually started downloads always run immediately.",
+      "scheduleFrom": "Window start",
+      "scheduleTo": "Window end"
     },
     "binaries": {
       "title": "Components",

@@ -65,6 +65,9 @@ export const queue = new DownloadQueue({
 })
 
 export function registerIpc(): void {
+  // Queue des letzten Laufs wiederherstellen (Issue #19)
+  queue.restore()
+
   // --- Settings -------------------------------------------------------------
   ipcMain.handle(IPC.settingsGet, () => getSettings())
   ipcMain.handle(IPC.settingsSet, (_e, patch: Partial<AppSettings>) => updateSettings(patch))
@@ -90,6 +93,8 @@ export function registerIpc(): void {
     queue.addMany(requests)
   )
   ipcMain.handle(IPC.downloadCancel, (_e, id: string) => queue.cancel(id))
+  ipcMain.handle(IPC.downloadPause, (_e, id: string) => queue.pause(id))
+  ipcMain.handle(IPC.downloadResume, (_e, id: string) => queue.resume(id))
   ipcMain.handle(IPC.downloadRetry, (_e, id: string) => queue.retry(id))
   ipcMain.handle(IPC.downloadRemove, (_e, id: string) => queue.remove(id))
   ipcMain.handle(IPC.downloadClearFinished, () => queue.clearFinished())

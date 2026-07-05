@@ -41,22 +41,28 @@ export function splitArgs(line: string): string[] {
   return out.filter((a) => a.length > 0)
 }
 
-function outputTemplate(settings: AppSettings, isPlaylist: boolean): string {
+function outputTemplate(settings: AppSettings, isPlaylist: boolean, suffix = ''): string {
   let name: string
   switch (settings.filenameTemplate) {
     case 'artist-title':
-      name = '%(artist,creator,channel,uploader)s - %(title)s.%(ext)s'
+      name = '%(artist,creator,channel,uploader)s - %(title)s'
       break
     case 'index-title':
-      name = '%(playlist_index&{} - |)s%(title)s.%(ext)s'
+      name = '%(playlist_index&{} - |)s%(title)s'
       break
     default:
-      name = '%(title)s.%(ext)s'
+      name = '%(title)s'
   }
+  name = `${name}${suffix}.%(ext)s`
   if (isPlaylist && settings.playlistSubfolder) {
     return `%(playlist_title,playlist_id)s/${name}`
   }
   return name
+}
+
+/** Akzeptiert "ss", "mm:ss" oder "hh:mm:ss" */
+export function isValidTimestamp(value: string): boolean {
+  return /^\d{1,3}(:[0-5]?\d){0,2}$/.test(value.trim())
 }
 
 export interface BuiltCommand {
@@ -100,8 +106,25 @@ export async function buildDownloadCommand(
   if (ffmpeg) args.push('--ffmpeg-location', dirname(ffmpeg))
 
   // Ziel
-  args.push('-P', merged.downloadFolder, '-o', outputTemplate(merged, isPlaylist))
+  args.push('-P', merged.downloadFolder, '-o', outputTemplate(merged, isPlaylist, request.filenameSuffix ?? ''))
   args.push('--windows-filenames')
+
+  // Nur einen Zeitbereich laden (Issue #24)
+  if (request.sectionFrom || request.sectionTo) {
+    const from = request.sectionFrom?.trim() || '0:00'
+    const to = request.sectionTo?.trim() || 'inf'
+    args.push('--download-sections', `*${from}-${to}`, '--force-keyframes-at-cuts')
+  }
+
+  // Video anhand der Kapitel aufteilen (Issue #23): Einzeldateien in einem
+  // Unterordner mit dem Videotitel, nummeriert nach Kapitel-Reihenfolge
+  if (request.splitChapters) {
+    args.push(
+      '--split-chapters',
+      '-o',
+      'chapter:%(title)s/%(section_number)02d - %(section_title)s.%(ext)s'
+    )
+  }
 
   if (merged.mode === 'audio') {
     args.push('-f', 'bestaudio/best', '-x', '--audio-format', merged.audioFormat)
@@ -163,6 +186,7 @@ interface RawInfo extends RawEntry {
   thumbnails?: { url: string }[]
   view_count?: number
   playlist_count?: number
+  chapters?: unknown[] | null
 }
 
 /**
@@ -207,6 +231,7 @@ export async function probeUrl(url: string): Promise<MediaInfo> {
     durationSeconds: typeof info.duration === 'number' ? info.duration : null,
     thumbnailUrl: info.thumbnail ?? info.thumbnails?.at(-1)?.url ?? null,
     viewCount: typeof info.view_count === 'number' ? info.view_count : null,
+    chapterCount: Array.isArray(info.chapters) ? info.chapters.length : 0,
     isPlaylist: false
   }
 }

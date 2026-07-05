@@ -10,6 +10,7 @@ import BxField from '../components/BxField.vue'
 import BxSelect from '../components/BxSelect.vue'
 import BxSegmented from '../components/BxSegmented.vue'
 import BxToggle from '../components/BxToggle.vue'
+import BxChip from '../components/BxChip.vue'
 import { useTemplatesStore, emptyTemplate } from '../stores/templates'
 import { useSettingsStore } from '../stores/settings'
 import { showToast } from '../composables/toast'
@@ -61,6 +62,13 @@ const videoQualityOptions = computed(() => [
 
 const showAudio = computed(() => form.value.mode !== 'video')
 const showVideo = computed(() => form.value.mode !== 'audio')
+
+function toggleExtraQuality(q: string): void {
+  const list = form.value.extraVideoQualities ?? (form.value.extraVideoQualities = [])
+  const idx = list.indexOf(q as (typeof list)[number])
+  if (idx === -1) list.push(q as (typeof list)[number])
+  else list.splice(idx, 1)
+}
 
 async function pick(field: 'folder' | 'audioFolder'): Promise<void> {
   const picked = await window.api.settings.pickFolder(
@@ -159,6 +167,24 @@ async function save(): Promise<void> {
             icon="full-screen"
             :options="videoQualityOptions"
           />
+        </div>
+        <!-- Zusätzliche Qualitätsstufen (Issue #10) -->
+        <div class="col-12">
+          <div class="f">
+            <div class="f-label">{{ t('download.options.extraQualities') }}</div>
+            <div class="row" style="flex-wrap: wrap; gap: 8px">
+              <BxChip
+                v-for="q in videoQualityOptions"
+                :key="q.value"
+                :variant="(form.extraVideoQualities ?? []).includes(q.value as never) ? 'marine' : 'neutral'"
+                style="cursor: pointer"
+                @click="toggleExtraQuality(q.value)"
+              >
+                {{ q.label }}
+              </BxChip>
+            </div>
+            <div class="f-hint">{{ t('download.options.extraQualitiesHint') }}</div>
+          </div>
         </div>
       </div>
     </BxCard>

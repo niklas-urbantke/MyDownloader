@@ -35,8 +35,21 @@ const info = ref<MediaInfo | null>(null)
 // Optionen für diesen Download — leben im Store und überdauern Downloads
 // und Seitenwechsel (Issue #3); Reset nur per Toggle oder App-Neustart.
 const options = useDownloadOptionsStore()
-const { useDefaults, mode, audioFormat, videoQuality, folder, audioFolder, writeSubtitles, templateId } =
-  storeToRefs(options)
+const {
+  useDefaults,
+  mode,
+  audioFormat,
+  videoQuality,
+  folder,
+  audioFolder,
+  writeSubtitles,
+  templateId,
+  extraQualities,
+  splitChapters,
+  sectionFrom,
+  sectionTo,
+  scheduledAt
+} = storeToRefs(options)
 
 const templates = useTemplatesStore()
 const activeTemplate = computed<DownloadTemplate | null>(
@@ -110,17 +123,56 @@ async function chooseCombi(which: 'video' | 'playlist'): Promise<void> {
   await next?.()
 }
 
+const qualityLabel = (q: string): string => (q === 'best' ? 'max' : `${q}p`)
+
+/** Pro-Download-Extras: Kapitel-Splitting, Zeitbereich, geplanter Start */
+function applyExtras(req: DownloadRequest): DownloadRequest {
+  const out = { ...req }
+  if (splitChapters.value) out.splitChapters = true
+  if (sectionFrom.value.trim()) out.sectionFrom = sectionFrom.value.trim()
+  if (sectionTo.value.trim()) out.sectionTo = sectionTo.value.trim()
+  if (scheduledAt.value) {
+    const ts = new Date(scheduledAt.value)
+    if (!Number.isNaN(ts.getTime()) && ts.getTime() > Date.now()) {
+      out.scheduledAt = ts.toISOString()
+    }
+  }
+  return out
+}
+
 /**
- * Baut die Download-Requests: normalerweise einer; im "Beides"-Modus
- * (manuell oder per Vorlage) zwei — Video und Audio mit eigenen Ordnern.
+ * Erzeugt für jede zusätzliche Qualitätsstufe einen weiteren Video-Request
+ * mit Qualitäts-Suffix im Dateinamen (Issue #10).
+ */
+function expandQualities(
+  videoReq: DownloadRequest,
+  primary: string,
+  extras: string[]
+): DownloadRequest[] {
+  const unique = [...new Set(extras)].filter((q) => q !== primary)
+  if (unique.length === 0) return [videoReq]
+  return [
+    { ...videoReq, filenameSuffix: ` [${qualityLabel(primary)}]` },
+    ...unique.map((q) => ({
+      ...videoReq,
+      overrides: { ...videoReq.overrides, videoQuality: q as AppSettings['videoQuality'] },
+      filenameSuffix: ` [${qualityLabel(q)}]`
+    }))
+  ]
+}
+
+/**
+ * Baut die Download-Requests: normalerweise einer; im "Beides"-Modus oder
+ * mit zusätzlichen Qualitätsstufen entsprechend mehr.
  */
 function buildRequests(): DownloadRequest[] {
   const base: DownloadRequest = { url: url.value.trim() }
   if (info.value) base.knownTitle = info.value.title
 
-  // Vorlage gewählt → Vorlage bestimmt alles
+  let requests: DownloadRequest[]
   const tpl = activeTemplate.value
   if (tpl) {
+    // Vorlage gewählt → Vorlage bestimmt alles
     const videoReq: DownloadRequest = {
       ...base,
       overrides: {
@@ -143,50 +195,53 @@ function buildRequests(): DownloadRequest[] {
           : {})
       }
     }
-    if (tpl.mode === 'video') return [videoReq]
-    if (tpl.mode === 'audio') return [audioReq]
-    return [videoReq, audioReq]
-  }
-
-  if (useDefaults.value) return [base]
-
-  const common = {
-    audioFormat: audioFormat.value as AppSettings['audioFormat'],
-    videoQuality: videoQuality.value as AppSettings['videoQuality'],
-    writeSubtitles: writeSubtitles.value
-  }
-  if (mode.value === 'both') {
-    return [
-      {
-        ...base,
-        overrides: {
-          ...common,
-          mode: 'video',
-          ...(folder.value ? { downloadFolder: folder.value } : {})
-        }
-      },
-      {
-        ...base,
-        overrides: {
-          ...common,
-          mode: 'audio',
-          ...(audioFolder.value || folder.value
-            ? { downloadFolder: audioFolder.value || folder.value }
-            : {})
-        }
-      }
-    ]
-  }
-  return [
-    {
+    const videoReqs = expandQualities(videoReq, tpl.videoQuality, tpl.extraVideoQualities ?? [])
+    requests =
+      tpl.mode === 'video' ? videoReqs : tpl.mode === 'audio' ? [audioReq] : [...videoReqs, audioReq]
+  } else if (useDefaults.value) {
+    requests = [base]
+  } else {
+    const common = {
+      audioFormat: audioFormat.value as AppSettings['audioFormat'],
+      videoQuality: videoQuality.value as AppSettings['videoQuality'],
+      writeSubtitles: writeSubtitles.value
+    }
+    const videoReq: DownloadRequest = {
       ...base,
       overrides: {
         ...common,
-        mode: mode.value as AppSettings['mode'],
+        mode: 'video',
         ...(folder.value ? { downloadFolder: folder.value } : {})
       }
     }
-  ]
+    const audioReq: DownloadRequest = {
+      ...base,
+      overrides: {
+        ...common,
+        mode: 'audio',
+        ...((mode.value === 'both' ? audioFolder.value || folder.value : folder.value)
+          ? {
+              downloadFolder:
+                mode.value === 'both' ? audioFolder.value || folder.value : folder.value
+            }
+          : {})
+      }
+    }
+    const videoReqs = expandQualities(videoReq, videoQuality.value, extraQualities.value)
+    requests =
+      mode.value === 'video'
+        ? videoReqs
+        : mode.value === 'audio'
+          ? [audioReq]
+          : [...videoReqs, audioReq]
+  }
+  return requests.map(applyExtras)
+}
+
+function toggleExtraQuality(q: string): void {
+  const idx = extraQualities.value.indexOf(q)
+  if (idx === -1) extraQualities.value.push(q)
+  else extraQualities.value.splice(idx, 1)
 }
 
 async function probe(): Promise<void> {
@@ -502,8 +557,69 @@ const playlistPreview = computed(() => {
                 :label="t('settings.fields.writeSubtitles')"
               />
             </div>
+            <!-- Zusätzliche Qualitätsstufen parallel laden (Issue #10) -->
+            <div v-if="mode !== 'audio'" class="col-12">
+              <div class="f">
+                <div class="f-label">{{ t('download.options.extraQualities') }}</div>
+                <div class="row" style="flex-wrap: wrap; gap: 8px">
+                  <BxChip
+                    v-for="q in videoQualityOptions"
+                    :key="q.value"
+                    :variant="extraQualities.includes(q.value) ? 'marine' : 'neutral'"
+                    style="cursor: pointer"
+                    @click="toggleExtraQuality(q.value)"
+                  >
+                    {{ q.label }}
+                  </BxChip>
+                </div>
+                <div class="f-hint">{{ t('download.options.extraQualitiesHint') }}</div>
+              </div>
+            </div>
           </div>
         </template>
+      </div>
+    </BxCard>
+
+    <!-- Extras für diesen Download: Zeitbereich, Kapitel, geplanter Start -->
+    <BxCard :title="t('download.extras.title')">
+      <div class="bx-form-grid">
+        <div class="col-6">
+          <BxField
+            v-model="sectionFrom"
+            :label="t('download.extras.sectionFrom')"
+            icon="time"
+            placeholder="0:00"
+            :hint="t('download.extras.sectionHint')"
+          />
+        </div>
+        <div class="col-6">
+          <BxField
+            v-model="sectionTo"
+            :label="t('download.extras.sectionTo')"
+            icon="time"
+            placeholder="1:23:45"
+          />
+        </div>
+        <div class="col-6" style="align-self: center">
+          <BxToggle
+            v-model="splitChapters"
+            :label="t('download.extras.splitChapters')"
+            :hint="
+              info && !info.isPlaylist && info.chapterCount > 0
+                ? t('download.extras.chaptersFound', { n: info.chapterCount })
+                : t('download.extras.splitChaptersHint')
+            "
+          />
+        </div>
+        <div class="col-6">
+          <BxField
+            v-model="scheduledAt"
+            type="datetime-local"
+            :label="t('download.extras.scheduledAt')"
+            icon="time"
+            :hint="t('download.extras.scheduledAtHint')"
+          />
+        </div>
       </div>
     </BxCard>
   </div>

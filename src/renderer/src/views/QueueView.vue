@@ -12,10 +12,13 @@ import BxDialog from '../components/BxDialog.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { useDownloadsStore } from '../stores/downloads'
 import { showToast } from '../composables/toast'
-import { formatSpeed, formatEta, formatBytes, isHttpUrl } from '../utils/format'
+import { formatSpeed, formatEta, formatBytes, formatDateTime, isHttpUrl } from '../utils/format'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const downloads = useDownloadsStore()
+
+const isScheduled = (item: DownloadItem): boolean =>
+  item.status === 'queued' && !!item.scheduledAt && Date.parse(item.scheduledAt) > Date.now()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const confirmCancelAll = ref(false)
@@ -190,6 +193,9 @@ function showInFolder(item: DownloadItem): void {
                 {{ t(`status.${item.status}`) }}
               </BxChip>
               <BxChip variant="neutral">{{ item.format.toUpperCase() }}</BxChip>
+              <BxChip v-if="isScheduled(item)" icon="time" variant="outline">
+                {{ t('queue.scheduledFor', { when: formatDateTime(item.scheduledAt!, locale) }) }}
+              </BxChip>
               <BxChip
                 v-if="item.isPlaylist && item.progress.playlistIndex && item.progress.playlistCount"
                 variant="outline"
@@ -265,6 +271,22 @@ function showInFolder(item: DownloadItem): void {
               @click="downloads.retry(item.id)"
             />
             <BxBtn
+              v-if="item.status === 'downloading' || item.status === 'converting'"
+              icon="pause"
+              variant="ghost"
+              size="sm"
+              :title="t('queue.pauseItem')"
+              @click="downloads.pause(item.id)"
+            />
+            <BxBtn
+              v-if="item.status === 'paused'"
+              icon="play"
+              variant="outline"
+              size="sm"
+              :label="t('queue.resumeItem')"
+              @click="downloads.resume(item.id)"
+            />
+            <BxBtn
               icon="note"
               variant="ghost"
               size="sm"
@@ -272,7 +294,7 @@ function showInFolder(item: DownloadItem): void {
               @click="openLog(item)"
             />
             <BxBtn
-              v-if="isActive(item) || item.status === 'queued'"
+              v-if="isActive(item) || item.status === 'queued' || item.status === 'paused'"
               icon="cancel"
               variant="ghost"
               size="sm"

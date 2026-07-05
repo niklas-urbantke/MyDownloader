@@ -10,8 +10,34 @@ import type {
 } from '@shared/types'
 import { getSettings } from './settings'
 import { buildDownloadCommand, probeUrl, ytDlpEnv, PROGRESS_PREFIX, OUTPUT_PREFIX } from './ytdlp'
+import { JsonStore } from './store'
 
 const MAX_LOG_LINES = 2000
+
+/** Persistierte Form eines Queue-Eintrags (ohne Prozess/Log) */
+interface PersistedEntry {
+  item: DownloadItem
+  request: DownloadRequest
+}
+
+/** Liegt die aktuelle Uhrzeit im täglichen Download-Zeitfenster? (Issue #22) */
+export function inScheduleWindow(settings: AppSettings, now = new Date()): boolean {
+  if (!settings.scheduleEnabled) return true
+  const parse = (s: string): number | null => {
+    const m = /^(\d{1,2}):(\d{2})$/.exec(s.trim())
+    if (!m) return null
+    const h = Number(m[1])
+    const min = Number(m[2])
+    if (h > 23 || min > 59) return null
+    return h * 60 + min
+  }
+  const from = parse(settings.scheduleFrom)
+  const to = parse(settings.scheduleTo)
+  if (from === null || to === null || from === to) return true
+  const cur = now.getHours() * 60 + now.getMinutes()
+  // from > to = Fenster über Mitternacht (z. B. 22:00–06:00)
+  return from < to ? cur >= from && cur < to : cur >= from || cur < to
+}
 
 export interface QueueEvents {
   onItemChanged: (item: DownloadItem) => void
@@ -27,6 +53,8 @@ interface InternalItem {
   proc: ChildProcessWithoutNullStreams | null
   log: string[]
   cancelled: boolean
+  /** true = Prozess wurde für eine Pause beendet, nicht abgebrochen */
+  pausing: boolean
 }
 
 function looksLikePlaylist(url: string): boolean {
@@ -58,8 +86,59 @@ export class DownloadQueue {
    * startet. Einträge mit request.startNow laufen immer sofort los.
    */
   private processing = false
+  private persistStore = new JsonStore<PersistedEntry[]>('queue.json', [])
+  private persistTimer: ReturnType<typeof setTimeout> | null = null
 
-  constructor(private events: QueueEvents) {}
+  constructor(private events: QueueEvents) {
+    // Weckt die Queue regelmäßig auf, damit geplante Downloads (Zeitpunkt
+    // oder Zeitfenster) ohne weitere Nutzeraktion starten (Issue #22)
+    setInterval(() => {
+      const hasWaiting = this.order.some((id) => this.items.get(id)?.item.status === 'queued')
+      if (hasWaiting) this.tick()
+    }, 30_000)
+  }
+
+  /**
+   * Stellt die Queue des letzten App-Laufs wieder her (Issue #19).
+   * Zuvor laufende Einträge kommen als 'paused' zurück und lassen sich
+   * per „Fortsetzen“ weiterladen (yt-dlp setzt .part-Dateien fort).
+   */
+  restore(): void {
+    const persisted = this.persistStore.load()
+    if (!Array.isArray(persisted)) return
+    for (const { item, request } of persisted) {
+      if (!item?.id || !request?.url) continue
+      const status: DownloadStatus =
+        item.status === 'downloading' ||
+        item.status === 'converting' ||
+        item.status === 'fetching-info'
+          ? 'paused'
+          : item.status
+      this.items.set(item.id, {
+        item: { ...item, status },
+        // startNow nicht wiederherstellen — nach einem Neustart soll nichts
+        // ungefragt loslaufen
+        request: { ...request, startNow: false },
+        proc: null,
+        log: [],
+        cancelled: false,
+        pausing: false
+      })
+      this.order.push(item.id)
+    }
+  }
+
+  private schedulePersist(): void {
+    if (this.persistTimer) return
+    this.persistTimer = setTimeout(() => {
+      this.persistTimer = null
+      const entries: PersistedEntry[] = this.order
+        .map((id) => this.items.get(id))
+        .filter((e): e is InternalItem => !!e)
+        .map((e) => ({ item: e.item, request: e.request }))
+      this.persistStore.save(entries)
+    }, 500)
+  }
 
   isProcessing(): boolean {
     return this.processing
@@ -122,9 +201,10 @@ export class DownloadQueue {
       addedAt: new Date().toISOString(),
       startedAt: null,
       finishedAt: null,
-      isPlaylist
+      isPlaylist,
+      scheduledAt: request.scheduledAt ?? null
     }
-    this.items.set(item.id, { item, request, proc: null, log: [], cancelled: false })
+    this.items.set(item.id, { item, request, proc: null, log: [], cancelled: false, pausing: false })
     this.order.push(item.id)
     this.emit(item.id)
     this.tick()
@@ -138,7 +218,7 @@ export class DownloadQueue {
   cancel(id: string): void {
     const entry = this.items.get(id)
     if (!entry) return
-    if (entry.item.status === 'queued') {
+    if (entry.item.status === 'queued' || entry.item.status === 'paused') {
       entry.item.status = 'cancelled'
       entry.item.finishedAt = new Date().toISOString()
       this.emit(id)
@@ -149,6 +229,38 @@ export class DownloadQueue {
       entry.cancelled = true
       this.killTree(entry.proc)
     }
+  }
+
+  /**
+   * Pausiert einen einzelnen Download (Issue #19). Laufende Prozesse werden
+   * beendet; bereits geladene Fragmente bleiben als .part liegen und werden
+   * beim Fortsetzen wiederverwendet.
+   */
+  pause(id: string): void {
+    const entry = this.items.get(id)
+    if (!entry) return
+    if (entry.item.status === 'queued') {
+      entry.item.status = 'paused'
+      this.emit(id)
+      return
+    }
+    if (entry.proc && this.isActive(entry.item.status)) {
+      entry.pausing = true
+      this.killTree(entry.proc)
+    }
+  }
+
+  /** Setzt einen pausierten Download fort — startet sofort. */
+  resume(id: string): void {
+    const entry = this.items.get(id)
+    if (!entry || entry.item.status !== 'paused') return
+    entry.pausing = false
+    entry.cancelled = false
+    entry.request.startNow = true
+    entry.item.status = 'queued'
+    entry.item.scheduledAt = null
+    this.emit(id)
+    this.tick()
   }
 
   retry(id: string): void {
@@ -174,6 +286,7 @@ export class DownloadQueue {
     if (this.isActive(entry.item.status)) this.cancel(id)
     this.items.delete(id)
     this.order = this.order.filter((x) => x !== id)
+    this.schedulePersist()
   }
 
   clearFinished(): string[] {
@@ -186,6 +299,7 @@ export class DownloadQueue {
         removed.push(id)
       }
     }
+    this.schedulePersist()
     return removed
   }
 
@@ -193,6 +307,28 @@ export class DownloadQueue {
     for (const id of this.order) {
       const st = this.items.get(id)?.item.status
       if (st && (st === 'queued' || this.isActive(st))) this.cancel(id)
+    }
+  }
+
+  /**
+   * Beim App-Ende: Zustand sofort persistieren (laufende Einträge kommen nach
+   * dem Neustart als 'paused' zurück) und alle Prozesse beenden.
+   */
+  shutdown(): void {
+    if (this.persistTimer) {
+      clearTimeout(this.persistTimer)
+      this.persistTimer = null
+    }
+    const entries: PersistedEntry[] = this.order
+      .map((id) => this.items.get(id))
+      .filter((e): e is InternalItem => !!e)
+      .map((e) => ({ item: e.item, request: e.request }))
+    this.persistStore.save(entries)
+    for (const entry of this.items.values()) {
+      if (entry.proc) {
+        entry.pausing = true
+        this.killTree(entry.proc)
+      }
     }
   }
 
@@ -207,6 +343,7 @@ export class DownloadQueue {
   private emit(id: string): void {
     const entry = this.items.get(id)
     if (entry) this.events.onItemChanged({ ...entry.item, progress: { ...entry.item.progress } })
+    this.schedulePersist()
   }
 
   private log(id: string, line: string): void {
@@ -220,13 +357,21 @@ export class DownloadQueue {
   private tick(): void {
     const settings = getSettings()
     const max = Math.max(1, Math.min(5, settings.concurrency))
+    const now = Date.now()
+    const windowOpen = inScheduleWindow(settings)
     let running = this.activeCount()
     for (const id of this.order) {
       if (running >= max) break
       const entry = this.items.get(id)
       if (!entry || entry.item.status !== 'queued') continue
-      // Ohne gestartete Queue laufen nur explizit gestartete Downloads
-      if (!this.processing && !entry.request.startNow) continue
+      // Geplante Downloads warten bis zu ihrem Startzeitpunkt (Issue #22)
+      if (entry.item.scheduledAt && Date.parse(entry.item.scheduledAt) > now) continue
+      if (!entry.request.startNow) {
+        // Ohne gestartete Queue laufen nur explizit gestartete Downloads
+        if (!this.processing) continue
+        // Queue-Betrieb respektiert das tägliche Zeitfenster (Issue #22)
+        if (!windowOpen) continue
+      }
       running++
       void this.run(entry, settings)
     }
@@ -315,7 +460,12 @@ export class DownloadQueue {
 
     proc.on('close', (code) => {
       entry.proc = null
-      if (entry.cancelled) {
+      if (entry.pausing) {
+        entry.pausing = false
+        item.status = 'paused'
+        this.emit(item.id)
+        this.tick()
+      } else if (entry.cancelled) {
         this.finish(entry, 'cancelled')
       } else if (code === 0) {
         item.progress.percent = 100

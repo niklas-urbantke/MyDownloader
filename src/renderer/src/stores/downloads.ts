@@ -38,6 +38,14 @@ export const useDownloadsStore = defineStore('downloads', () => {
     await window.api.downloads.cancel(id)
   }
 
+  async function pause(id: string): Promise<void> {
+    await window.api.downloads.pause(id)
+  }
+
+  async function resume(id: string): Promise<void> {
+    await window.api.downloads.resume(id)
+  }
+
   async function retry(id: string): Promise<void> {
     await window.api.downloads.retry(id)
   }
@@ -81,6 +89,7 @@ export const useDownloadsStore = defineStore('downloads', () => {
     )
   )
   const queuedItems = computed(() => items.value.filter((i) => i.status === 'queued'))
+  const pausedItems = computed(() => items.value.filter((i) => i.status === 'paused'))
   const errorItems = computed(() => items.value.filter((i) => i.status === 'error'))
   const completedToday = computed(() => {
     const today = new Date().toDateString()
@@ -97,6 +106,8 @@ export const useDownloadsStore = defineStore('downloads', () => {
     add,
     addMany,
     cancel,
+    pause,
+    resume,
     retry,
     remove,
     clearFinished,
@@ -106,6 +117,7 @@ export const useDownloadsStore = defineStore('downloads', () => {
     move,
     activeItems,
     queuedItems,
+    pausedItems,
     errorItems,
     completedToday
   }

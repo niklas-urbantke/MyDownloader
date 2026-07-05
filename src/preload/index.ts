@@ -42,6 +42,8 @@ const api = {
     addMany: (requests: DownloadRequest[]): Promise<DownloadItem[]> =>
       ipcRenderer.invoke(IPC.downloadAddMany, requests),
     cancel: (id: string): Promise<void> => ipcRenderer.invoke(IPC.downloadCancel, id),
+    pause: (id: string): Promise<void> => ipcRenderer.invoke(IPC.downloadPause, id),
+    resume: (id: string): Promise<void> => ipcRenderer.invoke(IPC.downloadResume, id),
     retry: (id: string): Promise<void> => ipcRenderer.invoke(IPC.downloadRetry, id),
     remove: (id: string): Promise<void> => ipcRenderer.invoke(IPC.downloadRemove, id),
     clearFinished: (): Promise<string[]> => ipcRenderer.invoke(IPC.downloadClearFinished),

@@ -121,7 +121,9 @@
       "video": "Video",
       "format": "Format",
       "quality": "Qualität",
-      "folder": "Zielordner"
+      "folder": "Zielordner",
+      "extraQualities": "Zusätzliche Qualitätsstufen",
+      "extraQualitiesHint": "Jede zusätzliche Stufe erzeugt einen eigenen Download mit Qualitäts-Zusatz im Dateinamen."
     },
     "errors": {
       "invalidUrl": "Das sieht nicht nach einer gültigen URL aus.",
@@ -134,6 +136,17 @@
       "question": "Dieser Link enthält ein einzelnes Video UND eine Playlist. Was soll geladen werden?",
       "video": "Nur dieses Video",
       "playlist": "Ganze Playlist"
+    },
+    "extras": {
+      "title": "Extras für diesen Download",
+      "sectionFrom": "Ausschnitt von",
+      "sectionTo": "Ausschnitt bis",
+      "sectionHint": "Leer lassen, um das ganze Video zu laden. Format: ss, mm:ss oder hh:mm:ss.",
+      "splitChapters": "In Kapitel aufteilen",
+      "splitChaptersHint": "Erzeugt pro Kapitel eine eigene Datei (falls das Video Kapitel hat).",
+      "chaptersFound": "{n} Kapitel erkannt — jede wird eine eigene Datei.",
+      "scheduledAt": "Später starten",
+      "scheduledAtHint": "Leer lassen für sofortigen Start."
     }
   },
   "queue": {
@@ -154,7 +167,10 @@
     "speed": "Geschwindigkeit",
     "eta": "Verbleibend",
     "playlistProgress": "Titel {current} von {total}",
-    "confirmCancelAll": "Wirklich alle laufenden Downloads abbrechen?"
+    "confirmCancelAll": "Wirklich alle laufenden Downloads abbrechen?",
+    "scheduledFor": "Geplant: {when}",
+    "pauseItem": "Download pausieren",
+    "resumeItem": "Fortsetzen"
   },
   "history": {
     "title": "Verlauf",
@@ -234,7 +250,11 @@
       "locale": "Sprache",
       "localeSystem": "Systemsprache",
       "notifyOnComplete": "Benachrichtigung, wenn ein Download fertig ist",
-      "clipboardWatcher": "Zwischenablage auf Video-URLs überwachen"
+      "clipboardWatcher": "Zwischenablage auf Video-URLs überwachen",
+      "scheduleEnabled": "Downloads nur im Zeitfenster ausführen",
+      "scheduleHint": "Die Warteschlange lädt dann nur zwischen Beginn und Ende (z. B. nachts). Manuell gestartete Downloads laufen immer sofort.",
+      "scheduleFrom": "Fenster-Beginn",
+      "scheduleTo": "Fenster-Ende"
     },
     "binaries": {
       "title": "Komponenten",

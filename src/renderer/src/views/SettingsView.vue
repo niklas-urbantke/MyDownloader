@@ -246,6 +246,32 @@ const concurrencyProxy = computed({
             :options="concurrencyOptions"
           />
         </div>
+        <!-- Tägliches Download-Zeitfenster (Issue #22) -->
+        <div class="col-12">
+          <BxToggle
+            v-model="settings.scheduleEnabled"
+            :label="t('settings.fields.scheduleEnabled')"
+            :hint="t('settings.fields.scheduleHint')"
+          />
+        </div>
+        <div class="col-6">
+          <BxField
+            v-model="settings.scheduleFrom"
+            type="time"
+            :label="t('settings.fields.scheduleFrom')"
+            icon="time"
+            :disabled="!settings.scheduleEnabled"
+          />
+        </div>
+        <div class="col-6">
+          <BxField
+            v-model="settings.scheduleTo"
+            type="time"
+            :label="t('settings.fields.scheduleTo')"
+            icon="time"
+            :disabled="!settings.scheduleEnabled"
+          />
+        </div>
       </div>
     </BxCard>
 

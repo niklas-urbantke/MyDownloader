@@ -90,8 +90,9 @@ if (!gotLock) {
     if (process.platform !== 'darwin') app.quit()
   })
 
-  // Laufende yt-dlp-Prozesse beim Beenden sauber abräumen
+  // Zustand sichern und laufende yt-dlp-Prozesse sauber beenden — nach dem
+  // nächsten Start stehen unterbrochene Downloads als „Pausiert“ bereit
   app.on('before-quit', () => {
-    queue.cancelAll()
+    queue.shutdown()
   })
 }

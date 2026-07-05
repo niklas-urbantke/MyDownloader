@@ -11,6 +11,7 @@ export function emptyTemplate(): DownloadTemplate {
     audioQuality: '0',
     videoContainer: 'mp4',
     videoQuality: 'best',
+    extraVideoQualities: [],
     writeSubtitles: false,
     folder: '',
     audioFolder: ''

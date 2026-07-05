@@ -30,6 +30,12 @@ export interface AppSettings {
   speedLimit: string
   /** Anzahl paralleler Downloads (1–5) */
   concurrency: number
+  /** Downloads nur innerhalb eines täglichen Zeitfensters ausführen (Issue #22) */
+  scheduleEnabled: boolean
+  /** Fenster-Beginn "HH:MM" */
+  scheduleFrom: string
+  /** Fenster-Ende "HH:MM" (kleiner als Beginn = über Mitternacht) */
+  scheduleTo: string
   /** SponsorBlock-Segmente automatisch entfernen */
   sponsorBlock: boolean
   /** Zusätzliche yt-dlp-Argumente (Profi-Option) */
@@ -58,6 +64,8 @@ export interface VideoInfo {
   durationSeconds: number | null
   thumbnailUrl: string | null
   viewCount: number | null
+  /** Anzahl der Kapitel (0 = keine) — Basis für das Kapitel-Splitting (Issue #23) */
+  chapterCount: number
   isPlaylist: false
 }
 
@@ -114,6 +122,15 @@ export interface DownloadRequest {
   >
   /** Anzeigetitel, falls schon bekannt (z. B. aus der Vorschau) */
   knownTitle?: string
+  /** Nur diesen Zeitbereich laden, Format "hh:mm:ss" (Issue #24) */
+  sectionFrom?: string
+  sectionTo?: string
+  /** Video anhand seiner Kapitel in Einzeldateien aufteilen (Issue #23) */
+  splitChapters?: boolean
+  /** Dateinamen-Zusatz, z. B. " [1080p]" bei Multi-Qualitäts-Downloads (Issue #10) */
+  filenameSuffix?: string
+  /** Geplanter Startzeitpunkt (ISO 8601) — vorher bleibt der Download liegen (Issue #22) */
+  scheduledAt?: string
 }
 
 export interface DownloadProgress {
@@ -150,6 +167,8 @@ export interface DownloadItem {
   startedAt: string | null
   finishedAt: string | null
   isPlaylist: boolean
+  /** Geplanter Startzeitpunkt (ISO), null = sofort verfügbar */
+  scheduledAt: string | null
 }
 
 // ---------------------------------------------------------------------------
@@ -165,6 +184,11 @@ export interface DownloadTemplate {
   audioQuality: AppSettings['audioQuality']
   videoContainer: VideoContainer
   videoQuality: VideoQuality
+  /**
+   * Zusätzliche Qualitätsstufen, die parallel geladen werden (Issue #10).
+   * Jede weitere Stufe erzeugt einen eigenen Queue-Eintrag mit Suffix im Dateinamen.
+   */
+  extraVideoQualities?: VideoQuality[]
   writeSubtitles: boolean
   /** Zielordner (leer = globaler Download-Ordner); bei 'both' der Video-Ordner */
   folder: string
@@ -225,6 +249,8 @@ export const IPC = {
   downloadAdd: 'download:add',
   downloadAddMany: 'download:add-many',
   downloadCancel: 'download:cancel',
+  downloadPause: 'download:pause',
+  downloadResume: 'download:resume',
   downloadRetry: 'download:retry',
   downloadRemove: 'download:remove',
   downloadClearFinished: 'download:clear-finished',
