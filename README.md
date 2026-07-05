@@ -3,30 +3,53 @@
 > Moderner Musik- & Video-Downloader — Electron + Vue 3, mit gebündeltem
 > yt-dlp und FFmpeg. Keine Abhängigkeiten, einfach installieren und loslegen.
 
-MyDownloader 4 ist der komplette Neuaufbau der bisherigen Python/tkinter-App
-(v3): neue Architektur, neues UI im Batix-Design-System, gleiche und viele
-neue Funktionen.
+MyDownloader 5 baut auf dem kompletten Neuaufbau von v4 (Electron + Vue 3,
+Batix-Design-System) auf und bringt einen großen Schwung neuer Funktionen:
+Abos, Spotify-Import, Metadaten-Editor, Auto-Updates, System-Tray u. v. m.
 
 ## Features
 
+### Downloads
 - **Downloads**: einzelne Videos/Songs, komplette Playlists (eigene
-  Unterordner), Warteschlange mit bis zu 5 parallelen Downloads —
-  manuell startbar, pausierbar und umsortierbar
+  Unterordner), **ganze Kanäle** (Videos/Shorts/Livestreams wählbar) und
+  Shorts — Warteschlange mit bis zu 5 parallelen Downloads
+- **Pausieren & Fortsetzen** einzelner Downloads; die Warteschlange übersteht
+  App-Neustarts (unterbrochene Downloads werden fortgesetzt)
+- **Zeitplaner**: Downloads zu einem Zeitpunkt planen oder die Queue auf ein
+  tägliches Zeitfenster begrenzen (z. B. nachts)
+- **Playlist-Abos**: abonnierte Playlists/Kanäle werden automatisch geprüft,
+  nur neue Videos werden geladen
+- **Mehrere Qualitätsstufen gleichzeitig** (z. B. 1080p + 480p) — pro Download
+  oder in Vorlagen
+- **Kapitel-Splitting** (lange Videos anhand der Kapitel in Einzeldateien)
+  und **Ausschnitt-Download** (nur einen Zeitbereich laden)
 - **Vorlagen**: Download-Presets mit Format, Qualität und eigenen
   Speicherorten — auf Wunsch Video **und** Audio in einem Rutsch
-  (getrennte Ordner je Format)
-- **Audio**: MP3, M4A, OPUS, FLAC, WAV — Qualität wählbar, Cover-Thumbnail
-  und Metadaten werden automatisch eingebettet
+- **Untertitel** (.srt) und **SponsorBlock**-Integration
+
+### Audio & Metadaten
+- **Audio**: MP3, M4A, OPUS, FLAC, WAV — Cover & Metadaten automatisch
 - **Video**: MP4, MKV, WEBM — Auflösung begrenzbar (480p bis 4K)
-- **Vorschau** vor dem Download (Titel, Kanal, Dauer, Playlist-Inhalt)
-- **Verlauf** mit Suche, Filtern, Re-Download und „Im Ordner zeigen“
-- **Untertitel** (.srt) in beliebigen Sprachen
-- **SponsorBlock**-Integration (Sponsor-Segmente automatisch entfernen)
-- **Clipboard-Watcher** (opt-in): erkennt kopierte Video-URLs
-- **Selbst-aktualisierendes yt-dlp** (Einstellungen → Komponenten)
+- **Metadaten-Editor** mit MusicBrainz-Vorschlägen und Cover-Tausch
+- **Lautstärke-Normalisierung** (ReplayGain-Tags oder EBU-R128-loudnorm)
+- **Songtexte** automatisch einbetten (LRCLIB, synchronisierte .lrc-Dateien)
+- **Eigenes Datei-Schema** mit Platzhaltern (`{artist}/{album}/{track} - {title}`)
+
+### Integration & Komfort
+- **Hörprobe** vor dem Download (30 Sekunden, auch für Playlist-Einträge)
+- **Spotify-Import**: Playlists/Alben mit dem eigenen Spotify-Konto laden und
+  als Audio-Downloads übernehmen (Client-ID in den Einstellungen, PKCE-Login)
+- **YouTube-Konto-Anbindung** über Browserfenster — für 18+-Inhalte (Cookies
+  bleiben lokal)
+- **System-Tray** mit Hintergrund-Downloads, **Drag & Drop** für Links und
+  URL-Listen, **Clipboard-Watcher**, native Benachrichtigungen mit
+  Ordner-Sprung, Dock-/Taskbar-Fortschritt
+- **Deep-Links**: `mydownloader://download?url=…` aus Browser/Bookmarklet
+- **Auto-Updates** über GitHub Releases + Offline-Updates per
+  `.urbupdate`-Datei (`node scripts/make-urbupdate.mjs`)
+- **Statistik-Dashboard**, durchsuchbarer Verlauf mit Zeitraum-Filtern,
+  Onboarding-Assistent, Hell-/Dunkel-Modus, Deutsch & Englisch
 - **Import aus v3** (Einstellungen + Download-Verlauf)
-- Geschwindigkeits-Limit, native Benachrichtigungen, Dock-/Taskbar-Fortschritt
-- Hell-/Dunkel-Modus, Deutsch & Englisch
 - **Alles gebündelt**: yt-dlp, FFmpeg und die nötige JavaScript-Runtime sind
   in der App enthalten — keine Installation von Python, Node oder FFmpeg nötig
 
