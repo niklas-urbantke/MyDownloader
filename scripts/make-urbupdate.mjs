@@ -3,9 +3,11 @@
  * Baut ein .urbupdate-Archiv (Issue #37) aus den Release-Artefakten.
  *
  * Verwendung (nach `npm run build:linux` / CI-Downloads in release/):
- *   node scripts/make-urbupdate.mjs [--dir release] [--out MyDownloader-<v>.urbupdate]
+ *   node scripts/make-urbupdate.mjs [--dir release] [--out <datei>] [--platform linux|win32|darwin]
  *
- * Das Archiv ist ein ZIP mit manifest.json und den Installern je Plattform.
+ * Das Archiv ist ein ZIP mit manifest.json und den Installern.
+ * Ohne --platform landen alle gefundenen Assets in EINER Datei (groß).
+ * Mit --platform wird nur das passende Asset gepackt (klein, empfohlen).
  * In der App: Info → „Update aus Datei installieren“.
  */
 import { createHash } from 'node:crypto'
@@ -23,7 +25,11 @@ const get = (name, fallback) => {
   return i !== -1 && args[i + 1] ? args[i + 1] : fallback
 }
 const dir = join(ROOT, get('dir', 'release'))
-const out = join(ROOT, get('out', `MyDownloader-${pkg.version}.urbupdate`))
+const platformFilter = get('platform', null)
+const defaultOut = platformFilter
+  ? `MyDownloader-${pkg.version}-${platformFilter}.urbupdate`
+  : `MyDownloader-${pkg.version}.urbupdate`
+const out = join(ROOT, get('out', defaultOut))
 
 /** Ordnet Release-Dateien Plattform/Typ zu */
 function classify(file) {
@@ -40,6 +46,7 @@ const assets = []
 for (const file of readdirSync(dir)) {
   const meta = classify(file)
   if (!meta) continue
+  if (platformFilter && meta.platform !== platformFilter) continue
   const path = join(dir, file)
   if (!statSync(path).isFile()) continue
   const data = readFileSync(path)
