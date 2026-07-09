@@ -28,7 +28,11 @@ export const useTemplatesStore = defineStore('templates', () => {
   }
 
   async function save(template: DownloadTemplate): Promise<DownloadTemplate> {
-    const saved = await window.api.templates.save({ ...template })
+    // In ein reines Objekt umwandeln: reaktive Vue-Proxies (z. B. das
+    // extraVideoQualities-Array) lassen sich sonst nicht über IPC klonen
+    // ("An object could not be cloned").
+    const plain = JSON.parse(JSON.stringify(template)) as DownloadTemplate
+    const saved = await window.api.templates.save(plain)
     const idx = entries.value.findIndex((t) => t.id === saved.id)
     if (idx === -1) entries.value.push(saved)
     else entries.value[idx] = saved
