@@ -121,24 +121,6 @@ packaging/aur/   PKGBUILD für Arch Linux
   die eigene Electron-Executable im `ELECTRON_RUN_AS_NODE`-Modus als Runtime
   übergeben — kein zusätzlicher Download nötig.
 
-## Release erstellen
-
-```bash
-# Version in package.json anheben, dann:
-git tag v4.0.0
-git push origin v4.0.0
-```
-
-Die GitHub-Actions-Pipeline (`.github/workflows/release.yml`) baut daraufhin
-auf Windows-, macOS- und Linux-Runnern alle Installer und veröffentlicht sie
-als GitHub-Release.
-
-## Alte Versionen
-
-- **v3 (Python/tkinter)**: über den Tag [`v3.0.0`](https://github.com/niklas-urbantke/YouTube-Downloader/tree/v3.0.0)
-- **Komplettes Archiv** (Flask-UI, C++-Prototyp, Spotify-Loader …): auf dem
-  [`recovery`-Branch](https://github.com/niklas-urbantke/YouTube-Downloader/tree/recovery)
-
 ## Lizenz
 
 [MIT](LICENSE) · gebündelte Komponenten: yt-dlp (Unlicense), FFmpeg (GPL/LGPL),
