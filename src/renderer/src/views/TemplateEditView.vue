@@ -82,7 +82,14 @@ async function save(): Promise<void> {
     nameError.value = t('templates.nameRequired')
     return
   }
-  await templates.save(form.value)
+  try {
+    await templates.save(form.value)
+  } catch (err) {
+    // Ohne diesen Zweig bleibt ein fehlgeschlagenes Speichern komplett
+    // unsichtbar — der Button „tut nichts“.
+    showToast(t('templates.saveFailed', { error: String(err) }), 'error')
+    return
+  }
   showToast(t('templates.saved', { name: form.value.name }))
   router.push({ name: 'templates' })
 }

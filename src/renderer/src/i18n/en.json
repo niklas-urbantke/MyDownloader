@@ -385,6 +385,7 @@
     "nameRequired": "Please enter a name.",
     "namePlaceholder": "e.g. music archive, 4K videos …",
     "saved": "Template “{name}” saved",
+    "saveFailed": "Could not save the template: {error}",
     "deleteTitle": "Delete template",
     "deleteQuestion": "Really delete template “{name}”?",
     "sections": {

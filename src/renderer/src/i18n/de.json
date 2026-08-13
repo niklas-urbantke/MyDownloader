@@ -385,6 +385,7 @@
     "nameRequired": "Bitte einen Namen vergeben.",
     "namePlaceholder": "z. B. Musik-Archiv, 4K-Videos …",
     "saved": "Vorlage „{name}“ gespeichert",
+    "saveFailed": "Vorlage konnte nicht gespeichert werden: {error}",
     "deleteTitle": "Vorlage löschen",
     "deleteQuestion": "Vorlage „{name}“ wirklich löschen?",
     "sections": {
