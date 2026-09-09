@@ -123,5 +123,5 @@ pacman:
 publish:
   provider: github
   owner: niklas-urbantke
-  repo: YouTube-Downloader
+  repo: MyDownloader
   releaseType: release
