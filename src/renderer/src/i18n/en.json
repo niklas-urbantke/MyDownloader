@@ -297,7 +297,15 @@
       "version": "Version {v}",
       "updateYtDlp": "Update yt-dlp",
       "updated": "yt-dlp is up to date: {v}",
-      "updateFailed": "Update failed: {msg}"
+      "updateFailed": "Update failed: {msg}",
+      "description": "yt-dlp needs to stay current: YouTube regularly blocks the access paths used by older builds, after which downloads abort mid-way with \"HTTP Error 403\". Updates are written to a writable folder, so they also work for AppImage and system-wide installations.",
+      "outdated": "yt-dlp is outdated (installed {current}, available {latest}). Please update, otherwise downloads will fail with HTTP 403.",
+      "autoUpdate": "Keep yt-dlp up to date",
+      "autoUpdateAuto": "Update automatically",
+      "autoUpdateNotify": "Only notify",
+      "autoUpdateOff": "Off",
+      "autoUpdated": "yt-dlp was updated automatically to {v}.",
+      "autoOutdated": "yt-dlp is outdated (installed {current}, available {latest})."
     },
     "importV3": {
       "title": "Import from version 3",

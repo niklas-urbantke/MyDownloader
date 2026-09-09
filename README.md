@@ -121,6 +121,39 @@ packaging/aur/   PKGBUILD für Arch Linux
   die eigene Electron-Executable im `ELECTRON_RUN_AS_NODE`-Modus als Runtime
   übergeben — kein zusätzlicher Download nötig.
 
+### yt-dlp aktuell halten (wichtig für Releases)
+
+YouTube sperrt in unregelmäßigen Abständen die Zugriffswege, die ältere
+yt-dlp-Stände benutzen. Ein Release mit veraltetem yt-dlp fällt deshalb nicht
+sofort auf, sondern erst Wochen später beim Nutzer: der Download startet und
+bricht mitten im Vorgang mit `HTTP Error 403` ab. Dagegen greifen drei Dinge:
+
+1. **Der Build zieht immer den neuesten Stand.** `scripts/fetch-binaries.mjs`
+   vergleicht das vorhandene Binary mit der neuesten Veröffentlichung, statt nur
+   auf Vorhandensein zu prüfen, und notiert den geladenen Stand in
+   `resources/bin/<ziel>/yt-dlp.version`. `npm run build:mac|win|linux` und
+   `npm run release` rufen das automatisch auf, ein altes lokales Binary kann
+   also nicht mehr versehentlich ins Release wandern. Die tatsächlich gebündelte
+   Version steht im Build-Log (`Bundled yt-dlp version: …`).
+
+   ```bash
+   node scripts/fetch-binaries.mjs                          # neuesten Stand holen
+   node scripts/fetch-binaries.mjs --ytdlp-version 2026.08.19  # Version festnageln
+   node scripts/fetch-binaries.mjs --offline                # ohne Netz bauen
+   ```
+
+2. **Die App aktualisiert sich selbst.** Beim Start prüft sie den Stand gegen
+   die neueste Veröffentlichung (Einstellung „yt-dlp aktuell halten“:
+   automatisch / nur melden / aus).
+
+3. **Das Update landet in einem beschreibbaren Ordner.** Aktualisiert wird eine
+   Kopie unter `userData/bin/`, die anschließend dem ausgelieferten Binary
+   vorgezogen wird. Der Programmordner selbst ist auf den meisten Installationen
+   schreibgeschützt (Linux-AppImage ist ein read-only Mount, Windows-Setups nach
+   `Program Files` gehören dem Administrator), dort scheiterte das frühere
+   In-Place-Update mit `Unable to write to …`. Bringt eine neue App-Version ein
+   neueres Binary mit, wird die veraltete Kopie beim Start automatisch verworfen.
+
 ## Lizenz
 
 [MIT](LICENSE) · gebündelte Komponenten: yt-dlp (Unlicense), FFmpeg (GPL/LGPL),
