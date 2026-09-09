@@ -68,6 +68,8 @@ export interface AppSettings {
   useAccountCookies: boolean
   /** Spotify-API Client-ID des Nutzers (Issue #35) */
   spotifyClientId: string
+  /** Woher Suchen ohne feste URL ihr Ergebnis nehmen (Musikvideo vermeiden) */
+  musicSource: 'ytmusic' | 'youtube'
 }
 
 // ---------------------------------------------------------------------------

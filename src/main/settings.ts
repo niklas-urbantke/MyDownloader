@@ -37,7 +37,10 @@ export function defaultSettings(): AppSettings {
     closeToTray: true,
     autoUpdate: 'notify',
     useAccountCookies: false,
-    spotifyClientId: ''
+    spotifyClientId: '',
+    // Standard YouTube Music: die normale Suche liefert fast immer das
+    // Musikvideo, eine Live- oder Lyric-Fassung statt der Albumversion
+    musicSource: 'ytmusic'
   }
 }
 

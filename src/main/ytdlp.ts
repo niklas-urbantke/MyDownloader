@@ -269,6 +269,48 @@ export async function probeUrl(url: string): Promise<MediaInfo> {
   }
 }
 
+/** Echte Video-IDs sind exakt 11 Zeichen; Kanäle (24) und Alben (17) sind länger */
+const VIDEO_ID_RE = /^[A-Za-z0-9_-]{11}$/
+
+/**
+ * Sucht auf YouTube Music und liefert die URL des ersten echten Videotreffers.
+ * null = kein Treffer oder Fehler.
+ */
+export async function musicSearchFirst(query: string): Promise<string | null> {
+  const bin = await getYtDlpPath()
+  if (!bin) return null
+  // Ein Kürzel wie "ytmsearch:" gibt es nicht, der Extraktor
+  // youtube:music:search_url greift nur über die Such-URL
+  const searchUrl = `https://music.youtube.com/search?q=${encodeURIComponent(query)}`
+  try {
+    const { stdout } = await execFileP(
+      bin,
+      [
+        ...jsRuntimeArgs(),
+        ...cookieArgs(),
+        '-J',
+        '--flat-playlist',
+        '--playlist-end',
+        '10',
+        '--no-warnings',
+        '--',
+        searchUrl
+      ],
+      { timeout: 60000, maxBuffer: 16 * 1024 * 1024, env: ytDlpEnv() }
+    )
+    const info = JSON.parse(stdout) as RawInfo
+    // Die Trefferliste mischt Kanäle (24 Zeichen) und Alben (17) mit hinein,
+    // die id der Suchseite selbst ist die Anfrage. Deshalb nur die Einträge
+    // ansehen und ausschließlich echte Video-IDs übernehmen.
+    const hit = (info.entries ?? []).map((e) => e.id ?? '').find((id) => VIDEO_ID_RE.test(id))
+    // Bewusst www statt music: dort greift der normale Extraktor mit
+    // allen Formaten
+    return hit ? `https://www.youtube.com/watch?v=${hit}` : null
+  } catch {
+    return null
+  }
+}
+
 /**
  * Liefert eine direkte Audio-Stream-URL für die Hörprobe (Issue #29) —
  * kein Download, der Renderer spielt die URL in einem <audio>-Element ab.

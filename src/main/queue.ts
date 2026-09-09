@@ -9,7 +9,14 @@ import type {
   DownloadStatus
 } from '@shared/types'
 import { getSettings } from './settings'
-import { buildDownloadCommand, probeUrl, ytDlpEnv, PROGRESS_PREFIX, OUTPUT_PREFIX } from './ytdlp'
+import {
+  buildDownloadCommand,
+  musicSearchFirst,
+  probeUrl,
+  ytDlpEnv,
+  PROGRESS_PREFIX,
+  OUTPUT_PREFIX
+} from './ytdlp'
 import { JsonStore } from './store'
 import { isAudioFile, postprocessAudioFile } from './postprocess'
 
@@ -65,6 +72,18 @@ function looksLikePlaylist(url: string): boolean {
     // Ganze Kanäle verhalten sich wie Playlists (Issue #9)
     /youtube\.com\/(@[^/]+|channel\/|c\/|user\/)/i.test(url)
   )
+}
+
+/**
+ * Holt die reine Suchanfrage aus einer ytsearch-URL heraus, also ohne das
+ * "ytsearchN:"-Präfix und ohne den angehängten Zusatz "official audio".
+ * null = keine Suche, sondern eine feste URL.
+ */
+export function searchQueryFromUrl(url: string): string | null {
+  const m = /^ytsearch\d*:(.*)$/is.exec(url.trim())
+  if (!m) return null
+  const query = m[1].replace(/\s+official\s+audio\s*$/i, '').trim()
+  return query || null
 }
 
 function emptyProgress(): DownloadProgress {
@@ -398,6 +417,10 @@ export class DownloadQueue {
     item.startedAt = new Date().toISOString()
     this.emit(item.id)
 
+    // Suchen erst hier auflösen, nicht schon beim Einreihen: ein Import mit
+    // 50 Titeln würde sonst 50 Netzwerkaufrufe machen, bevor irgendetwas läuft
+    await this.resolveSearchUrl(entry, settings)
+
     // Titel/Thumbnail besorgen, falls noch nicht bekannt
     if (!entry.request.knownTitle) {
       try {
@@ -487,6 +510,30 @@ export class DownloadQueue {
       item.errorMessage = err.message
       this.finish(entry, 'error')
     })
+  }
+
+  /**
+   * Wandelt eine Suchanfrage in eine feste Video-URL, damit statt des
+   * Musikvideos die Albumfassung geladen wird. Schlägt das fehl, bleibt die
+   * ursprüngliche ytsearch-URL stehen und der Download läuft trotzdem.
+   */
+  private async resolveSearchUrl(entry: InternalItem, settings: AppSettings): Promise<void> {
+    const { item } = entry
+    if (settings.musicSource !== 'ytmusic') return
+    const query = searchQueryFromUrl(item.url)
+    if (!query) return
+
+    const resolved = await musicSearchFirst(query)
+    if (!resolved) {
+      this.log(item.id, `[suche] YouTube Music ohne Treffer, normale Suche: ${query}`)
+      return
+    }
+    this.log(item.id, `[suche] YouTube Music: ${query} → ${resolved}`)
+    item.url = resolved
+    // Auch die Anfrage umschreiben, sonst lädt der spätere yt-dlp-Aufruf
+    // wieder über die Suche
+    entry.request.url = resolved
+    this.emit(item.id)
   }
 
   private handleStdoutLine(entry: InternalItem, line: string): void {

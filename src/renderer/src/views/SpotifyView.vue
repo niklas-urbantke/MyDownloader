@@ -77,6 +77,16 @@ const selectedCount = computed(() =>
   playlist.value ? playlist.value.tracks.length - excluded.value.size : 0
 )
 
+/**
+ * Nur ein Hinweis, aus welcher Quelle importiert wird. Aufgelöst wird die
+ * Suche erst im Main-Prozess, wenn der Titel an die Reihe kommt.
+ */
+const sourceHint = computed(() =>
+  settingsStore.settings?.musicSource === 'youtube'
+    ? t('spotify.sourceYoutube')
+    : t('spotify.sourceYtmusic')
+)
+
 async function importSelected(): Promise<void> {
   if (!playlist.value) return
   const requests = playlist.value.tracks
@@ -157,6 +167,8 @@ async function importSelected(): Promise<void> {
               @click="importSelected"
             />
           </div>
+          <!-- Woher die Titel geholt werden, wenn keine feste URL vorliegt -->
+          <BxBanner variant="info" icon="music">{{ sourceHint }}</BxBanner>
         </div>
       </BxCard>
 

@@ -148,6 +148,13 @@ const customPreview = computed(() => {
   return `${sample || '…'}.mp3`
 })
 
+// Quelle für Suchen ohne feste URL (z. B. Spotify-Import): YouTube Music
+// trifft die Albumfassung, die normale Suche fast immer das Musikvideo
+const musicSourceOptions = computed(() => [
+  { value: 'ytmusic', label: t('settings.fields.musicSourceYtmusic') },
+  { value: 'youtube', label: t('settings.fields.musicSourceYoutube') }
+])
+
 const normalizeOptions = computed(() => [
   { value: 'off', label: t('settings.fields.normalizeOff') },
   { value: 'replaygain', label: t('settings.fields.normalizeReplaygain') },
@@ -275,6 +282,16 @@ const concurrencyProxy = computed({
         </div>
         <div class="col-6">
           <BxToggle v-model="settings.embedMetadata" :label="t('settings.fields.embedMetadata')" />
+        </div>
+        <!-- Musikquelle für Suchen ohne feste URL -->
+        <div class="col-12">
+          <BxSelect
+            v-model="settings.musicSource"
+            :label="t('settings.fields.musicSource')"
+            icon="music"
+            :options="musicSourceOptions"
+            :hint="t('settings.fields.musicSourceHint')"
+          />
         </div>
         <!-- Lautstärke-Normalisierung (Issue #26) -->
         <div class="col-6">
