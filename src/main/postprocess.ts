@@ -189,7 +189,7 @@ export async function fetchAndEmbedLyrics(
   let lyrics: LrcLibResponse | null = null
   try {
     const res = await fetch(`https://lrclib.net/api/get?${params.toString()}`, {
-      headers: { 'User-Agent': 'MyDownloader (https://github.com/niklas-urbantke/YouTube-Downloader)' },
+      headers: { 'User-Agent': 'MyDownloader (https://github.com/niklas-urbantke/MyDownloader)' },
       signal: AbortSignal.timeout(15000)
     })
     if (res.ok) lyrics = (await res.json()) as LrcLibResponse

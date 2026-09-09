@@ -56,7 +56,7 @@ Abos, Spotify-Import, Metadaten-Editor, Auto-Updates, System-Tray u. v. m.
 ## Installation
 
 Alle Installer gibt es auf der
-[Releases-Seite](https://github.com/niklas-urbantke/YouTube-Downloader/releases).
+[Releases-Seite](https://github.com/niklas-urbantke/MyDownloader/releases).
 
 | Plattform | Datei | Hinweis |
 | --- | --- | --- |
