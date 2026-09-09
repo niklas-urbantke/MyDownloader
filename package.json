@@ -1,7 +1,7 @@
 {
   "name": "mydownloader",
   "productName": "MyDownloader",
-  "version": "5.2.0",
+  "version": "5.3.0",
   "description": "MyDownloader — moderner Musik- & Video-Downloader auf Basis von yt-dlp und FFmpeg",
   "main": "./out/main/index.js",
   "author": {
