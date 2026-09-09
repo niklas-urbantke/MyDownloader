@@ -6,6 +6,11 @@ directories:
   buildResources: build
   output: release
 
+# Stellt vor jedem Packvorgang die Binaries der jeweiligen Ziel-Architektur
+# bereit und bricht ab, wenn sie fehlen (sonst entsteht still ein Paket ohne
+# yt-dlp/FFmpeg, siehe scripts/before-pack.cjs)
+beforePack: scripts/before-pack.cjs
+
 files:
   - out/**
   - package.json

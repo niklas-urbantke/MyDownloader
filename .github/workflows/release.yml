@@ -30,6 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Der beforePack-Hook (scripts/before-pack.cjs) besorgt die Binaries je
+      # Ziel-Architektur ohnehin und bricht ab, wenn eine fehlt. Der Vorablauf
+      # hier macht die gebündelte yt-dlp-Version im Log früh sichtbar.
       - name: Fetch bundled binaries (macOS)
         if: runner.os == 'macOS'
         run: |
