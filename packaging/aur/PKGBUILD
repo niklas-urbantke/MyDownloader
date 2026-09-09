@@ -4,7 +4,7 @@
 # pushen; bei jedem Release pkgver anheben und Checksummen mit `updpkgsums` erneuern.
 
 pkgname=mydownloader-bin
-pkgver=4.1.0
+pkgver=5.2.0
 pkgrel=1
 pkgdesc="Moderner Musik- & Video-Downloader (yt-dlp + FFmpeg gebündelt)"
 arch=('x86_64')

@@ -86,6 +86,12 @@ export interface AppSettings {
   spotifyClientId: string
   /** Woher Suchen ohne feste URL ihr Ergebnis nehmen (Musikvideo vermeiden) */
   musicSource: 'ytmusic' | 'youtube'
+  /**
+   * yt-dlp aktuell halten: automatisch aktualisieren / nur melden / aus.
+   * YouTube sperrt regelmäßig die von älteren yt-dlp-Ständen benutzten Clients,
+   * dann brechen Downloads mitten im Vorgang mit HTTP 403 ab.
+   */
+  ytDlpAutoUpdate: 'auto' | 'notify' | 'off'
 }
 
 // ---------------------------------------------------------------------------
@@ -361,7 +367,16 @@ export interface MusicBrainzSuggestion {
 // ---------------------------------------------------------------------------
 
 export interface BinaryStatus {
-  ytDlp: { available: boolean; path: string | null; version: string | null }
+  ytDlp: {
+    available: boolean
+    path: string | null
+    version: string | null
+    /** Neueste offiziell veröffentlichte Version (null = nicht ermittelbar) */
+    latestVersion: string | null
+    updateAvailable: boolean
+    /** true = selbst aktualisierte Kopie in userData statt des ausgelieferten Binaries */
+    managed: boolean
+  }
   ffmpeg: { available: boolean; path: string | null; version: string | null }
 }
 
@@ -447,6 +462,8 @@ export const IPC = {
   // System
   binariesStatus: 'binaries:status',
   binariesUpdateYtDlp: 'binaries:update-ytdlp',
+  /** Main → Renderer: yt-dlp war veraltet und wurde beim Start aktualisiert */
+  binariesYtDlpEvent: 'binaries:ytdlp-event',
   importV3: 'import:v3',
   appInfo: 'app:info',
   openPath: 'shell:open-path',

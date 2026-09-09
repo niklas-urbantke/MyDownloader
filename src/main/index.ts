@@ -7,6 +7,31 @@ import { startClipboardWatcher } from './clipboard'
 import { getSettings } from './settings'
 import { setupTray, isQuitting } from './tray'
 import { setupAutoUpdater } from './updater'
+import { reconcileManagedYtDlp, checkYtDlpUpToDate } from './binaries'
+import { IPC } from '@shared/types'
+
+/**
+ * Hält yt-dlp aktuell. Das mit der App ausgelieferte Binary altert zwischen den
+ * Releases; sobald YouTube den von diesem Stand benutzten Player-Client sperrt,
+ * bricht jeder Download mitten im Vorgang mit „HTTP Error 403“ ab. Der Check
+ * läuft verzögert, damit er den Fensterstart nicht ausbremst.
+ */
+async function maintainYtDlp(win: BrowserWindow): Promise<void> {
+  // Ein älteres selbst aktualisiertes Binary aus einer früheren Installation
+  // darf ein neueres ausgeliefertes nicht verdrängen
+  await reconcileManagedYtDlp()
+  const mode = getSettings().ytDlpAutoUpdate
+  if (mode === 'off') return
+  await new Promise((resolve) => setTimeout(resolve, 5000))
+  try {
+    const result = await checkYtDlpUpToDate(mode)
+    if (result.updated || (result.latest && result.current !== result.latest)) {
+      if (!win.isDestroyed()) win.webContents.send(IPC.binariesYtDlpEvent, result)
+    }
+  } catch {
+    /* Netzwerkfehler dürfen den Start nicht stören */
+  }
+}
 
 /**
  * Deep-Links (Issue #34): mydownloader://download?url=<encoded>
@@ -148,6 +173,7 @@ if (!gotLock) {
     const win = createWindow()
     setupTray(queue, () => BrowserWindow.getAllWindows()[0] ?? null)
     setupAutoUpdater()
+    void maintainYtDlp(win)
 
     // Deep-Link aus dem Erststart-Aufruf (Windows/Linux)
     const initialLink = deepLinkFromArgv(process.argv)

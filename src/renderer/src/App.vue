@@ -50,6 +50,22 @@ onMounted(async () => {
       }
     })
   })
+
+  // yt-dlp-Wartung beim Start: gemeldet wird nur, wenn wirklich etwas ansteht
+  window.api.system.onYtDlpEvent((info) => {
+    if (info.updated) {
+      showToast(t('settings.binaries.autoUpdated', { v: info.current ?? '' }), 'info')
+    } else if (info.latest && info.current) {
+      showToast(
+        t('settings.binaries.autoOutdated', { current: info.current, latest: info.latest }),
+        'error',
+        {
+          actionLabel: t('settings.binaries.updateYtDlp'),
+          onAction: () => router.push({ name: 'settings' })
+        }
+      )
+    }
+  })
 })
 
 // Sidenav-Zustand kommt aus den Einstellungen (Default: eingeblendet, Issue #12)

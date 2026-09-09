@@ -312,7 +312,15 @@
       "version": "Version {v}",
       "updateYtDlp": "yt-dlp aktualisieren",
       "updated": "yt-dlp ist aktuell: {v}",
-      "updateFailed": "Update fehlgeschlagen: {msg}"
+      "updateFailed": "Update fehlgeschlagen: {msg}",
+      "description": "yt-dlp muss aktuell bleiben: YouTube sperrt regelmäßig die von älteren Ständen benutzten Zugriffswege, danach brechen Downloads mitten im Vorgang mit „HTTP Error 403“ ab. Die Aktualisierung landet in einem beschreibbaren Ordner, sie funktioniert deshalb auch bei AppImage- und Systeminstallationen.",
+      "outdated": "yt-dlp ist veraltet (installiert {current}, verfügbar {latest}). Bitte aktualisieren, sonst brechen Downloads mit HTTP 403 ab.",
+      "autoUpdate": "yt-dlp aktuell halten",
+      "autoUpdateAuto": "Automatisch aktualisieren",
+      "autoUpdateNotify": "Nur melden",
+      "autoUpdateOff": "Aus",
+      "autoUpdated": "yt-dlp wurde automatisch auf {v} aktualisiert.",
+      "autoOutdated": "yt-dlp ist veraltet (installiert {current}, verfügbar {latest})."
     },
     "importV3": {
       "title": "Aus Version 3 importieren",

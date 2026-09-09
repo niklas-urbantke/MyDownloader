@@ -6,12 +6,21 @@
  * Verwendung:
  *   node scripts/fetch-binaries.mjs                       # aktuelle Plattform
  *   node scripts/fetch-binaries.mjs --platform win32 --arch x64
+ *   node scripts/fetch-binaries.mjs --ytdlp-version 2026.08.19   # Version festnageln
+ *   node scripts/fetch-binaries.mjs --offline              # nur vorhandenen Stand melden
+ *
+ * yt-dlp wird gegen die neueste Veröffentlichung abgeglichen, nicht nur auf
+ * Vorhandensein geprüft: ein Release mit veraltetem yt-dlp fällt sonst erst
+ * beim Nutzer auf, wenn YouTube den benutzten Player-Client sperrt und jeder
+ * Download mitten im Vorgang mit „HTTP Error 403“ abbricht. Der geladene Stand
+ * wird in <ziel>/yt-dlp.version notiert, damit der Abgleich auch bei Builds für
+ * fremde Plattformen funktioniert (dort lässt sich das Binary nicht ausführen).
  *
  * Quellen:
  *   yt-dlp  — offizielle GitHub-Releases (yt-dlp/yt-dlp)
  *   ffmpeg  — statische Builds aus eugeneware/ffmpeg-static (GitHub-Releases)
  */
-import { mkdir, chmod, writeFile, access } from 'node:fs/promises'
+import { mkdir, chmod, writeFile, readFile, access } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
@@ -46,7 +55,9 @@ function parseArgs() {
   return {
     platform: get('platform', process.platform),
     arch: get('arch', process.arch),
-    force: args.includes('--force')
+    ytdlpVersion: get('ytdlp-version', null),
+    force: args.includes('--force'),
+    offline: args.includes('--offline')
   }
 }
 
@@ -68,8 +79,31 @@ async function download(url, dest) {
   process.stdout.write(`${(buf.length / 1024 / 1024).toFixed(1)} MB ✓\n`)
 }
 
+/** Neueste veröffentlichte yt-dlp-Version (null = nicht ermittelbar) */
+async function latestYtDlpTag() {
+  try {
+    const res = await fetch('https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest', {
+      headers: { Accept: 'application/vnd.github+json' },
+      signal: AbortSignal.timeout(20000)
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    return typeof data.tag_name === 'string' ? data.tag_name.trim() : null
+  } catch {
+    return null
+  }
+}
+
+async function readStamp(path) {
+  try {
+    return (await readFile(path, 'utf-8')).trim() || null
+  } catch {
+    return null
+  }
+}
+
 async function main() {
-  const { platform, arch, force } = parseArgs()
+  const { platform, arch, force, offline, ytdlpVersion } = parseArgs()
   const key = `${platform}-${arch}`
   const ytAsset = YTDLP_ASSETS[key]
   const ffAsset = FFMPEG_ASSETS[key]
@@ -85,14 +119,37 @@ async function main() {
   const ext = platform === 'win32' ? '.exe' : ''
   const ytDest = join(dir, `yt-dlp${ext}`)
   const ffDest = join(dir, `ffmpeg${ext}`)
+  const ytStamp = join(dir, 'yt-dlp.version')
 
-  if (force || !(await exists(ytDest))) {
-    await download(
-      `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${ytAsset}`,
-      ytDest
-    )
+  const havePresent = await exists(ytDest)
+  const haveVersion = await readStamp(ytStamp)
+
+  // Gewünschter Stand: festgenagelt, sonst die neueste Veröffentlichung
+  let wanted = ytdlpVersion
+  if (!wanted && !offline) {
+    wanted = await latestYtDlpTag()
+    if (!wanted) {
+      console.warn('  ! yt-dlp-Version konnte nicht ermittelt werden (kein Netz?)')
+    }
+  }
+
+  const outdated = !!wanted && haveVersion !== wanted
+  const needYt = force || !havePresent || outdated
+
+  if (needYt && (wanted || !offline)) {
+    if (havePresent && outdated) {
+      console.log(`  yt-dlp veraltet: ${haveVersion ?? 'unbekannt'} → ${wanted}`)
+    }
+    const url = wanted
+      ? `https://github.com/yt-dlp/yt-dlp/releases/download/${wanted}/${ytAsset}`
+      : `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${ytAsset}`
+    await download(url, ytDest)
+    await writeFile(ytStamp, `${wanted ?? 'latest'}\n`, 'utf-8')
+  } else if (havePresent) {
+    console.log(`  yt-dlp aktuell (${haveVersion ?? 'Version unbekannt'})`)
   } else {
-    console.log(`  yt-dlp already present (use --force to refresh)`)
+    console.error('  ! yt-dlp fehlt und kann offline nicht geladen werden')
+    process.exit(1)
   }
 
   if (force || !(await exists(ffDest))) {
@@ -109,6 +166,9 @@ async function main() {
     await chmod(ytDest, 0o755)
     await chmod(ffDest, 0o755)
   }
+
+  // Im CI-Log nachvollziehbar machen, was tatsächlich ins Release wandert
+  console.log(`Bundled yt-dlp version: ${(await readStamp(ytStamp)) ?? 'unbekannt'}`)
   console.log('Done.')
 }
 

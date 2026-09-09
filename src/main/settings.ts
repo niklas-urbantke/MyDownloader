@@ -44,7 +44,8 @@ export function defaultSettings(): AppSettings {
     spotifyClientId: '',
     // Standard YouTube Music: die normale Suche liefert fast immer das
     // Musikvideo, eine Live- oder Lyric-Fassung statt der Albumversion
-    musicSource: 'ytmusic'
+    musicSource: 'ytmusic',
+    ytDlpAutoUpdate: 'auto'
   }
 }
 
