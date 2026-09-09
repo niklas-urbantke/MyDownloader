@@ -181,6 +181,12 @@ const autoUpdateOptions = computed(() => [
   { value: 'off', label: t('settings.fields.autoUpdateOff') }
 ])
 
+const ytDlpAutoUpdateOptions = computed(() => [
+  { value: 'auto', label: t('settings.binaries.autoUpdateAuto') },
+  { value: 'notify', label: t('settings.binaries.autoUpdateNotify') },
+  { value: 'off', label: t('settings.binaries.autoUpdateOff') }
+])
+
 const concurrencyProxy = computed({
   get: () => String(settings.value?.concurrency ?? 2),
   set: (v: string) => {
@@ -583,6 +589,28 @@ const concurrencyProxy = computed({
         <BxBanner v-if="binaries && (!binaries.ytDlp.available || !binaries.ffmpeg.available)" variant="warn">
           {{ t('dashboard.badges.binariesMissing') }}
         </BxBanner>
+        <BxBanner v-else-if="binaries?.ytDlp.updateAvailable" variant="warn">
+          {{
+            t('settings.binaries.outdated', {
+              current: binaries.ytDlp.version,
+              latest: binaries.ytDlp.latestVersion
+            })
+          }}
+        </BxBanner>
+        <p class="t-body2" style="margin: 0; color: var(--fg2)">
+          {{ t('settings.binaries.description') }}
+        </p>
+        <div class="row" style="gap: 12px; flex-wrap: wrap">
+          <div class="col-6">
+            <BxSelect
+              v-if="settings"
+              v-model="settings.ytDlpAutoUpdate"
+              :label="t('settings.binaries.autoUpdate')"
+              icon="cloud-download"
+              :options="ytDlpAutoUpdateOptions"
+            />
+          </div>
+        </div>
       </div>
     </BxCard>
 

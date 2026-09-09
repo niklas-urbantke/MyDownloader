@@ -37,7 +37,8 @@ export function defaultSettings(): AppSettings {
     closeToTray: true,
     autoUpdate: 'notify',
     useAccountCookies: false,
-    spotifyClientId: ''
+    spotifyClientId: '',
+    ytDlpAutoUpdate: 'auto'
   }
 }
 

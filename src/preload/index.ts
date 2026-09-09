@@ -159,6 +159,17 @@ const api = {
     binaries: (): Promise<BinaryStatus> => ipcRenderer.invoke(IPC.binariesStatus),
     updateYtDlp: (): Promise<{ ok: boolean; message: string }> =>
       ipcRenderer.invoke(IPC.binariesUpdateYtDlp),
+    /** Meldet, wenn der Start-Check yt-dlp aktualisiert hat oder es veraltet ist */
+    onYtDlpEvent: (
+      cb: (info: { current: string | null; latest: string | null; updated: boolean }) => void
+    ): (() => void) => {
+      const listener = (
+        _e: unknown,
+        info: { current: string | null; latest: string | null; updated: boolean }
+      ): void => cb(info)
+      ipcRenderer.on(IPC.binariesYtDlpEvent, listener)
+      return () => ipcRenderer.removeListener(IPC.binariesYtDlpEvent, listener)
+    },
     appInfo: (): Promise<AppInfo> => ipcRenderer.invoke(IPC.appInfo),
     importV3: (): Promise<{ ok: boolean; settingsImported: number; historyImported: number }> =>
       ipcRenderer.invoke(IPC.importV3),
