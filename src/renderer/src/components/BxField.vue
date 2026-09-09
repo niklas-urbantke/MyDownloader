@@ -28,28 +28,33 @@ void props
 </script>
 
 <template>
-  <div class="f">
-    <div v-if="label" class="f-label">{{ label }}</div>
+  <div class="field">
+    <span v-if="label" class="label">{{ label }}</span>
 
-    <!-- Read-only: gleiche Silhouette, ruhiger Hintergrund (View-Modus) -->
-    <div v-if="readonly" class="f-readonly" :class="{ 'f-readonly--block': multiline }">
-      <AppIcon v-if="icon" :name="icon" />
-      <span style="white-space: pre-wrap; line-height: 1.5">
+    <!-- Nur lesen: gleiche Silhouette wie ein Feld, ruhiger Inhalt -->
+    <div
+      v-if="readonly"
+      class="input field__static"
+      :class="{ 'field__static--block': multiline }"
+    >
+      <AppIcon v-if="icon" :name="icon" class="icon--sm" />
+      <span>
         <template v-if="displayValue()">{{ displayValue() }}</template>
-        <span v-else style="color: var(--fg3)">—</span>
+        <span v-else class="text-muted">&mdash;</span>
       </span>
     </div>
 
     <div
       v-else
-      class="f-control"
-      :class="{ 'f-control--multiline': multiline, 'f-control--disabled': disabled }"
-      :style="error ? { borderColor: '#C10015' } : undefined"
+      class="field__group"
+      :class="{ 'field__group--icon': !!icon, 'field__group--multiline': multiline }"
     >
-      <AppIcon v-if="icon" :name="icon" />
+      <AppIcon v-if="icon" :name="icon" class="icon--sm" />
       <textarea
         v-if="multiline"
         v-model="model"
+        class="textarea"
+        :class="{ 'input--error': !!error }"
         :placeholder="placeholder"
         :rows="rows"
         :disabled="disabled"
@@ -58,15 +63,19 @@ void props
       <input
         v-else
         v-model="model"
+        class="input"
+        :class="{ 'input--error': !!error }"
         :type="type"
         :placeholder="placeholder"
         :disabled="disabled"
         v-bind="$attrs"
         @keydown.enter="$emit('enter')"
       />
-      <slot name="append" />
+      <span v-if="$slots.append" class="field__append"><slot name="append" /></span>
     </div>
 
-    <div v-if="error || hint" class="f-hint" :class="{ err: !!error }">{{ error || hint }}</div>
+    <span v-if="error || hint" class="help" :class="{ 'help--error': !!error }">
+      {{ error || hint }}
+    </span>
   </div>
 </template>

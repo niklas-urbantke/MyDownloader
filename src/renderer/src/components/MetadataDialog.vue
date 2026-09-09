@@ -129,24 +129,27 @@ async function save(applyAlbumToAll = false): Promise<void> {
 
 <template>
   <BxDialog :open="open" :title="t('metadata.title')" wide @close="emit('close')">
-    <div class="stack" style="min-width: 0">
+    <div class="stack dialog-body">
       <BxSelect
         v-if="files.length > 1"
         v-model="selectedFile"
         :label="t('metadata.file')"
-        icon="music"
+        icon="activity"
         :options="fileOptions"
       />
 
-      <div v-if="loading" style="color: var(--fg2)">{{ t('common.loading') }}</div>
+      <div v-if="loading" class="cluster text-secondary">
+        <span class="spinner" aria-hidden="true" />
+        <span>{{ t('common.loading') }}</span>
+      </div>
 
       <template v-else>
-        <div class="bx-form-grid">
+        <div class="form-grid">
           <div class="col-6">
-            <BxField v-model="tags.title" :label="t('metadata.fields.title')" icon="pencil-line" />
+            <BxField v-model="tags.title" :label="t('metadata.fields.title')" icon="edit" />
           </div>
           <div class="col-6">
-            <BxField v-model="tags.artist" :label="t('metadata.fields.artist')" icon="male-user" />
+            <BxField v-model="tags.artist" :label="t('metadata.fields.artist')" icon="user" />
           </div>
           <div class="col-6">
             <BxField v-model="tags.album" :label="t('metadata.fields.album')" icon="layout" />
@@ -155,59 +158,59 @@ async function save(applyAlbumToAll = false): Promise<void> {
             <BxField
               v-model="tags.albumArtist"
               :label="t('metadata.fields.albumArtist')"
-              icon="male-user"
+              icon="users"
             />
           </div>
           <div class="col-4">
-            <BxField v-model="tags.track" :label="t('metadata.fields.track')" icon="checklist" />
+            <BxField v-model="tags.track" :label="t('metadata.fields.track')" icon="list" />
           </div>
           <div class="col-4">
-            <BxField v-model="tags.genre" :label="t('metadata.fields.genre')" icon="music" />
+            <BxField v-model="tags.genre" :label="t('metadata.fields.genre')" icon="tag" />
           </div>
           <div class="col-4">
-            <BxField v-model="tags.date" :label="t('metadata.fields.year')" icon="time" />
+            <BxField v-model="tags.date" :label="t('metadata.fields.year')" icon="calendar" />
           </div>
         </div>
 
         <!-- Cover -->
-        <div class="row" style="gap: 10px; flex-wrap: wrap; align-items: center">
+        <div class="cluster">
           <BxBtn
-            icon="manage-folder"
-            variant="outline"
+            icon="image"
+            variant="secondary"
             size="sm"
             :label="t('metadata.pickCover')"
             @click="pickCover"
           />
-          <BxChip v-if="coverPath" icon="check-in-circle" variant="apple">
+          <BxChip v-if="coverPath" icon="check-circle" variant="success">
             {{ coverPath.split(/[\\/]/).at(-1) }}
           </BxChip>
         </div>
 
         <!-- MusicBrainz -->
         <div class="stack stack--sm">
-          <div class="row">
+          <div class="cluster">
             <BxBtn
               icon="search"
-              variant="outline"
+              variant="secondary"
               size="sm"
               :label="t('metadata.searchMusicBrainz')"
               :disabled="searching || (!tags.title && !tags.artist)"
               @click="searchMusicBrainz"
             />
           </div>
-          <table v-if="suggestions.length > 0" class="bx-table">
+          <table v-if="suggestions.length > 0" class="table table--plain">
             <tbody>
-              <tr v-for="(s, i) in suggestions" :key="i" style="cursor: default">
+              <tr v-for="(s, i) in suggestions" :key="i">
                 <td>
                   <strong>{{ s.artist }}</strong> — {{ s.title }}
-                  <span v-if="s.album" style="color: var(--fg2)"> · {{ s.album }}</span>
-                  <span v-if="s.date" style="color: var(--fg2)"> ({{ s.date }})</span>
+                  <span v-if="s.album" class="text-secondary"> · {{ s.album }}</span>
+                  <span v-if="s.date" class="text-secondary"> ({{ s.date }})</span>
                 </td>
-                <td style="width: 120px; text-align: right">
+                <td class="suggestion-action">
                   <BxBtn
                     size="sm"
                     variant="ghost"
-                    icon="check-in-circle"
+                    icon="check-circle"
                     :label="t('metadata.apply')"
                     @click="applySuggestion(s)"
                   />
@@ -223,15 +226,15 @@ async function save(applyAlbumToAll = false): Promise<void> {
       <BxBtn variant="ghost" :label="t('common.cancel')" @click="emit('close')" />
       <BxBtn
         v-if="files.length > 1"
-        variant="outline"
-        icon="checklist"
+        variant="secondary"
+        icon="list"
         :label="t('metadata.saveAll')"
         :disabled="saving || loading"
         @click="save(true)"
       />
       <BxBtn
-        variant="cta"
-        icon="check-in-circle"
+        variant="primary"
+        icon="check-circle"
         :label="t('common.save')"
         :disabled="saving || loading"
         @click="save(false)"
@@ -239,3 +242,15 @@ async function save(applyAlbumToAll = false): Promise<void> {
     </template>
   </BxDialog>
 </template>
+
+<style scoped>
+/* Der Dialog darf nicht an langen Dateinamen aufgehen. */
+.dialog-body {
+  min-width: 0;
+}
+
+.suggestion-action {
+  width: 7.5rem;
+  text-align: end;
+}
+</style>

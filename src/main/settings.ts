@@ -29,6 +29,10 @@ export function defaultSettings(): AppSettings {
     targetLufs: -14,
     fetchLyrics: false,
     theme: 'system',
+    style: 'aero',
+    accent: 'azure',
+    glass: true,
+    vivid: false,
     locale: 'system',
     notifyOnComplete: true,
     clipboardWatcher: false,
@@ -52,8 +56,20 @@ function getStore(): JsonStore<AppSettings> {
   return store
 }
 
+/**
+ * Alte Staende sanft nachziehen: "colorful" und "flat" waren fruher eigene
+ * Themes. Seit der Umstellung auf urbDesign sind es zwei Schalter neben dem
+ * Erscheinungsbild, deshalb landen beide auf Hell und setzen ihren Schalter.
+ */
+function migrate(s: AppSettings): AppSettings {
+  const legacy = s.theme as string
+  if (legacy === 'colorful') return { ...s, theme: 'light', vivid: true }
+  if (legacy === 'flat') return { ...s, theme: 'light', glass: false }
+  return s
+}
+
 export function getSettings(): AppSettings {
-  if (!cached) cached = getStore().load()
+  if (!cached) cached = migrate(getStore().load())
   return cached
 }
 

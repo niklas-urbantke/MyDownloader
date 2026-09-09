@@ -66,21 +66,21 @@ const navGroups = computed(() => [
   {
     label: t('nav.sections.main'),
     items: [
-      { route: 'dashboard', icon: 'grid-layout', labelKey: 'nav.dashboard' },
+      { route: 'dashboard', icon: 'grid', labelKey: 'nav.dashboard' },
       { route: 'download', icon: 'download', labelKey: 'nav.download' },
-      { route: 'queue', icon: 'checklist', labelKey: 'nav.queue' },
+      { route: 'queue', icon: 'list', labelKey: 'nav.queue' },
       { route: 'templates', icon: 'layout', labelKey: 'nav.templates' },
-      { route: 'subscriptions', icon: 'reload', labelKey: 'nav.subscriptions' },
-      { route: 'spotify', icon: 'music', labelKey: 'nav.spotify' },
-      { route: 'history', icon: 'time', labelKey: 'nav.history' },
-      { route: 'stats', icon: 'statistic', labelKey: 'nav.stats' }
+      { route: 'subscriptions', icon: 'refresh', labelKey: 'nav.subscriptions' },
+      { route: 'spotify', icon: 'spotify', labelKey: 'nav.spotify' },
+      { route: 'history', icon: 'clock', labelKey: 'nav.history' },
+      { route: 'stats', icon: 'activity', labelKey: 'nav.stats' }
     ] as NavItem[]
   },
   {
     label: t('nav.sections.system'),
     items: [
-      { route: 'settings', icon: 'setting', labelKey: 'nav.settings' },
-      { route: 'about', icon: 'help-in-circle', labelKey: 'nav.about' }
+      { route: 'settings', icon: 'settings', labelKey: 'nav.settings' },
+      { route: 'about', icon: 'help-circle', labelKey: 'nav.about' }
     ] as NavItem[]
   }
 ])
@@ -156,79 +156,77 @@ async function onDrop(e: DragEvent): Promise<void> {
 
 <template>
   <div
-    class="bx-root"
+    class="app-shell"
     @dragenter="onDragEnter"
     @dragover.prevent
     @dragleave="onDragLeave"
     @drop="onDrop"
   >
-    <!-- Sidenav: standardmäßig komplett ausgeblendet (Breite 0) -->
-    <nav class="bx-nav" :class="{ open: navOpen }">
-      <div class="bx-nav-brand">
-        <AppLogo :size="30" wordmark inverse />
+    <!-- Seitenleiste: zugeklappt vollstaendig ausgeblendet (Breite 0) -->
+    <nav class="app-nav glass" :class="{ 'is-open': navOpen }">
+      <div class="app-nav__brand">
+        <AppLogo :size="30" wordmark />
       </div>
-      <div class="bx-nav-list">
+      <div class="app-nav__list">
         <div v-for="(group, gi) in navGroups" :key="gi">
-          <div class="bx-nav-section-label">{{ group.label }}</div>
+          <div class="app-nav__section">{{ group.label }}</div>
           <div
             v-for="item in group.items"
             :key="item.route"
-            class="bx-nav-item"
-            :class="{ active: route.name === item.route }"
+            class="app-nav__item"
+            :class="{ 'is-active': route.name === item.route }"
             :title="t(item.labelKey)"
             @click="go(item.route)"
           >
             <AppIcon :name="item.icon" />
-            <span class="label">{{ t(item.labelKey) }}</span>
+            <span>{{ t(item.labelKey) }}</span>
           </div>
         </div>
       </div>
     </nav>
 
-    <div class="bx-main">
-      <header class="bx-header">
-        <div
-          class="bx-header-toggle"
+    <div class="app-main">
+      <header class="app-header glass">
+        <button
+          class="btn btn--ghost btn--icon"
           :title="t('nav.menu')"
-          role="button"
-          tabindex="0"
+          type="button"
           @click="navOpen = !navOpen"
-          @keydown.enter="navOpen = !navOpen"
         >
-          <AppIcon name="side-nav" />
-        </div>
-        <div class="bx-breadcrumb">
+          <AppIcon name="sidebar" />
+        </button>
+        <nav class="breadcrumb app-header__crumbs">
           <template v-for="(crumb, i) in breadcrumb" :key="i">
             <span
               v-if="i < breadcrumb.length - 1"
-              class="crumb"
+              class="is-clickable"
               @click="crumb.route && go(crumb.route)"
               >{{ crumb.label }}</span
             >
-            <span v-if="i < breadcrumb.length - 1" class="sep">/</span>
-            <span v-else class="here">{{ crumb.label }}</span>
+            <AppIcon v-if="i < breadcrumb.length - 1" name="chevron-right" class="icon--xs" />
+            <span v-else aria-current="page">{{ crumb.label }}</span>
           </template>
-        </div>
-        <div class="row" style="gap: 10px">
+        </nav>
+        <div class="cluster">
           <button
             v-if="downloadsStore.activeItems.length > 0"
-            class="bx-header-chip"
+            class="btn btn--glass btn--sm"
             type="button"
             @click="go('queue')"
           >
-            <AppIcon name="download" />
+            <AppIcon name="download" class="icon--sm" />
             <span>{{
               t('dashboard.badges.active', { n: downloadsStore.activeItems.length })
             }}</span>
           </button>
-          <button class="bx-header-chip" type="button" @click="go('download')">
-            <AppIcon name="add" />
+          <button class="btn btn--primary btn--sm" type="button" @click="go('download')">
+            <AppIcon name="plus" class="icon--sm" />
             <span>{{ t('nav.download') }}</span>
           </button>
         </div>
       </header>
 
-      <main class="bx-page">
+      <main class="app-page">
         <router-view />
       </main>
     </div>
@@ -238,33 +236,10 @@ async function onDrop(e: DragEvent): Promise<void> {
 
     <!-- Drop-Zone-Overlay (Issue #17) -->
     <div v-if="dragOver" class="drop-overlay">
-      <div class="drop-overlay-inner">
+      <div class="drop-overlay__inner">
         <AppIcon name="download" :size="48" />
         <p>{{ t('dragdrop.hint') }}</p>
       </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.drop-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 48, 99, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-.drop-overlay-inner {
-  background: var(--bg1, #fff);
-  color: var(--marine, #003063);
-  border: 3px dashed var(--marine, #003063);
-  border-radius: 16px;
-  padding: 48px 64px;
-  text-align: center;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-</style>

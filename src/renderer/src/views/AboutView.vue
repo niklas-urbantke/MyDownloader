@@ -57,31 +57,31 @@ function openRepo(): void {
 <template>
   <PageHead :title="t('about.title')" :sub="t('about.subtitle')" />
 
-  <div class="stack stack--lg" style="max-width: 760px">
+  <div class="stack stack--lg about-page">
     <BxCard>
-      <div class="row" style="gap: 20px; align-items: center">
+      <div class="cluster about-head">
         <AppLogo :size="64" />
         <div class="stack stack--sm">
-          <h2 class="t-display-2" style="margin: 0">{{ t('app.name') }}</h2>
-          <div class="row" style="gap: 8px">
-            <BxChip v-if="info" variant="marine">{{
+          <h2>{{ t('app.name') }}</h2>
+          <div class="cluster" style="--cluster-gap: var(--space-2)">
+            <BxChip v-if="info" variant="accent">{{
               t('about.version', { v: info.version })
             }}</BxChip>
-            <BxChip v-if="info" variant="neutral">Electron {{ info.electronVersion }}</BxChip>
-            <BxChip v-if="info" variant="neutral">{{ info.platform }}/{{ info.arch }}</BxChip>
+            <BxChip v-if="info" variant="slate">Electron {{ info.electronVersion }}</BxChip>
+            <BxChip v-if="info" variant="slate">{{ info.platform }}/{{ info.arch }}</BxChip>
           </div>
-          <p class="t-body2" style="margin: 0; color: var(--fg2)">{{ t('about.stack') }}</p>
+          <p class="text-secondary about-text">{{ t('about.stack') }}</p>
         </div>
         <span class="spacer" />
-        <BxBtn icon="globe" variant="outline" label="GitHub" @click="openRepo" />
+        <BxBtn icon="globe" variant="secondary" label="GitHub" @click="openRepo" />
       </div>
     </BxCard>
 
     <BxCard :title="t('about.features')">
-      <div class="about-features">
-        <div v-for="(feature, i) in featureList()" :key="i" class="row" style="gap: 10px">
-          <AppIcon name="check-in-circle" style="color: var(--apple)" />
-          <span class="t-body2">{{ feature }}</span>
+      <div class="grid-auto" style="--col-min: 18rem; --grid-gap: var(--space-3) var(--space-6)">
+        <div v-for="(feature, i) in featureList()" :key="i" class="cluster about-feature">
+          <AppIcon name="check-circle" class="icon--success" />
+          <span class="about-text">{{ feature }}</span>
         </div>
       </div>
     </BxCard>
@@ -89,10 +89,10 @@ function openRepo(): void {
     <!-- Updates (Issues #33 / #37) -->
     <BxCard :title="t('about.updates.title')">
       <div class="stack">
-        <div class="row" style="gap: 12px; flex-wrap: wrap; align-items: center">
+        <div class="cluster">
           <BxBtn
-            icon="cloud-download"
-            variant="outline"
+            icon="download"
+            variant="secondary"
             :label="t('about.checkUpdates')"
             :disabled="update?.status === 'checking' || update?.status === 'downloading'"
             @click="checkUpdates"
@@ -104,47 +104,47 @@ function openRepo(): void {
             @click="installUrbUpdate"
           />
           <span class="spacer" />
-          <BxChip v-if="update?.status === 'checking'" variant="neutral">
+          <BxChip v-if="update?.status === 'checking'" variant="slate">
             {{ t('about.updates.checking') }}
           </BxChip>
-          <BxChip v-else-if="update?.status === 'not-available'" icon="check-in-circle" variant="apple">
+          <BxChip v-else-if="update?.status === 'not-available'" icon="check-circle" variant="success">
             {{ t('about.updates.upToDate') }}
           </BxChip>
-          <BxChip v-else-if="update?.status === 'error'" icon="attention" variant="neg">
+          <BxChip v-else-if="update?.status === 'error'" icon="alert-triangle" variant="danger">
             {{ update.message }}
           </BxChip>
         </div>
 
         <template v-if="update?.status === 'available'">
-          <div class="row" style="gap: 12px; align-items: center; flex-wrap: wrap">
-            <BxChip icon="information-in-circle" variant="marine">
+          <div class="cluster">
+            <BxChip icon="info" variant="accent">
               {{ t('about.updates.available', { v: update.version ?? '' }) }}
             </BxChip>
             <BxBtn
               icon="download"
-              variant="cta"
+              variant="primary"
               size="sm"
               :label="t('about.updates.download')"
               @click="downloadUpdate"
             />
           </div>
-          <p v-if="update.notes" class="t-body2" style="margin: 0; color: var(--fg2); white-space: pre-wrap">
+          <p v-if="update.notes" class="text-secondary about-text about-notes">
             {{ update.notes }}
           </p>
         </template>
 
         <template v-else-if="update?.status === 'downloading'">
-          <BxProgress :value="update.percent ?? -1" variant="marine" />
+          <BxProgress :value="update.percent ?? -1" variant="accent" />
         </template>
 
         <template v-else-if="update?.status === 'downloaded'">
-          <div class="row" style="gap: 12px; align-items: center">
-            <BxChip icon="check-in-circle" variant="apple">
+          <div class="cluster">
+            <BxChip icon="check-circle" variant="success">
               {{ t('about.updates.readyToInstall', { v: update.version ?? '' }) }}
             </BxChip>
             <BxBtn
-              icon="replay"
-              variant="cta"
+              icon="rotate-cw"
+              variant="primary"
               size="sm"
               :label="t('about.updates.installNow')"
               @click="installUpdate"
@@ -155,7 +155,7 @@ function openRepo(): void {
     </BxCard>
 
     <BxCard :title="t('about.openSource')">
-      <p class="t-body2" style="margin: 0; color: var(--fg2)">
+      <p class="text-secondary about-text">
         MIT-Lizenz · yt-dlp (Unlicense) · FFmpeg (GPL/LGPL) · Electron (MIT) · Vue (MIT)
       </p>
     </BxCard>
@@ -163,14 +163,27 @@ function openRepo(): void {
 </template>
 
 <style scoped>
-.about-features {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px 24px;
+/* Lesebreite der Seite. */
+.about-page {
+  max-width: 47.5rem;
 }
-@media (max-width: 700px) {
-  .about-features {
-    grid-template-columns: 1fr;
-  }
+
+/* Zeichen, Name und Schaltfläche in einer Zeile. */
+.about-head {
+  --cluster-gap: var(--space-5);
+  flex-wrap: nowrap;
+}
+
+.about-feature {
+  --cluster-gap: var(--space-3);
+  flex-wrap: nowrap;
+  align-items: flex-start;
+}
+
+.about-text {
+  font-size: var(--text-sm);
+}
+.about-notes {
+  white-space: pre-wrap;
 }
 </style>

@@ -39,9 +39,9 @@ const videoQualityOptions = computed(() => [
 const themeOptions = computed(() => [
   { value: 'light', label: t('settings.fields.themeLight'), icon: 'sun' },
   { value: 'dark', label: t('settings.fields.themeDark'), icon: 'moon' },
-  { value: 'colorful', label: t('settings.fields.themeColorful'), icon: 'color-palette' },
-  { value: 'flat', label: t('settings.fields.themeFlat'), icon: 'color-palette' },
-  { value: 'system', label: t('settings.fields.themeSystem'), icon: 'sun-moon' }
+  { value: 'colorful', label: t('settings.fields.themeColorful'), icon: 'image' },
+  { value: 'flat', label: t('settings.fields.themeFlat'), icon: 'image' },
+  { value: 'system', label: t('settings.fields.themeSystem'), icon: 'sun' }
 ])
 const localeOptions = computed(() => [
   { value: 'de', label: 'Deutsch' },
@@ -68,71 +68,88 @@ void props
 
 <template>
   <BxDialog :open="open" :title="t('onboarding.title')" wide @close="finish">
-    <div v-if="settings" class="stack stack--lg" style="min-width: 0; min-height: 300px">
+    <div v-if="settings" class="stack stack--lg onboarding">
       <!-- Schritt 1: Willkommen + Komponenten-Check -->
       <template v-if="step === 0">
-        <div class="row" style="gap: 16px; align-items: center">
+        <div class="cluster" style="--cluster-gap: var(--space-4)">
           <AppLogo :size="52" />
-          <div>
-            <h3 class="t-display-3" style="margin: 0 0 4px">{{ t('onboarding.welcome') }}</h3>
-            <p class="t-body2" style="margin: 0; color: var(--fg2)">
-              {{ t('onboarding.welcomeText') }}
-            </p>
+          <div class="stack stack--sm">
+            <h2>{{ t('onboarding.welcome') }}</h2>
+            <p class="text-secondary">{{ t('onboarding.welcomeText') }}</p>
           </div>
         </div>
-        <div class="row" style="gap: 10px; flex-wrap: wrap">
+        <div class="cluster">
           <BxChip
-            :variant="binaries?.ytDlp.available ? 'apple' : 'neg'"
-            :icon="binaries?.ytDlp.available ? 'check-in-circle' : 'cancel-in-circle'"
+            :variant="binaries?.ytDlp.available ? 'success' : 'danger'"
+            :icon="binaries?.ytDlp.available ? 'check-circle' : 'x-circle'"
           >
-            yt-dlp {{ binaries?.ytDlp.available ? t('settings.binaries.available') : t('settings.binaries.missing') }}
+            yt-dlp
+            {{
+              binaries?.ytDlp.available
+                ? t('settings.binaries.available')
+                : t('settings.binaries.missing')
+            }}
           </BxChip>
           <BxChip
-            :variant="binaries?.ffmpeg.available ? 'apple' : 'neg'"
-            :icon="binaries?.ffmpeg.available ? 'check-in-circle' : 'cancel-in-circle'"
+            :variant="binaries?.ffmpeg.available ? 'success' : 'danger'"
+            :icon="binaries?.ffmpeg.available ? 'check-circle' : 'x-circle'"
           >
-            FFmpeg {{ binaries?.ffmpeg.available ? t('settings.binaries.available') : t('settings.binaries.missing') }}
+            FFmpeg
+            {{
+              binaries?.ffmpeg.available
+                ? t('settings.binaries.available')
+                : t('settings.binaries.missing')
+            }}
           </BxChip>
         </div>
       </template>
 
       <!-- Schritt 2: Zielordner -->
       <template v-else-if="step === 1">
-        <h3 class="t-display-3" style="margin: 0">{{ t('onboarding.folderTitle') }}</h3>
-        <BxField v-model="settings.downloadFolder" icon="folder" :label="t('settings.fields.downloadFolder')">
+        <h2>{{ t('onboarding.folderTitle') }}</h2>
+        <BxField
+          v-model="settings.downloadFolder"
+          icon="folder"
+          :label="t('settings.fields.downloadFolder')"
+        >
           <template #append>
-            <BxBtn size="sm" variant="outline" icon="manage-folder"
-              :label="t('settings.fields.browse')" @click="pickFolder" />
+            <BxBtn
+              size="sm"
+              variant="secondary"
+              icon="folder"
+              :label="t('settings.fields.browse')"
+              @click="pickFolder"
+            />
           </template>
         </BxField>
       </template>
 
       <!-- Schritt 3: Format & Qualität -->
       <template v-else-if="step === 2">
-        <h3 class="t-display-3" style="margin: 0">{{ t('onboarding.formatTitle') }}</h3>
-        <div class="f">
-          <div class="f-label">{{ t('settings.fields.mode') }}</div>
+        <h2>{{ t('onboarding.formatTitle') }}</h2>
+        <div class="field">
+          <span class="label">{{ t('settings.fields.mode') }}</span>
           <BxSegmented
             v-model="settings.mode"
             :options="[
-              { value: 'audio', label: t('settings.fields.modeAudio'), icon: 'music' },
-              { value: 'video', label: t('settings.fields.modeVideo'), icon: 'video-player' }
+              { value: 'audio', label: t('settings.fields.modeAudio'), icon: 'activity' },
+              { value: 'video', label: t('settings.fields.modeVideo'), icon: 'image' }
             ]"
           />
         </div>
-        <div class="bx-form-grid">
+        <div class="form-grid">
           <div class="col-6">
             <BxSelect
               v-if="settings.mode === 'audio'"
               v-model="settings.audioFormat"
-              icon="music"
+              icon="activity"
               :label="t('settings.fields.audioFormat')"
               :options="audioFormatOptions"
             />
             <BxSelect
               v-else
               v-model="settings.videoQuality"
-              icon="video-player"
+              icon="image"
               :label="t('settings.fields.videoQuality')"
               :options="videoQualityOptions"
             />
@@ -142,9 +159,9 @@ void props
 
       <!-- Schritt 4: Darstellung -->
       <template v-else>
-        <h3 class="t-display-3" style="margin: 0">{{ t('onboarding.appearanceTitle') }}</h3>
-        <div class="f">
-          <div class="f-label">{{ t('settings.fields.theme') }}</div>
+        <h2>{{ t('onboarding.appearanceTitle') }}</h2>
+        <div class="field">
+          <span class="label">{{ t('settings.fields.theme') }}</span>
           <BxSegmented v-model="settings.theme" :options="themeOptions" />
         </div>
         <BxSelect
@@ -156,30 +173,52 @@ void props
       </template>
 
       <!-- Fortschrittspunkte -->
-      <div class="row" style="justify-content: center; gap: 8px; margin-top: auto">
+      <div class="cluster onboarding__dots">
         <span
           v-for="i in stepCount"
           :key="i"
-          :style="{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            background: i - 1 === step ? 'var(--marine)' : 'var(--marine-10, #dde)',
-            display: 'inline-block'
-          }"
+          class="onboarding__dot"
+          :class="{ 'is-active': i - 1 === step }"
         />
       </div>
     </div>
 
     <template #actions>
       <BxBtn variant="ghost" :label="t('onboarding.skip')" @click="finish" />
-      <BxBtn v-if="step > 0" variant="outline" :label="t('onboarding.back')" @click="step--" />
+      <BxBtn v-if="step > 0" variant="secondary" :label="t('onboarding.back')" @click="step--" />
       <BxBtn
-        variant="cta"
-        :icon="step === stepCount - 1 ? 'check-in-circle' : 'arrow-right'"
+        variant="primary"
+        :icon="step === stepCount - 1 ? 'check-circle' : 'arrow-right'"
         :label="step === stepCount - 1 ? t('onboarding.finish') : t('onboarding.next')"
         @click="next"
       />
     </template>
   </BxDialog>
 </template>
+
+<style scoped>
+/* Feste Mindesthoehe, damit die Schritte nicht springen. */
+.onboarding {
+  min-width: 0;
+  min-height: 19rem;
+}
+
+/* Schrittanzeige: der aktuelle Punkt traegt die Akzentfarbe. */
+.onboarding__dots {
+  --cluster-gap: var(--space-2);
+  justify-content: center;
+  margin-block-start: auto;
+}
+
+.onboarding__dot {
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background-color: var(--color-border-strong);
+}
+
+.onboarding__dot.is-active {
+  background-color: var(--color-accent);
+}
+</style>

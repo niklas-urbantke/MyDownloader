@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import type { AccentName } from '@shared/types'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { AccountStatus, BinaryStatus, SpotifyStatus } from '@shared/types'
+import type { AccountStatus, BinaryStatus } from '@shared/types'
 import PageHead from '../components/PageHead.vue'
 import BxCard from '../components/BxCard.vue'
 import BxBtn from '../components/BxBtn.vue'
@@ -44,7 +45,6 @@ async function runImportV3(): Promise<void> {
 onMounted(async () => {
   binaries.value = await window.api.system.binaries()
   account.value = await window.api.account.status()
-  spotify.value = await window.api.spotify.status()
 })
 
 // --- Konto (Issue #13) ---
@@ -70,23 +70,8 @@ async function accountLogout(): Promise<void> {
   }
 }
 
-// --- Spotify (Issue #35) ---
-const spotify = ref<SpotifyStatus | null>(null)
-const spotifyBusy = ref(false)
-
-async function spotifyLogin(): Promise<void> {
-  spotifyBusy.value = true
-  try {
-    spotify.value = await window.api.spotify.login()
-    if (spotify.value.loggedIn) showToast(t('spotify.loggedIn'))
-  } finally {
-    spotifyBusy.value = false
-  }
-}
-
-async function spotifyLogout(): Promise<void> {
-  spotify.value = await window.api.spotify.logout()
-}
+// Spotify braucht hier nichts mehr: Ein einzelner Songlink lässt sich ohne
+// Registrierung auflösen, deshalb gibt es weder Client-ID noch Anmeldung.
 
 // --- Onboarding erneut starten (Issue #31) ---
 function restartOnboarding(): void {
@@ -173,9 +158,21 @@ const concurrencyOptions = ['1', '2', '3', '4', '5'].map((v) => ({ value: v, lab
 const themeOptions = computed(() => [
   { value: 'light', label: t('settings.fields.themeLight'), icon: 'sun' },
   { value: 'dark', label: t('settings.fields.themeDark'), icon: 'moon' },
-  { value: 'colorful', label: t('settings.fields.themeColorful'), icon: 'color-palette' },
-  { value: 'flat', label: t('settings.fields.themeFlat'), icon: 'color-palette' },
-  { value: 'system', label: t('settings.fields.themeSystem'), icon: 'sun-moon' }
+  { value: 'system', label: t('settings.fields.themeSystem'), icon: 'monitor' }
+])
+/** Zwei Token-Saetze, beide gibt es in Hell und Dunkel. */
+const styleOptions = computed(() => [
+  { value: 'classic', label: t('settings.fields.styleClassic'), icon: 'square' },
+  { value: 'aero', label: t('settings.fields.styleAero'), icon: 'layers' }
+])
+/** Die sechs Markentoene. Wirken nur im Stil "aero". */
+const accentOptions = computed(() => [
+  { value: 'azure', label: t('settings.fields.accentAzure') },
+  { value: 'indigo', label: t('settings.fields.accentIndigo') },
+  { value: 'amber', label: t('settings.fields.accentAmber') },
+  { value: 'jade', label: t('settings.fields.accentJade') },
+  { value: 'rose', label: t('settings.fields.accentRose') },
+  { value: 'slate', label: t('settings.fields.accentSlate') }
 ])
 const localeOptions = computed(() => [
   { value: 'de', label: 'Deutsch' },
@@ -202,7 +199,7 @@ const concurrencyProxy = computed({
   <div v-if="settings" class="stack stack--lg">
     <!-- Ausgabe -->
     <BxCard :title="t('settings.sections.output')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-12">
           <BxField
             v-model="settings.downloadFolder"
@@ -212,8 +209,8 @@ const concurrencyProxy = computed({
             <template #append>
               <BxBtn
                 size="sm"
-                variant="outline"
-                icon="manage-folder"
+                variant="secondary"
+                icon="folder"
                 :label="t('settings.fields.browse')"
                 @click="store.pickDownloadFolder()"
               />
@@ -221,13 +218,13 @@ const concurrencyProxy = computed({
           </BxField>
         </div>
         <div class="col-6">
-          <div class="f">
-            <div class="f-label">{{ t('settings.fields.mode') }}</div>
+          <div class="field">
+            <span class="label">{{ t('settings.fields.mode') }}</span>
             <BxSegmented
               v-model="settings.mode"
               :options="[
-                { value: 'audio', label: t('settings.fields.modeAudio'), icon: 'music' },
-                { value: 'video', label: t('settings.fields.modeVideo'), icon: 'video-player' }
+                { value: 'audio', label: t('settings.fields.modeAudio'), icon: 'activity' },
+                { value: 'video', label: t('settings.fields.modeVideo'), icon: 'image' }
               ]"
             />
           </div>
@@ -236,7 +233,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="settings.filenameTemplate"
             :label="t('settings.fields.filenameTemplate')"
-            icon="pencil-line"
+            icon="edit"
             :options="filenameOptions"
           />
         </div>
@@ -244,7 +241,7 @@ const concurrencyProxy = computed({
           <BxField
             v-model="settings.customFilenameTemplate"
             :label="t('settings.fields.customFilenameTemplate')"
-            icon="pencil-line"
+            icon="edit"
             placeholder="{artist}/{album}/{track} - {title}"
             :hint="t('settings.fields.customFilenamePreview', { preview: customPreview })"
           />
@@ -260,12 +257,12 @@ const concurrencyProxy = computed({
 
     <!-- Audio -->
     <BxCard :title="t('settings.sections.audio')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxSelect
             v-model="settings.audioFormat"
             :label="t('settings.fields.audioFormat')"
-            icon="music"
+            icon="activity"
             :options="audioFormatOptions"
           />
         </div>
@@ -273,7 +270,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="settings.audioQuality"
             :label="t('settings.fields.audioQuality')"
-            icon="setting-horizontal"
+            icon="sliders"
             :options="audioQualityOptions"
           />
         </div>
@@ -288,7 +285,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="settings.musicSource"
             :label="t('settings.fields.musicSource')"
-            icon="music"
+            icon="activity"
             :options="musicSourceOptions"
             :hint="t('settings.fields.musicSourceHint')"
           />
@@ -298,7 +295,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="settings.normalizeAudio"
             :label="t('settings.fields.normalizeAudio')"
-            icon="setting-horizontal"
+            icon="sliders"
             :options="normalizeOptions"
           />
         </div>
@@ -306,7 +303,7 @@ const concurrencyProxy = computed({
           <BxField
             v-model="lufsProxy"
             :label="t('settings.fields.targetLufs')"
-            icon="line-chart"
+            icon="activity"
             :hint="t('settings.fields.targetLufsHint')"
             :disabled="settings.normalizeAudio === 'off'"
           />
@@ -324,12 +321,12 @@ const concurrencyProxy = computed({
 
     <!-- Video -->
     <BxCard :title="t('settings.sections.video')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxSelect
             v-model="settings.videoContainer"
             :label="t('settings.fields.videoContainer')"
-            icon="video-player"
+            icon="image"
             :options="containerOptions"
           />
         </div>
@@ -337,7 +334,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="settings.videoQuality"
             :label="t('settings.fields.videoQuality')"
-            icon="full-screen"
+            icon="maximize"
             :options="videoQualityOptions"
           />
         </div>
@@ -346,7 +343,7 @@ const concurrencyProxy = computed({
 
     <!-- Untertitel -->
     <BxCard :title="t('settings.sections.subtitles')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxToggle v-model="settings.writeSubtitles" :label="t('settings.fields.writeSubtitles')" />
         </div>
@@ -364,12 +361,12 @@ const concurrencyProxy = computed({
 
     <!-- Netzwerk & Leistung -->
     <BxCard :title="t('settings.sections.network')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxField
             v-model="settings.speedLimit"
             :label="t('settings.fields.speedLimit')"
-            icon="rocket"
+            icon="zap"
             :hint="t('settings.fields.speedLimitHint')"
             placeholder="∞"
           />
@@ -378,7 +375,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="concurrencyProxy"
             :label="t('settings.fields.concurrency')"
-            icon="stop-start"
+            icon="power"
             :options="concurrencyOptions"
           />
         </div>
@@ -395,7 +392,7 @@ const concurrencyProxy = computed({
             v-model="settings.scheduleFrom"
             type="time"
             :label="t('settings.fields.scheduleFrom')"
-            icon="time"
+            icon="clock"
             :disabled="!settings.scheduleEnabled"
           />
         </div>
@@ -404,7 +401,7 @@ const concurrencyProxy = computed({
             v-model="settings.scheduleTo"
             type="time"
             :label="t('settings.fields.scheduleTo')"
-            icon="time"
+            icon="clock"
             :disabled="!settings.scheduleEnabled"
           />
         </div>
@@ -413,7 +410,7 @@ const concurrencyProxy = computed({
 
     <!-- Erweitert -->
     <BxCard :title="t('settings.sections.advanced')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-12">
           <BxToggle v-model="settings.sponsorBlock" :label="t('settings.fields.sponsorBlock')" />
         </div>
@@ -421,7 +418,7 @@ const concurrencyProxy = computed({
           <BxField
             v-model="settings.extraArgs"
             :label="t('settings.fields.extraArgs')"
-            icon="setting-vertical"
+            icon="sliders"
             :hint="t('settings.fields.extraArgsHint')"
             placeholder="--cookies-from-browser firefox"
           />
@@ -431,13 +428,47 @@ const concurrencyProxy = computed({
 
     <!-- Darstellung -->
     <BxCard :title="t('settings.sections.appearance')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
-          <div class="f">
-            <div class="f-label">{{ t('settings.fields.theme') }}</div>
+          <div class="field">
+            <span class="label">{{ t('settings.fields.theme') }}</span>
             <BxSegmented v-model="settings.theme" :options="themeOptions" />
           </div>
         </div>
+        <div class="col-6">
+          <div class="field">
+            <span class="label">{{ t('settings.fields.style') }}</span>
+            <BxSegmented v-model="settings.style" :options="styleOptions" />
+            <span class="help">{{ t('settings.fields.styleHint') }}</span>
+          </div>
+        </div>
+
+        <!-- Akzent und die zwei Schalter wirken nur im neuen Stil. -->
+        <div v-if="settings.style === 'aero'" class="col-12">
+          <div class="field">
+            <span class="label">{{ t('settings.fields.accent') }}</span>
+            <div class="cluster accent-choice">
+              <button
+                v-for="a in accentOptions"
+                :key="a.value"
+                type="button"
+                class="btn btn--sm accent-btn"
+                :class="settings.accent === a.value ? 'btn--primary' : 'btn--secondary'"
+                @click="settings.accent = a.value as AccentName"
+              >
+                <span class="accent-dot" :style="{ backgroundColor: `var(--tone-${a.value})` }" />
+                {{ a.label }}
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-if="settings.style === 'aero'" class="col-6">
+          <BxToggle v-model="settings.glass" :label="t('settings.fields.glass')" />
+        </div>
+        <div v-if="settings.style === 'aero'" class="col-6">
+          <BxToggle v-model="settings.vivid" :label="t('settings.fields.vivid')" />
+        </div>
+
         <div class="col-6">
           <BxSelect
             v-model="settings.locale"
@@ -470,7 +501,7 @@ const concurrencyProxy = computed({
           <BxSelect
             v-model="settings.autoUpdate"
             :label="t('settings.fields.autoUpdate')"
-            icon="cloud-download"
+            icon="cloud"
             :options="autoUpdateOptions"
           />
         </div>
@@ -480,29 +511,29 @@ const concurrencyProxy = computed({
     <!-- YouTube-Konto (Issue #13) -->
     <BxCard :title="t('settings.account.title')">
       <div class="stack">
-        <p class="t-body2" style="margin: 0; color: var(--fg2)">
+        <p class="text-secondary">
           {{ t('settings.account.description') }}
         </p>
-        <div class="row" style="gap: 12px; flex-wrap: wrap; align-items: center">
+        <div class="cluster">
           <BxChip
-            :variant="account?.loggedIn ? 'apple' : 'neutral'"
-            :icon="account?.loggedIn ? 'check-in-circle' : 'male-user'"
+            :variant="account?.loggedIn ? 'success' : 'slate'"
+            :icon="account?.loggedIn ? 'check-circle' : 'user'"
           >
             {{ account?.loggedIn ? t('settings.account.statusLoggedIn') : t('settings.account.statusLoggedOut') }}
           </BxChip>
           <span class="spacer" />
           <BxBtn
             v-if="!account?.loggedIn"
-            icon="male-user"
-            variant="cta"
+            icon="user"
+            variant="primary"
             :label="t('settings.account.login')"
             :disabled="accountBusy"
             @click="accountLogin"
           />
           <BxBtn
             v-else
-            icon="cancel"
-            variant="outline"
+            icon="x"
+            variant="secondary"
             :label="t('settings.account.logout')"
             :disabled="accountBusy"
             @click="accountLogout"
@@ -517,58 +548,13 @@ const concurrencyProxy = computed({
       </div>
     </BxCard>
 
-    <!-- Spotify (Issue #35) -->
-    <BxCard :title="t('settings.spotify.title')">
-      <div class="stack">
-        <p class="t-body2" style="margin: 0; color: var(--fg2)">
-          {{ t('settings.spotify.description') }}
-        </p>
-        <BxField
-          v-model="settings.spotifyClientId"
-          :label="t('settings.spotify.clientId')"
-          icon="key"
-          :hint="t('settings.spotify.clientIdHint')"
-          placeholder="z. B. 5f2a…"
-        />
-        <div class="row" style="gap: 12px; flex-wrap: wrap; align-items: center">
-          <BxChip
-            :variant="spotify?.loggedIn ? 'apple' : 'neutral'"
-            :icon="spotify?.loggedIn ? 'check-in-circle' : 'music'"
-          >
-            {{
-              spotify?.loggedIn
-                ? t('spotify.connectedAs', { name: spotify.displayName ?? 'Spotify' })
-                : t('settings.spotify.statusLoggedOut')
-            }}
-          </BxChip>
-          <span class="spacer" />
-          <BxBtn
-            v-if="!spotify?.loggedIn"
-            icon="link"
-            variant="cta"
-            :label="t('spotify.login')"
-            :disabled="spotifyBusy || !settings.spotifyClientId.trim()"
-            @click="spotifyLogin"
-          />
-          <BxBtn
-            v-else
-            icon="cancel"
-            variant="outline"
-            :label="t('settings.account.logout')"
-            :disabled="spotifyBusy"
-            @click="spotifyLogout"
-          />
-        </div>
-      </div>
-    </BxCard>
-
     <!-- System & Wartung -->
     <BxCard :title="t('settings.binaries.title')">
       <div class="stack">
-        <div class="row" style="gap: 12px; flex-wrap: wrap">
+        <div class="cluster">
           <BxChip
-            :variant="binaries?.ytDlp.available ? 'apple' : 'neg'"
-            :icon="binaries?.ytDlp.available ? 'check-in-circle' : 'cancel-in-circle'"
+            :variant="binaries?.ytDlp.available ? 'success' : 'danger'"
+            :icon="binaries?.ytDlp.available ? 'check-circle' : 'x-circle'"
           >
             {{ t('settings.binaries.ytdlp') }}
             {{
@@ -578,8 +564,8 @@ const concurrencyProxy = computed({
             }}
           </BxChip>
           <BxChip
-            :variant="binaries?.ffmpeg.available ? 'apple' : 'neg'"
-            :icon="binaries?.ffmpeg.available ? 'check-in-circle' : 'cancel-in-circle'"
+            :variant="binaries?.ffmpeg.available ? 'success' : 'danger'"
+            :icon="binaries?.ffmpeg.available ? 'check-circle' : 'x-circle'"
           >
             {{ t('settings.binaries.ffmpeg') }}
             {{
@@ -590,14 +576,14 @@ const concurrencyProxy = computed({
           </BxChip>
           <span class="spacer" />
           <BxBtn
-            icon="cloud-download"
-            variant="outline"
+            icon="cloud"
+            variant="secondary"
             :label="t('settings.binaries.updateYtDlp')"
             :disabled="updatingYtDlp || !binaries?.ytDlp.available"
             @click="updateYtDlp"
           />
         </div>
-        <BxBanner v-if="binaries && (!binaries.ytDlp.available || !binaries.ffmpeg.available)" variant="warn">
+        <BxBanner v-if="binaries && (!binaries.ytDlp.available || !binaries.ffmpeg.available)" variant="warning">
           {{ t('dashboard.badges.binariesMissing') }}
         </BxBanner>
       </div>
@@ -606,19 +592,19 @@ const concurrencyProxy = computed({
     <!-- v3-Import -->
     <BxCard :title="t('settings.importV3.title')">
       <div class="stack">
-        <p class="t-body2" style="margin: 0; color: var(--fg2)">
+        <p class="text-secondary">
           {{ t('settings.importV3.description') }}
         </p>
-        <div class="row" style="gap: 12px; flex-wrap: wrap">
+        <div class="cluster">
           <BxBtn
             icon="upload"
-            variant="outline"
+            variant="secondary"
             :label="t('settings.importV3.action')"
             :disabled="importing"
             @click="runImportV3"
           />
           <BxBtn
-            icon="replay"
+            icon="rotate-cw"
             variant="ghost"
             :label="t('settings.restartOnboarding')"
             @click="restartOnboarding"
@@ -628,3 +614,16 @@ const concurrencyProxy = computed({
     </BxCard>
   </div>
 </template>
+
+<style scoped>
+/* Farbiger Punkt am Akzent-Knopf, damit man sieht, was man waehlt. */
+.accent-btn {
+  gap: var(--space-2);
+}
+.accent-dot {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  border-radius: var(--radius-full);
+  border: var(--border-thin) solid var(--color-border-strong);
+}
+</style>

@@ -112,10 +112,10 @@ const urlValid = computed(() => isHttpUrl(url.value))
 const channel = computed(() => analyzeChannelUrl(url.value))
 const channelTab = ref<'videos' | 'shorts' | 'streams' | 'all'>('videos')
 const channelTabOptions = computed(() => [
-  { value: 'videos', label: t('download.channel.videos'), icon: 'video-player' },
+  { value: 'videos', label: t('download.channel.videos'), icon: 'image' },
   { value: 'shorts', label: t('download.channel.shorts'), icon: 'play' },
-  { value: 'streams', label: t('download.channel.streams'), icon: 'record' },
-  { value: 'all', label: t('download.channel.all'), icon: 'checklist' }
+  { value: 'streams', label: t('download.channel.streams'), icon: 'circle' },
+  { value: 'all', label: t('download.channel.all'), icon: 'list' }
 ])
 
 /** Effektive Ziel-URL: bei Kanälen mit gewähltem Tab */
@@ -378,14 +378,14 @@ const playlistPreview = computed(() => {
           @enter="probe"
         />
         <!-- Kanal erkannt: Tab wählen (Issue #9) -->
-        <div v-if="channel" class="row" style="gap: 12px; align-items: center; flex-wrap: wrap">
-          <BxChip icon="male-user" variant="marine">{{ t('download.channel.detected') }}</BxChip>
+        <div v-if="channel" class="cluster">
+          <BxChip icon="user" variant="accent">{{ t('download.channel.detected') }}</BxChip>
           <BxSegmented v-model="channelTab" :options="channelTabOptions" />
         </div>
-        <div class="row" style="flex-wrap: wrap">
+        <div class="cluster">
           <BxBtn
             icon="search"
-            variant="outline"
+            variant="secondary"
             :label="t('download.probe')"
             :disabled="!urlValid || probing"
             @click="probe"
@@ -398,15 +398,15 @@ const playlistPreview = computed(() => {
           />
           <span class="spacer" />
           <BxBtn
-            icon="add"
-            variant="outline"
+            icon="plus"
+            variant="secondary"
             :label="t('download.addToQueue')"
             :disabled="!urlValid"
             @click="start(false)"
           />
           <BxBtn
             icon="download"
-            variant="cta"
+            variant="primary"
             :label="t('download.start')"
             :disabled="!urlValid"
             @click="start(true)"
@@ -417,42 +417,46 @@ const playlistPreview = computed(() => {
 
     <!-- Vorschau -->
     <BxCard :title="t('download.preview.title')" :padded="false">
-      <div v-if="probing" class="bx-card-section" style="color: var(--fg2)">
-        <AppIcon name="searching" /> {{ t('common.loading') }}
+      <div v-if="probing" class="card__body cluster text-secondary">
+        <AppIcon name="search" class="icon--sm" /> {{ t('common.loading') }}
       </div>
 
-      <div v-else-if="!info" class="bx-card-section" style="color: var(--fg2)">
+      <div v-else-if="!info" class="card__body text-secondary">
         {{ t('download.preview.empty') }}
       </div>
 
       <!-- Einzelnes Video -->
-      <div v-else-if="!info.isPlaylist" class="bx-card-section">
-        <div class="row" style="align-items: flex-start; gap: 20px">
+      <div v-else-if="!info.isPlaylist" class="card__body">
+        <div class="cluster" style="align-items: flex-start; --cluster-gap: var(--space-5)">
           <img
             v-if="info.thumbnailUrl"
             :src="info.thumbnailUrl"
             alt=""
-            style="width: 220px; border-radius: 8px; border: 1px solid var(--marine-10)"
+            style="
+              width: 13.75rem;
+              border-radius: var(--radius-lg);
+              border: var(--border-thin) solid var(--color-border);
+            "
           />
-          <div class="stack--sm stack" style="min-width: 0">
-            <h3 class="t-display-3" style="margin: 0">{{ info.title }}</h3>
-            <div class="row" style="flex-wrap: wrap; gap: 8px">
-              <BxChip icon="male-user" variant="neutral">{{ info.uploader }}</BxChip>
-              <BxChip v-if="info.durationSeconds" icon="time" variant="neutral">
+          <div class="stack stack--sm" style="flex: 1; min-width: 0">
+            <h3>{{ info.title }}</h3>
+            <div class="cluster" style="--cluster-gap: var(--space-2)">
+              <BxChip icon="user" variant="slate">{{ info.uploader }}</BxChip>
+              <BxChip v-if="info.durationSeconds" icon="clock" variant="slate">
                 {{ formatDuration(info.durationSeconds) }}
               </BxChip>
-              <BxChip v-if="info.viewCount" icon="line-chart" variant="neutral">
+              <BxChip v-if="info.viewCount" icon="activity" variant="slate">
                 {{ formatCount(info.viewCount, locale) }} {{ t('download.preview.views') }}
               </BxChip>
-              <BxChip v-if="info.chapterCount > 0" icon="checklist" variant="outline">
+              <BxChip v-if="info.chapterCount > 0" icon="list" variant="slate">
                 {{ t('download.extras.chaptersFound', { n: info.chapterCount }) }}
               </BxChip>
             </div>
             <!-- Hörprobe (Issue #29) -->
-            <div class="row">
+            <div class="cluster">
               <BxBtn
                 :icon="previewingUrl === info.url ? 'stop' : 'play'"
-                variant="outline"
+                variant="secondary"
                 size="sm"
                 :label="previewingUrl === info.url ? t('download.preview.stopListen') : t('download.preview.listen')"
                 :disabled="previewLoadingUrl === info.url"
@@ -465,21 +469,21 @@ const playlistPreview = computed(() => {
 
       <!-- Playlist -->
       <template v-else>
-        <div class="bx-card-section">
-          <div class="row" style="gap: 12px; flex-wrap: wrap">
-            <BxChip icon="checklist" variant="marine">{{ t('download.preview.playlist') }}</BxChip>
-            <h3 class="t-display-3" style="margin: 0">{{ info.title }}</h3>
-            <BxChip variant="apple">{{
+        <div class="card__body">
+          <div class="cluster">
+            <BxChip icon="list" variant="accent">{{ t('download.preview.playlist') }}</BxChip>
+            <h3>{{ info.title }}</h3>
+            <BxChip variant="success">{{
               t('download.preview.entries', { n: info.entryCount })
             }}</BxChip>
           </div>
         </div>
-        <table class="bx-table">
+        <table class="table table--plain">
           <tbody>
-            <tr v-for="(entry, i) in playlistPreview" :key="entry.id" style="cursor: default">
-              <td style="width: 40px; color: var(--fg2)">{{ i + 1 }}</td>
+            <tr v-for="(entry, i) in playlistPreview" :key="entry.id">
+              <td class="text-muted" style="width: 2.5rem">{{ i + 1 }}</td>
               <td>{{ entry.title }}</td>
-              <td style="width: 50px">
+              <td style="width: 3.125rem">
                 <BxBtn
                   v-if="entry.url"
                   :icon="previewingUrl === entry.url ? 'stop' : 'play'"
@@ -490,17 +494,13 @@ const playlistPreview = computed(() => {
                   @click="togglePreview(entry.url)"
                 />
               </td>
-              <td style="width: 90px; color: var(--fg2); text-align: right">
+              <td class="text-muted" style="width: 5.625rem; text-align: right">
                 {{ formatDuration(entry.durationSeconds) }}
               </td>
             </tr>
           </tbody>
         </table>
-        <div
-          v-if="info.entryCount > playlistPreview.length"
-          class="bx-card-section"
-          style="color: var(--fg2); font-size: 0.85rem"
-        >
+        <div v-if="info.entryCount > playlistPreview.length" class="card__body help">
           {{ t('download.preview.showingFirst', { n: playlistPreview.length }) }}
         </div>
       </template>
@@ -512,14 +512,14 @@ const playlistPreview = computed(() => {
       <template #actions>
         <BxBtn variant="ghost" :label="t('common.cancel')" @click="combi = null" />
         <BxBtn
-          variant="outline"
-          icon="video-player"
+          variant="secondary"
+          icon="image"
           :label="t('download.combi.video')"
           @click="chooseCombi('video')"
         />
         <BxBtn
-          variant="cta"
-          icon="checklist"
+          variant="primary"
+          icon="list"
           :label="t('download.combi.playlist')"
           @click="chooseCombi('playlist')"
         />
@@ -530,8 +530,8 @@ const playlistPreview = computed(() => {
     <BxCard :title="t('download.options.title')">
       <div class="stack">
         <!-- Vorlagen-Auswahl -->
-        <div class="row" style="gap: 16px; align-items: flex-end; flex-wrap: wrap">
-          <div style="flex: 1; min-width: 240px">
+        <div class="cluster" style="align-items: flex-end">
+          <div style="flex: 1; min-width: 15rem">
             <BxSelect
               v-model="templateId"
               :label="t('templates.useTemplate')"
@@ -540,7 +540,7 @@ const playlistPreview = computed(() => {
             />
           </div>
           <BxBtn
-            icon="pencil"
+            icon="edit"
             variant="ghost"
             :label="t('templates.manage')"
             @click="router.push({ name: 'templates' })"
@@ -561,15 +561,15 @@ const playlistPreview = computed(() => {
 
         <template v-else>
           <BxToggle v-model="useDefaults" :label="t('download.options.useDefaults')" />
-          <div v-if="!useDefaults" class="bx-form-grid">
+          <div v-if="!useDefaults" class="form-grid">
             <div class="col-6">
-              <div class="f">
-                <div class="f-label">{{ t('download.options.mode') }}</div>
+              <div class="field">
+                <span class="label">{{ t('download.options.mode') }}</span>
                 <BxSegmented
                   v-model="mode"
                   :options="[
-                    { value: 'audio', label: t('download.options.audio'), icon: 'music' },
-                    { value: 'video', label: t('download.options.video'), icon: 'video-player' },
+                    { value: 'audio', label: t('download.options.audio'), icon: 'activity' },
+                    { value: 'video', label: t('download.options.video'), icon: 'image' },
                     { value: 'both', label: t('templates.modeBoth'), icon: 'layout' }
                   ]"
                 />
@@ -579,22 +579,22 @@ const playlistPreview = computed(() => {
               <BxSelect
                 v-if="mode === 'audio'"
                 v-model="audioFormat"
-                icon="music"
+                icon="activity"
                 :label="t('download.options.format')"
                 :options="audioFormatOptions"
               />
               <BxSelect
                 v-else-if="mode === 'video'"
                 v-model="videoQuality"
-                icon="video-player"
+                icon="image"
                 :label="t('download.options.quality')"
                 :options="videoQualityOptions"
               />
-              <div v-else class="bx-form-grid" style="gap: 16px">
+              <div v-else class="form-grid">
                 <div class="col-6">
                   <BxSelect
                     v-model="audioFormat"
-                    icon="music"
+                    icon="activity"
                     :label="t('download.options.format')"
                     :options="audioFormatOptions"
                   />
@@ -602,7 +602,7 @@ const playlistPreview = computed(() => {
                 <div class="col-6">
                   <BxSelect
                     v-model="videoQuality"
-                    icon="video-player"
+                    icon="image"
                     :label="t('download.options.quality')"
                     :options="videoQualityOptions"
                   />
@@ -619,8 +619,8 @@ const playlistPreview = computed(() => {
                 <template #append>
                   <BxBtn
                     size="sm"
-                    variant="outline"
-                    icon="manage-folder"
+                    variant="secondary"
+                    icon="folder"
                     :label="t('settings.fields.browse')"
                     @click="pickFolder"
                   />
@@ -637,8 +637,8 @@ const playlistPreview = computed(() => {
                 <template #append>
                   <BxBtn
                     size="sm"
-                    variant="outline"
-                    icon="manage-folder"
+                    variant="secondary"
+                    icon="folder"
                     :label="t('settings.fields.browse')"
                     @click="pickAudioFolder"
                   />
@@ -653,20 +653,20 @@ const playlistPreview = computed(() => {
             </div>
             <!-- Zusätzliche Qualitätsstufen parallel laden (Issue #10) -->
             <div v-if="mode !== 'audio'" class="col-12">
-              <div class="f">
-                <div class="f-label">{{ t('download.options.extraQualities') }}</div>
-                <div class="row" style="flex-wrap: wrap; gap: 8px">
+              <div class="field">
+                <span class="label">{{ t('download.options.extraQualities') }}</span>
+                <div class="cluster" style="--cluster-gap: var(--space-2)">
                   <BxChip
                     v-for="q in videoQualityOptions"
                     :key="q.value"
-                    :variant="extraQualities.includes(q.value) ? 'marine' : 'neutral'"
+                    :variant="extraQualities.includes(q.value) ? 'accent' : 'slate'"
                     style="cursor: pointer"
                     @click="toggleExtraQuality(q.value)"
                   >
                     {{ q.label }}
                   </BxChip>
                 </div>
-                <div class="f-hint">{{ t('download.options.extraQualitiesHint') }}</div>
+                <span class="help">{{ t('download.options.extraQualitiesHint') }}</span>
               </div>
             </div>
           </div>
@@ -676,12 +676,12 @@ const playlistPreview = computed(() => {
 
     <!-- Extras für diesen Download: Zeitbereich, Kapitel, geplanter Start -->
     <BxCard :title="t('download.extras.title')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxField
             v-model="sectionFrom"
             :label="t('download.extras.sectionFrom')"
-            icon="time"
+            icon="clock"
             placeholder="0:00"
             :hint="t('download.extras.sectionHint')"
           />
@@ -690,7 +690,7 @@ const playlistPreview = computed(() => {
           <BxField
             v-model="sectionTo"
             :label="t('download.extras.sectionTo')"
-            icon="time"
+            icon="clock"
             placeholder="1:23:45"
           />
         </div>
@@ -710,7 +710,7 @@ const playlistPreview = computed(() => {
             v-model="scheduledAt"
             type="datetime-local"
             :label="t('download.extras.scheduledAt')"
-            icon="time"
+            icon="clock"
             :hint="t('download.extras.scheduledAtHint')"
           />
         </div>

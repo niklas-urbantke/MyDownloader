@@ -91,9 +91,7 @@ async function checkNow(sub: Subscription): Promise<void> {
   checkingId.value = sub.id
   try {
     const found = await window.api.subscriptions.checkNow(sub.id)
-    showToast(
-      found > 0 ? t('subscriptions.foundNew', { n: found }) : t('subscriptions.nothingNew')
-    )
+    showToast(found > 0 ? t('subscriptions.foundNew', { n: found }) : t('subscriptions.nothingNew'))
     subs.value = await window.api.subscriptions.list()
   } finally {
     checkingId.value = ''
@@ -122,7 +120,7 @@ async function confirmDelete(): Promise<void> {
   <div class="stack stack--lg">
     <!-- Neues Abo -->
     <BxCard :title="t('subscriptions.addTitle')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-12">
           <BxField
             v-model="newUrl"
@@ -133,11 +131,20 @@ async function confirmDelete(): Promise<void> {
           />
         </div>
         <div class="col-4">
-          <BxField v-model="newFolder" :label="t('download.options.folder')" icon="folder"
-            :placeholder="settingsStore.settings?.downloadFolder ?? ''">
+          <BxField
+            v-model="newFolder"
+            :label="t('download.options.folder')"
+            icon="folder"
+            :placeholder="settingsStore.settings?.downloadFolder ?? ''"
+          >
             <template #append>
-              <BxBtn size="sm" variant="outline" icon="manage-folder"
-                :label="t('settings.fields.browse')" @click="pickFolder" />
+              <BxBtn
+                size="sm"
+                variant="secondary"
+                icon="folder"
+                :label="t('settings.fields.browse')"
+                @click="pickFolder"
+              />
             </template>
           </BxField>
         </div>
@@ -153,16 +160,16 @@ async function confirmDelete(): Promise<void> {
           <BxSelect
             v-model="newInterval"
             :label="t('subscriptions.fields.interval')"
-            icon="time"
+            icon="clock"
             :options="intervalOptions"
           />
         </div>
         <div class="col-12">
-          <div class="row">
+          <div class="cluster">
             <span class="spacer" />
             <BxBtn
-              icon="add"
-              variant="cta"
+              icon="plus"
+              variant="primary"
               :label="t('subscriptions.add')"
               :disabled="!isHttpUrl(newUrl) || adding"
               @click="addSubscription"
@@ -173,62 +180,69 @@ async function confirmDelete(): Promise<void> {
     </BxCard>
 
     <!-- Bestehende Abos -->
-    <div v-if="subs.length === 0" class="bx-card">
-      <div class="bx-card-section" style="color: var(--fg2); text-align: center; padding: 48px">
-        <AppIcon name="replay" :size="40" style="color: var(--marine-40)" />
-        <p>{{ t('subscriptions.empty') }}</p>
+    <BxCard v-if="subs.length === 0" :padded="false">
+      <div class="empty">
+        <span class="empty__icon">
+          <AppIcon name="refresh" class="icon--xl icon--duo" />
+        </span>
+        <p class="empty__title">{{ t('subscriptions.empty') }}</p>
       </div>
-    </div>
+    </BxCard>
 
     <div v-else class="stack">
-      <BxCard v-for="sub in subs" :key="sub.id" :padded="false">
-        <div class="bx-card-section">
-          <div class="row" style="gap: 16px; flex-wrap: wrap; align-items: center">
-            <div class="stack stack--sm" style="flex: 1; min-width: 260px">
-              <div class="row" style="gap: 10px; flex-wrap: wrap">
-                <strong style="font-size: 1rem; color: var(--marine)">{{ sub.title }}</strong>
-                <BxChip v-if="!sub.enabled" variant="warn">{{ t('subscriptions.pausedChip') }}</BxChip>
-                <BxChip v-if="sub.lastNewCount > 0" variant="apple">
-                  {{ t('subscriptions.newChip', { n: sub.lastNewCount }) }}
-                </BxChip>
-              </div>
-              <div style="color: var(--fg2); font-size: 12px">
-                {{ sub.knownVideoIds.length }} {{ t('subscriptions.knownVideos') }}
-                <template v-if="sub.lastCheckedAt">
-                  · {{ t('subscriptions.lastChecked', { when: formatDateTime(sub.lastCheckedAt, locale) }) }}
-                </template>
-                <template v-if="sub.folder"> · {{ sub.folder }}</template>
-              </div>
+      <BxCard v-for="sub in subs" :key="sub.id">
+        <div class="cluster" style="--cluster-gap: var(--space-4)">
+          <div class="stack stack--sm sub-main">
+            <div class="cluster" style="--cluster-gap: var(--space-2)">
+              <strong class="sub-title">{{ sub.title }}</strong>
+              <BxChip v-if="!sub.enabled" variant="warning">
+                {{ t('subscriptions.pausedChip') }}
+              </BxChip>
+              <BxChip v-if="sub.lastNewCount > 0" variant="success">
+                {{ t('subscriptions.newChip', { n: sub.lastNewCount }) }}
+              </BxChip>
             </div>
-            <div style="width: 160px">
-              <BxSelect
-                :model-value="String(sub.intervalMinutes)"
-                icon="time"
-                :options="intervalOptions"
-                @update:model-value="(v: string) => setInterval(sub, v)"
-              />
+            <div class="sub-meta">
+              {{ sub.knownVideoIds.length }} {{ t('subscriptions.knownVideos') }}
+              <template v-if="sub.lastCheckedAt">
+                ·
+                {{
+                  t('subscriptions.lastChecked', {
+                    when: formatDateTime(sub.lastCheckedAt, locale)
+                  })
+                }}
+              </template>
+              <template v-if="sub.folder"> · {{ sub.folder }}</template>
             </div>
-            <BxToggle
-              :model-value="sub.enabled"
-              :label="t('subscriptions.enabled')"
-              @update:model-value="(v: boolean) => toggleEnabled(sub, v)"
-            />
-            <BxBtn
-              icon="reload"
-              variant="outline"
-              size="sm"
-              :label="t('subscriptions.checkNow')"
-              :disabled="checkingId === sub.id"
-              @click="checkNow(sub)"
-            />
-            <BxBtn
-              icon="trash"
-              variant="ghost"
-              size="sm"
-              :title="t('common.delete')"
-              @click="deleteTarget = sub"
+          </div>
+          <div class="sub-interval">
+            <BxSelect
+              :model-value="String(sub.intervalMinutes)"
+              icon="clock"
+              :options="intervalOptions"
+              @update:model-value="(v: string) => setInterval(sub, v)"
             />
           </div>
+          <BxToggle
+            :model-value="sub.enabled"
+            :label="t('subscriptions.enabled')"
+            @update:model-value="(v: boolean) => toggleEnabled(sub, v)"
+          />
+          <BxBtn
+            icon="refresh"
+            variant="secondary"
+            size="sm"
+            :label="t('subscriptions.checkNow')"
+            :disabled="checkingId === sub.id"
+            @click="checkNow(sub)"
+          />
+          <BxBtn
+            icon="trash"
+            variant="ghost"
+            size="sm"
+            :title="t('common.delete')"
+            @click="deleteTarget = sub"
+          />
         </div>
       </BxCard>
     </div>
@@ -246,3 +260,26 @@ async function confirmDelete(): Promise<void> {
     </template>
   </BxDialog>
 </template>
+
+<style scoped>
+/* Ein Abo je Karte: Titel und Kennzahlen links, die Bedienelemente
+   rechts daneben. */
+.sub-main {
+  flex: 1;
+  min-width: 16rem;
+}
+
+.sub-title {
+  font-size: var(--text-base);
+  color: var(--color-accent);
+}
+
+.sub-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.sub-interval {
+  width: 10rem;
+}
+</style>

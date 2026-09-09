@@ -11,7 +11,16 @@ export type AudioFormat = 'mp3' | 'm4a' | 'opus' | 'flac' | 'wav'
 export type VideoContainer = 'mp4' | 'mkv' | 'webm'
 export type VideoQuality = 'best' | '2160' | '1440' | '1080' | '720' | '480'
 export type DownloadMode = 'audio' | 'video'
-export type ThemeName = 'light' | 'dark' | 'colorful' | 'flat' | 'system'
+export type ThemeName = 'light' | 'dark' | 'system'
+/**
+ * Welcher Token-Satz gezeichnet wird. Beide gibt es in Hell und Dunkel,
+ * die Wahl des Erscheinungsbilds ist davon unabhaengig.
+ *  classic = der bisherige Batix-Look
+ *  aero    = das Designsystem urbDesign ("Aero Plasma")
+ */
+export type StyleName = 'classic' | 'aero'
+/** Die sechs Markentoene des Designsystems, jeder taugt als Akzent. */
+export type AccentName = 'azure' | 'indigo' | 'amber' | 'jade' | 'rose' | 'slate'
 export type LocaleName = 'de' | 'en' | 'system'
 
 export interface AppSettings {
@@ -53,6 +62,13 @@ export interface AppSettings {
   /** Songtexte automatisch suchen und einbetten (Issue #27) */
   fetchLyrics: boolean
   theme: ThemeName
+  style: StyleName
+  /** Akzentfarbe: zeigt die --color-accent*-Rollen auf eine andere Palette */
+  accent: AccentName
+  /** Glas-Optik (Unschaerfe, Glanz, Koernung). Aus = flache, deckende Flaechen. */
+  glass: boolean
+  /** Markenton-Verlaeufe prominent einsetzen (frueher das Theme "Bunt") */
+  vivid: boolean
   locale: LocaleName
   notifyOnComplete: boolean
   clipboardWatcher: boolean

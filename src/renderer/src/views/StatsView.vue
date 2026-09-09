@@ -54,7 +54,7 @@ const chart = computed(() => {
 
   <div v-if="stats" class="stack stack--lg">
     <!-- KPIs -->
-    <div class="bx-tiles">
+    <div class="grid-auto" style="--col-min: 14rem">
       <BxStat :label="t('stats.kpi.total')" :value="stats.totalDownloads" />
       <BxStat :label="t('stats.kpi.completed')" :value="stats.completed" />
       <BxStat :label="t('stats.kpi.successRate')" :value="successRate" />
@@ -63,7 +63,7 @@ const chart = computed(() => {
 
     <!-- Downloads pro Monat -->
     <BxCard :title="t('stats.perMonth')">
-      <div style="overflow-x: auto">
+      <div class="chart-scroll">
         <svg
           :width="chart.width"
           :height="chart.height"
@@ -72,29 +72,21 @@ const chart = computed(() => {
         >
           <g v-for="(bar, i) in chart.bars" :key="i">
             <rect
+              class="chart__bar"
               :x="bar.x"
               :y="bar.y"
               :width="bar.w"
               :height="Math.max(2, bar.h)"
               rx="4"
-              fill="var(--marine, #003063)"
-              opacity="0.85"
             />
-            <text
-              :x="bar.x + bar.w / 2"
-              :y="bar.y - 6"
-              text-anchor="middle"
-              font-size="11"
-              fill="var(--fg2, #667)"
-            >
+            <text class="chart__value" :x="bar.x + bar.w / 2" :y="bar.y - 6" text-anchor="middle">
               {{ bar.count }}
             </text>
             <text
+              class="chart__label"
               :x="bar.x + bar.w / 2"
               :y="chart.height - 6"
               text-anchor="middle"
-              font-size="11"
-              fill="var(--fg2, #667)"
             >
               {{ bar.label }}
             </text>
@@ -103,18 +95,18 @@ const chart = computed(() => {
       </div>
     </BxCard>
 
-    <div class="bx-form-grid">
+    <div class="form-grid">
       <!-- Top-Künstler/Kanäle -->
       <div class="col-6">
         <BxCard :title="t('stats.topUploaders')" :padded="false">
-          <table class="bx-table">
+          <table class="table table--plain">
             <tbody>
-              <tr v-for="u in stats.topUploaders" :key="u.name" style="cursor: default">
+              <tr v-for="u in stats.topUploaders" :key="u.name">
                 <td>{{ u.name }}</td>
-                <td style="width: 80px; text-align: right; color: var(--fg2)">{{ u.count }}</td>
+                <td class="text-secondary uploader-count">{{ u.count }}</td>
               </tr>
               <tr v-if="stats.topUploaders.length === 0">
-                <td style="color: var(--fg2)">{{ t('stats.noData') }}</td>
+                <td class="text-secondary">{{ t('stats.noData') }}</td>
               </tr>
             </tbody>
           </table>
@@ -123,11 +115,11 @@ const chart = computed(() => {
       <!-- Formate -->
       <div class="col-6">
         <BxCard :title="t('stats.formats')">
-          <div class="row" style="flex-wrap: wrap; gap: 8px">
-            <BxChip v-for="f in stats.formats" :key="f.format" variant="neutral">
+          <div class="cluster" style="--cluster-gap: var(--space-2)">
+            <BxChip v-for="f in stats.formats" :key="f.format" variant="slate">
               {{ f.format.toUpperCase() }} · {{ f.count }}
             </BxChip>
-            <span v-if="stats.formats.length === 0" style="color: var(--fg2)">
+            <span v-if="stats.formats.length === 0" class="text-secondary">
               {{ t('stats.noData') }}
             </span>
           </div>
@@ -136,3 +128,28 @@ const chart = computed(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+/* Das Diagramm rollt waagerecht, wenn viele Monate anfallen. */
+.chart-scroll {
+  overflow-x: auto;
+}
+
+.chart__bar {
+  fill: var(--color-accent);
+  opacity: 0.85;
+}
+.chart__value,
+.chart__label {
+  fill: var(--color-text-secondary);
+  font-size: var(--text-xs);
+}
+.chart__value {
+  font-weight: var(--font-semibold);
+}
+
+.uploader-count {
+  width: 5rem;
+  text-align: end;
+}
+</style>

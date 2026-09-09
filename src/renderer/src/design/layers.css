@@ -1,0 +1,15 @@
+/* ============================================================
+   Reihenfolge der Kaskadenebenen.
+
+   Diese Zeile muss vor allen Stylesheets stehen. Im Dokument
+   (index.html) steht sie bereits, hier steht sie ein zweites Mal,
+   weil der Bundler die Stylesheets erst nach dem Dokumentkopf
+   einhaengt. Eine wiederholte Angabe ist harmlos: die erste
+   Nennung legt die Rangfolge fest.
+
+   tokens      Rohwerte und semantische Rollen (urbDesign)
+   base        Reset, Grundtypografie, Fokusring (urbDesign)
+   components  der Baukasten (urbDesign)
+   app         alles, was nur MyDownloader braucht (app.css)
+   ============================================================ */
+@layer tokens, base, components, app;

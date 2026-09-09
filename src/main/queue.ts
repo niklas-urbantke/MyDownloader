@@ -19,6 +19,7 @@ import {
 } from './ytdlp'
 import { JsonStore } from './store'
 import { isAudioFile, postprocessAudioFile } from './postprocess'
+import { isSpotifyTrackLink, resolveSpotifyTrackQuery } from './spotify'
 
 const MAX_LOG_LINES = 2000
 
@@ -419,6 +420,7 @@ export class DownloadQueue {
 
     // Suchen erst hier auflösen, nicht schon beim Einreihen: ein Import mit
     // 50 Titeln würde sonst 50 Netzwerkaufrufe machen, bevor irgendetwas läuft
+    await this.resolveSpotifyLink(entry)
     await this.resolveSearchUrl(entry, settings)
 
     // Titel/Thumbnail besorgen, falls noch nicht bekannt
@@ -510,6 +512,37 @@ export class DownloadQueue {
       item.errorMessage = err.message
       this.finish(entry, 'error')
     })
+  }
+
+  /**
+   * Von Spotify selbst lädt nichts. Aus einem Songlink werden nur Künstler und
+   * Titel gelesen (aus den og-Angaben der normalen Songseite, ohne Client-ID
+   * und ohne Anmeldung), daraus wird eine ytsearch-URL. Um die kümmert sich
+   * danach `resolveSearchUrl` wie um jede andere Suche.
+   *
+   * Ist die Seite nicht lesbar, bleibt die URL stehen und der Download läuft
+   * ganz normal weiter.
+   */
+  private async resolveSpotifyLink(entry: InternalItem): Promise<void> {
+    const { item } = entry
+    const spotifyUrl = item.url
+    if (!isSpotifyTrackLink(spotifyUrl)) return
+
+    const query = await resolveSpotifyTrackQuery(spotifyUrl)
+    if (!query) {
+      this.log(item.id, '[suche] Spotify-Song konnte nicht gelesen werden')
+      return
+    }
+    this.log(item.id, `[suche] Spotify: ${query}`)
+    const searchUrl = `ytsearch1:${query}`
+    item.url = searchUrl
+    // Auch die Anfrage umschreiben, sonst bekäme yt-dlp später wieder den
+    // Spotify-Link, mit dem es nichts anfangen kann
+    entry.request.url = searchUrl
+    // Solange kein echter Titel bekannt ist, steht die URL im Titel, und dann
+    // ist der Suchbegriff die bessere Anzeige
+    if (item.title === spotifyUrl) item.title = query
+    this.emit(item.id)
   }
 
   /**

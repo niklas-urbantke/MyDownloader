@@ -1,85 +1,41 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import type { SpotifyPlaylist, SpotifyStatus, SpotifyTrack } from '@shared/types'
 import PageHead from '../components/PageHead.vue'
 import BxCard from '../components/BxCard.vue'
 import BxBtn from '../components/BxBtn.vue'
 import BxField from '../components/BxField.vue'
-import BxChip from '../components/BxChip.vue'
 import BxBanner from '../components/BxBanner.vue'
-import AppIcon from '../components/AppIcon.vue'
 import { useDownloadsStore } from '../stores/downloads'
 import { useSettingsStore } from '../stores/settings'
 import { showToast } from '../composables/toast'
-import { formatDuration } from '../utils/format'
 
 const { t } = useI18n()
 const router = useRouter()
 const downloads = useDownloadsStore()
 const settingsStore = useSettingsStore()
 
-const status = ref<SpotifyStatus | null>(null)
-const loggingIn = ref(false)
+/**
+ * Link auf einen einzelnen Song, dieselbe Erkennung wie im Main-Prozess
+ * (open.spotify.com/track/…, auch mit /intl-xx/, sowie spotify:track:…).
+ * Hier nur, um die Schaltfläche zu sperren und früh zu warnen.
+ */
+const TRACK_LINK = /(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?track\/|spotify:track:)[A-Za-z0-9]+/
+
 const url = ref('')
-const loading = ref(false)
-const playlist = ref<SpotifyPlaylist | null>(null)
-const excluded = ref<Set<number>>(new Set())
-/** Manuell überschriebene Suchanfragen je Track-Index */
-const queryOverrides = ref<Record<number, string>>({})
+const adding = ref(false)
 
-onMounted(async () => {
-  status.value = await window.api.spotify.status()
-})
+const isTrackLink = computed(() => TRACK_LINK.test(url.value.trim()))
 
-async function login(): Promise<void> {
-  loggingIn.value = true
-  try {
-    status.value = await window.api.spotify.login()
-    if (status.value.loggedIn) showToast(t('spotify.loggedIn'))
-  } finally {
-    loggingIn.value = false
-  }
-}
-
-async function loadPlaylist(): Promise<void> {
-  if (!url.value.trim()) return
-  loading.value = true
-  playlist.value = null
-  excluded.value = new Set()
-  queryOverrides.value = {}
-  try {
-    playlist.value = await window.api.spotify.getPlaylist(url.value.trim())
-    if (!playlist.value) showToast(t('spotify.loadFailed'), 'error')
-  } finally {
-    loading.value = false
-  }
-}
-
-/** Standard-Suchanfrage: bevorzugt Album-/Topic-Treffer wie der v3-Loader */
-function defaultQuery(track: SpotifyTrack): string {
-  return `${track.artist} - ${track.title}`
-}
-
-function queryFor(index: number, track: SpotifyTrack): string {
-  return queryOverrides.value[index] ?? defaultQuery(track)
-}
-
-function toggleExcluded(index: number): void {
-  const set = new Set(excluded.value)
-  if (set.has(index)) set.delete(index)
-  else set.add(index)
-  excluded.value = set
-}
-
-const selectedCount = computed(() =>
-  playlist.value ? playlist.value.tracks.length - excluded.value.size : 0
+/** Erst meckern, wenn wirklich etwas Falsches im Feld steht. */
+const linkError = computed(() =>
+  url.value.trim() && !isTrackLink.value ? t('spotify.invalidLink') : ''
 )
 
 /**
- * Nur ein Hinweis, aus welcher Quelle importiert wird. Aufgelöst wird die
- * Suche erst im Main-Prozess, wenn der Titel an die Reihe kommt.
+ * Nur ein Hinweis, wo gesucht wird. Aufgelöst wird die Suche erst im
+ * Main-Prozess, wenn der Titel an die Reihe kommt.
  */
 const sourceHint = computed(() =>
   settingsStore.settings?.musicSource === 'youtube'
@@ -87,21 +43,24 @@ const sourceHint = computed(() =>
     : t('spotify.sourceYtmusic')
 )
 
-async function importSelected(): Promise<void> {
-  if (!playlist.value) return
-  const requests = playlist.value.tracks
-    .map((track, i) => ({ track, i }))
-    .filter(({ i }) => !excluded.value.has(i))
-    .map(({ track, i }) => ({
-      // yt-dlp löst ytsearch1: selbst zum besten Treffer auf
-      url: `ytsearch1:${queryFor(i, track)} official audio`,
-      knownTitle: `${track.artist} - ${track.title}`,
-      overrides: { mode: 'audio' as const }
-    }))
-  if (requests.length === 0) return
-  await downloads.addMany(requests)
-  showToast(t('download.addedMany', { n: requests.length }))
-  router.push({ name: 'queue' })
+async function addTrack(): Promise<void> {
+  if (!isTrackLink.value || adding.value) return
+  adding.value = true
+  try {
+    // Der Link geht so, wie er ist, in die Warteschlange: Künstler und Titel
+    // liest der Main-Prozess erst, wenn der Eintrag an die Reihe kommt, und
+    // macht daraus die YouTube-Suche.
+    await downloads.add({
+      url: url.value.trim(),
+      startNow: true,
+      overrides: { mode: 'audio' }
+    })
+    showToast(t('download.added'))
+    url.value = ''
+    router.push({ name: 'queue' })
+  } finally {
+    adding.value = false
+  }
 }
 </script>
 
@@ -109,130 +68,33 @@ async function importSelected(): Promise<void> {
   <PageHead :title="t('spotify.title')" :sub="t('spotify.subtitle')" />
 
   <div class="stack stack--lg">
-    <!-- Kein Client konfiguriert / nicht angemeldet -->
-    <BxBanner v-if="status && !status.configured" variant="info" icon="information-in-circle">
-      {{ t('spotify.setupHint') }}
-      <BxBtn
-        variant="ghost"
-        size="sm"
-        :label="t('nav.settings')"
-        @click="router.push({ name: 'settings' })"
-      />
-    </BxBanner>
-
-    <BxCard v-if="status && status.configured && !status.loggedIn">
-      <div class="row" style="gap: 16px; align-items: center">
-        <AppIcon name="music" :size="28" style="color: var(--marine)" />
-        <span style="flex: 1">{{ t('spotify.loginHint') }}</span>
-        <BxBtn
+    <BxCard>
+      <div class="stack">
+        <p class="text-secondary">{{ t('spotify.howItWorks') }}</p>
+        <BxField
+          v-model="url"
           icon="link"
-          variant="cta"
-          :label="t('spotify.login')"
-          :disabled="loggingIn"
-          @click="login"
+          :label="t('spotify.linkLabel')"
+          :placeholder="t('spotify.urlPlaceholder')"
+          :hint="t('spotify.linkHint')"
+          :error="linkError"
+          @enter="addTrack"
         />
+        <div class="cluster">
+          <BxBtn
+            icon="download"
+            variant="primary"
+            :label="t('spotify.load')"
+            :disabled="adding || !isTrackLink"
+            @click="addTrack"
+          />
+        </div>
       </div>
     </BxCard>
 
-    <!-- Angemeldet: Playlist laden -->
-    <template v-if="status?.loggedIn">
-      <BxCard>
-        <div class="stack">
-          <div class="row" style="gap: 8px; align-items: center; flex-wrap: wrap">
-            <BxChip icon="check-in-circle" variant="apple">
-              {{ t('spotify.connectedAs', { name: status.displayName ?? 'Spotify' }) }}
-            </BxChip>
-          </div>
-          <BxField
-            v-model="url"
-            icon="link"
-            :placeholder="t('spotify.urlPlaceholder')"
-            @enter="loadPlaylist"
-          />
-          <div class="row">
-            <BxBtn
-              icon="search"
-              variant="outline"
-              :label="t('spotify.load')"
-              :disabled="loading || !url.trim()"
-              @click="loadPlaylist"
-            />
-            <span class="spacer" />
-            <BxBtn
-              v-if="playlist"
-              icon="download"
-              variant="cta"
-              :label="t('spotify.import', { n: selectedCount })"
-              :disabled="selectedCount === 0"
-              @click="importSelected"
-            />
-          </div>
-          <!-- Woher die Titel geholt werden, wenn keine feste URL vorliegt -->
-          <BxBanner variant="info" icon="music">{{ sourceHint }}</BxBanner>
-        </div>
-      </BxCard>
+    <!-- Woher der Titel geholt wird, wenn keine feste URL vorliegt -->
+    <BxBanner variant="info" icon="activity">{{ sourceHint }}</BxBanner>
 
-      <div v-if="loading" class="bx-card">
-        <div class="bx-card-section" style="color: var(--fg2)">
-          <AppIcon name="searching" /> {{ t('common.loading') }}
-        </div>
-      </div>
-
-      <!-- Trackliste mit Matching-Vorschau -->
-      <BxCard v-if="playlist" :padded="false" :title="`${playlist.title} — ${t('spotify.tracks', { n: playlist.tracks.length })}`">
-        <table class="bx-table">
-          <thead>
-            <tr>
-              <th style="width: 40px"></th>
-              <th>{{ t('spotify.columns.track') }}</th>
-              <th>{{ t('spotify.columns.query') }}</th>
-              <th style="width: 80px">{{ t('spotify.columns.duration') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(track, i) in playlist.tracks"
-              :key="i"
-              :style="{ opacity: excluded.has(i) ? 0.4 : 1, cursor: 'default' }"
-            >
-              <td>
-                <div
-                  class="toggle"
-                  :class="{ on: !excluded.has(i) }"
-                  style="transform: scale(0.8)"
-                  role="checkbox"
-                  :aria-checked="!excluded.has(i)"
-                  @click="toggleExcluded(i)"
-                />
-              </td>
-              <td>
-                <strong>{{ track.artist }}</strong> — {{ track.title }}
-                <span v-if="track.album" style="color: var(--fg2)"> · {{ track.album }}</span>
-              </td>
-              <td>
-                <input
-                  class="spotify-query"
-                  :value="queryFor(i, track)"
-                  @input="queryOverrides[i] = ($event.target as HTMLInputElement).value"
-                />
-              </td>
-              <td style="color: var(--fg2)">{{ formatDuration(track.durationSeconds) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </BxCard>
-    </template>
+    <BxBanner variant="info" icon="clock">{{ t('spotify.playlistsLater') }}</BxBanner>
   </div>
 </template>
-
-<style scoped>
-.spotify-query {
-  width: 100%;
-  border: 1px solid var(--marine-10, #dde);
-  border-radius: 6px;
-  padding: 4px 8px;
-  font-size: 12px;
-  background: transparent;
-  color: inherit;
-}
-</style>

@@ -1,24 +1,51 @@
-<!doctype html>
-<html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <title>MyDownloader</title>
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.ytimg.com https://*.googleusercontent.com; font-src 'self' data:"
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  urbDesign Icon-Set (Sprite), Theme "Aero Plasma"
 
-    <!-- Reihenfolge der Ebenen: steht vor allen Stylesheets, damit spaetere
-         Ebenen gewinnen, ohne dass irgendwo !important noetig wird.
-         Dieselbe Zeile steht zusaetzlich in design/layers.css, weil der
-         Bundler die Stylesheets erst nach diesem Dokument einhaengen kann. -->
-    <style>@layer tokens, base, components, app;</style>
-  </head>
-  <body>
-    <!-- Icon-Sprite von urbDesign, eingesetzt aus design/icons.svg.
-         Es muss im selben Dokument liegen, sonst wirken weder
-         --icon-stroke/--icon-fill noch url(#urb-grad-*). -->
+  Schreibweise in diesem Kommentar: ein XML-Kommentar darf keine zwei
+  Bindestriche hintereinander enthalten. Namen wie "var(-icon-stroke)" oder
+  ".icon-duo" stehen hier deshalb mit nur einem Bindestrich, in CSS sind es
+  an dieser Stelle zwei.
+
+  Linien-Icons, 24x24, farbfaehig. Jedes <symbol> traegt
+    stroke="var(-icon-stroke, currentColor)"
+    fill="var(-icon-fill, none)"
+  Damit steuert das Design-System die Farbe vollstaendig von aussen, ohne das
+  Sprite anzufassen:
+
+    Einfarbig  nichts setzen. Der Strich folgt currentColor, also der
+               Textfarbe des umgebenden Elements. Die Toenungsklassen
+               (.icon-azure, .icon-jade, .icon-accent und Geschwister)
+               setzen genau diese color.
+    Duotone    .icon-duo setzt -icon-fill auf eine sehr zarte Variante der
+               aktuellen Farbe. Geschlossene Flaechen fuellen sich leicht,
+               der Strich bleibt kraeftig.
+    Verlauf    .icon-grad-azure (und die sieben Geschwister) setzen
+               -icon-stroke auf url(#urb-grad-azure). Der Strich bekommt
+               damit den Verlauf aus dem defs-Block dieser Datei.
+
+  WICHTIG: url(#urb-grad-azure) und use href="#name" loesen nur innerhalb
+  desselben Dokuments auf. Das Sprite muss also inline im HTML liegen,
+  entweder per fetch eingehaengt (so macht es icons.html) oder fest
+  eingebaut (so macht es index.html). Ein use href="icons.svg#name" auf die
+  externe Datei zeigt zwar das Icon, findet die Verlaeufe aber nicht.
+
+  Die Stop-Farben der Verlaeufe sind feste Hex-Werte, denn SVG-Attribute
+  kennen die CSS-Tokens aus tokens.css nicht zuverlaessig. Sie entsprechen
+  den Palettenstufen 300 und 600 (bei indigo und jade 700).
+
+  Zwei Sonderfaelle: bei "more-horizontal" und "more-vertical" sind die
+  Punkte gefuellte Kreise. Sie folgen -icon-stroke statt -icon-fill, sonst
+  waeren sie im einfarbigen Modus unsichtbar.
+
+  Metadaten je Symbol:
+    data-cat   Kategorie fuer die Uebersichtsseite
+    data-tone  Markenton (azure, indigo, amber, jade, rose, slate). Die
+               Uebersicht leitet daraus ihre Farbklassen ab.
+
+  Verwendung:
+    <svg class="icon icon-jade" aria-hidden="true"><use href="#check"></use></svg>
+-->
 <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"
      style="position:absolute;width:0;height:0;overflow:hidden">
   <defs>
@@ -174,25 +201,4 @@
   <symbol id="play" data-cat="System" data-tone="indigo" viewBox="0 0 24 24" fill="var(--icon-fill, none)" stroke="var(--icon-stroke, currentColor)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3l14 9-14 9z"/></symbol>
   <symbol id="pause" data-cat="System" data-tone="indigo" viewBox="0 0 24 24" fill="var(--icon-fill, none)" stroke="var(--icon-stroke, currentColor)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></symbol>
   <symbol id="stop" data-cat="System" data-tone="indigo" viewBox="0 0 24 24" fill="var(--icon-fill, none)" stroke="var(--icon-stroke, currentColor)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="5" width="14" height="14" rx="2"/></symbol>
-
-  <!-- App-eigenes Markenzeichen, NICHT Teil von urbDesign.
-       Steht bewusst hier und nicht in icons.svg, damit die Kopie des
-       Designsystems woertlich bleibt. Gleiche Strichstaerke und gleicher Radius wie die uebrigen Symbole,
-       damit es neben ihnen gleich gross wirkt. Die drei Boegen sitzen mittig im Ring.
-       Tiefer gesetzt wirken sie nach unten gerutscht, breiter gezogen
-       stossen sie an den Ring.
-       Farbe kommt wie bei allen anderen ueber currentColor. -->
-  <symbol id="spotify" data-cat="Marken" data-tone="jade" viewBox="0 0 24 24"
-          fill="var(--icon-fill, none)" stroke="var(--icon-stroke, currentColor)"
-          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="10"/>
-    <path d="M7.6 9.5Q12 7.3 16.4 9.5"/>
-    <path d="M8.48 12.6Q12 10.6 15.52 12.6"/>
-    <path d="M9.36 15.5Q12 13.9 14.64 15.5"/>
-  </symbol>
 </svg>
-
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
-</html>

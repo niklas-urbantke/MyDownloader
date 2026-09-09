@@ -35,8 +35,8 @@ onMounted(async () => {
 })
 
 const modeOptions = computed(() => [
-  { value: 'audio', label: t('download.options.audio'), icon: 'music' },
-  { value: 'video', label: t('download.options.video'), icon: 'video-player' },
+  { value: 'audio', label: t('download.options.audio'), icon: 'activity' },
+  { value: 'video', label: t('download.options.video'), icon: 'image' },
   { value: 'both', label: t('templates.modeBoth'), icon: 'layout' }
 ])
 const audioFormatOptions = ['mp3', 'm4a', 'opus', 'flac', 'wav'].map((v) => ({
@@ -86,7 +86,7 @@ async function save(): Promise<void> {
     await templates.save(form.value)
   } catch (err) {
     // Ohne diesen Zweig bleibt ein fehlgeschlagenes Speichern komplett
-    // unsichtbar — der Button „tut nichts“.
+    // unsichtbar, der Button „tut nichts“.
     showToast(t('templates.saveFailed', { error: String(err) }), 'error')
     return
   }
@@ -102,31 +102,31 @@ async function save(): Promise<void> {
   >
     <template #actions>
       <BxBtn
-        icon="cancel"
+        icon="x"
         variant="ghost"
         :label="t('common.cancel')"
         @click="router.push({ name: 'templates' })"
       />
-      <BxBtn icon="check-in-circle" variant="cta" :label="t('common.save')" @click="save" />
+      <BxBtn icon="check-circle" variant="primary" :label="t('common.save')" @click="save" />
     </template>
   </PageHead>
 
-  <div class="stack stack--lg" style="max-width: 900px">
+  <div class="stack stack--lg form-page">
     <BxCard :title="t('templates.sections.general')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxField
             v-model="form.name"
             :label="t('templates.fields.name')"
-            icon="pencil-line"
+            icon="edit"
             :error="nameError || undefined"
             :placeholder="t('templates.namePlaceholder')"
             @update:model-value="nameError = ''"
           />
         </div>
         <div class="col-6">
-          <div class="f">
-            <div class="f-label">{{ t('download.options.mode') }}</div>
+          <div class="field">
+            <span class="label">{{ t('download.options.mode') }}</span>
             <BxSegmented v-model="form.mode" :options="modeOptions" />
           </div>
         </div>
@@ -137,12 +137,12 @@ async function save(): Promise<void> {
     </BxCard>
 
     <BxCard v-if="showAudio" :title="t('settings.sections.audio')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxSelect
             v-model="form.audioFormat"
             :label="t('settings.fields.audioFormat')"
-            icon="music"
+            icon="activity"
             :options="audioFormatOptions"
           />
         </div>
@@ -150,7 +150,7 @@ async function save(): Promise<void> {
           <BxSelect
             v-model="form.audioQuality"
             :label="t('settings.fields.audioQuality')"
-            icon="setting-horizontal"
+            icon="sliders"
             :options="audioQualityOptions"
           />
         </div>
@@ -158,12 +158,12 @@ async function save(): Promise<void> {
     </BxCard>
 
     <BxCard v-if="showVideo" :title="t('settings.sections.video')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div class="col-6">
           <BxSelect
             v-model="form.videoContainer"
             :label="t('settings.fields.videoContainer')"
-            icon="video-player"
+            icon="image"
             :options="containerOptions"
           />
         </div>
@@ -171,45 +171,51 @@ async function save(): Promise<void> {
           <BxSelect
             v-model="form.videoQuality"
             :label="t('settings.fields.videoQuality')"
-            icon="full-screen"
+            icon="maximize"
             :options="videoQualityOptions"
           />
         </div>
         <!-- Zusätzliche Qualitätsstufen (Issue #10) -->
         <div class="col-12">
-          <div class="f">
-            <div class="f-label">{{ t('download.options.extraQualities') }}</div>
-            <div class="row" style="flex-wrap: wrap; gap: 8px">
+          <div class="field">
+            <span class="label">{{ t('download.options.extraQualities') }}</span>
+            <div class="cluster">
               <BxChip
                 v-for="q in videoQualityOptions"
                 :key="q.value"
-                :variant="(form.extraVideoQualities ?? []).includes(q.value as never) ? 'marine' : 'neutral'"
-                style="cursor: pointer"
+                :variant="
+                  (form.extraVideoQualities ?? []).includes(q.value as never) ? 'accent' : 'slate'
+                "
+                class="quality-chip"
                 @click="toggleExtraQuality(q.value)"
               >
                 {{ q.label }}
               </BxChip>
             </div>
-            <div class="f-hint">{{ t('download.options.extraQualitiesHint') }}</div>
+            <span class="help">{{ t('download.options.extraQualitiesHint') }}</span>
           </div>
         </div>
       </div>
     </BxCard>
 
     <BxCard :title="t('templates.sections.folders')">
-      <div class="bx-form-grid">
+      <div class="form-grid">
         <div :class="form.mode === 'both' ? 'col-6' : 'col-12'">
           <BxField
             v-model="form.folder"
-            :label="form.mode === 'both' ? t('templates.fields.videoFolder') : t('download.options.folder')"
+            :label="
+              form.mode === 'both'
+                ? t('templates.fields.videoFolder')
+                : t('download.options.folder')
+            "
             icon="folder"
             :placeholder="settingsStore.settings?.downloadFolder ?? ''"
           >
             <template #append>
               <BxBtn
                 size="sm"
-                variant="outline"
-                icon="manage-folder"
+                variant="secondary"
+                icon="folder"
                 :label="t('settings.fields.browse')"
                 @click="pick('folder')"
               />
@@ -226,8 +232,8 @@ async function save(): Promise<void> {
             <template #append>
               <BxBtn
                 size="sm"
-                variant="outline"
-                icon="manage-folder"
+                variant="secondary"
+                icon="folder"
                 :label="t('settings.fields.browse')"
                 @click="pick('audioFolder')"
               />
@@ -238,3 +244,16 @@ async function save(): Promise<void> {
     </BxCard>
   </div>
 </template>
+
+<style scoped>
+/* Formularseite: begrenzte Zeilenlaenge, damit die Felder nicht
+   ueber die volle Fensterbreite laufen. */
+.form-page {
+  max-width: 56rem;
+}
+
+/* Die Qualitaetsstufen sind Schalter, keine reinen Anzeigen. */
+.quality-chip {
+  cursor: pointer;
+}
+</style>

@@ -3,15 +3,27 @@ import { ref, watch } from 'vue'
 import type { AppSettings } from '@shared/types'
 import { applyLocale } from '../i18n'
 
-function applyTheme(theme: AppSettings['theme']): void {
-  // 'colorful' ist ein eigenständiges Theme; 'system' folgt dem OS (hell/dunkel)
+/**
+ * Setzt das Erscheinungsbild und die Darstellungswahl am Wurzelelement.
+ * Vier unabhaengige Achsen, genau wie in den Einstellungen sichtbar:
+ *   data-theme   hell oder dunkel (system folgt dem Betriebssystem)
+ *   data-style   classic (bisheriger Look) oder aero (urbDesign)
+ *   data-accent  einer der sechs Markentoene, nur im Stil aero wirksam
+ *   data-glass / data-vivid  die beiden Schalter, nur im Stil aero wirksam
+ */
+function applyAppearance(s: AppSettings): void {
+  const root = document.documentElement
   const resolved =
-    theme === 'system'
+    s.theme === 'system'
       ? window.matchMedia('(prefers-color-scheme: dark)').matches
         ? 'dark'
         : 'light'
-      : theme
-  document.documentElement.dataset.theme = resolved
+      : s.theme
+  root.dataset.theme = resolved
+  root.dataset.style = s.style
+  root.dataset.accent = s.accent
+  root.dataset.glass = s.glass ? 'on' : 'off'
+  root.dataset.vivid = s.vivid ? 'on' : 'off'
 }
 
 export const useSettingsStore = defineStore('settings', () => {
@@ -23,7 +35,7 @@ export const useSettingsStore = defineStore('settings', () => {
     const firstLoad = !loaded.value
     settings.value = await window.api.settings.get()
     loaded.value = true
-    applyTheme(settings.value.theme)
+    applyAppearance(settings.value)
     applyLocale(settings.value.locale)
     if (!firstLoad) return
 
@@ -32,7 +44,7 @@ export const useSettingsStore = defineStore('settings', () => {
       settings,
       (val) => {
         if (!val) return
-        applyTheme(val.theme)
+        applyAppearance(val)
         applyLocale(val.locale)
         if (saveTimer) clearTimeout(saveTimer)
         saveTimer = setTimeout(() => {
@@ -55,7 +67,7 @@ export const useSettingsStore = defineStore('settings', () => {
 
     window
       .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', () => settings.value && applyTheme(settings.value.theme))
+      .addEventListener('change', () => settings.value && applyAppearance(settings.value))
   }
 
   async function pickDownloadFolder(): Promise<void> {

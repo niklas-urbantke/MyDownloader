@@ -289,8 +289,19 @@
       "autoUpdateAuto": "Automatisch herunterladen",
       "autoUpdateNotify": "Nur benachrichtigen",
       "autoUpdateOff": "Deaktiviert",
-      "themeColorful": "Bunt",
-      "themeFlat": "Flach"
+      "style": "Stil",
+      "styleClassic": "Bisher",
+      "styleAero": "Neu",
+      "styleHint": "Beide Stile gibt es in Hell und Dunkel. „Neu“ ist das Designsystem urbDesign mit Glasflächen.",
+      "accent": "Akzentfarbe",
+      "accentAzure": "Azur",
+      "accentIndigo": "Indigo",
+      "accentAmber": "Bernstein",
+      "accentJade": "Jade",
+      "accentRose": "Rose",
+      "accentSlate": "Schiefer",
+      "glass": "Glasflächen",
+      "vivid": "Bunte Verläufe"
     },
     "binaries": {
       "title": "Komponenten",
@@ -320,13 +331,6 @@
       "useCookies": "Konto-Cookies für Downloads verwenden",
       "useCookiesHint": "Erforderlich für 18+-Inhalte. Die Cookies werden nur an yt-dlp auf diesem Gerät übergeben."
     },
-    "spotify": {
-      "title": "Spotify",
-      "description": "Für den Spotify-Import brauchst du eine eigene (kostenlose) App auf developer.spotify.com. Lege dort eine App an, trage als Redirect-URI http://127.0.0.1:8988/callback ein und füge die Client-ID hier ein. Danach kann sich jeder Nutzer mit seinem eigenen Spotify-Konto anmelden.",
-      "clientId": "Client-ID",
-      "clientIdHint": "Aus deinem Spotify-Developer-Dashboard. Ein Client-Secret wird nicht benötigt (PKCE).",
-      "statusLoggedOut": "Nicht verbunden"
-    },
     "restartOnboarding": "Einrichtungsassistent starten"
   },
   "about": {
@@ -345,7 +349,7 @@
       "Hörprobe vor dem Download",
       "Metadaten-Editor mit MusicBrainz",
       "Lautstärke-Normalisierung & Songtexte",
-      "Spotify-Import mit eigenem Konto",
+      "Spotify-Songlinks: Titel wird bei YouTube geladen",
       "YouTube-Konto für 18+-Inhalte",
       "System-Tray, Drag & Drop, Deep-Links",
       "Auto-Updates & .urbupdate-Dateien",
@@ -454,24 +458,16 @@
   },
   "spotify": {
     "title": "Spotify-Import",
-    "subtitle": "Spotify-Playlists, -Alben und -Titel als Audio-Downloads übernehmen.",
-    "setupHint": "Zuerst in den Einstellungen eine Spotify Client-ID hinterlegen und anmelden.",
-    "loginHint": "Mit deinem Spotify-Konto anmelden, um Playlists zu laden.",
-    "login": "Mit Spotify anmelden",
-    "loggedIn": "Bei Spotify angemeldet",
-    "connectedAs": "Verbunden als {name}",
-    "urlPlaceholder": "https://open.spotify.com/playlist/… oder Album-/Track-Link",
-    "load": "Playlist laden",
-    "loadFailed": "Playlist konnte nicht geladen werden.",
-    "tracks": "{n} Titel",
-    "import": "{n} Titel herunterladen",
-    "sourceYtmusic": "Die Titel werden über YouTube Music gesucht, das trifft meist die Albumfassung statt des Musikvideos. Umstellbar in den Einstellungen unter „Musikquelle für Suchen“.",
-    "sourceYoutube": "Die Titel werden über die normale YouTube-Suche geholt, das ist häufig das Musikvideo. In den Einstellungen lässt sich YouTube Music bevorzugen.",
-    "columns": {
-      "track": "Titel",
-      "query": "YouTube-Suchanfrage",
-      "duration": "Dauer"
-    }
+    "subtitle": "Einen Spotify-Songlink einfügen, geladen wird der Titel anschließend bei YouTube.",
+    "howItWorks": "Von Spotify selbst wird nichts heruntergeladen. Aus dem Link werden nur Künstler und Titel gelesen, die Datei kommt danach von YouTube. Eine Anmeldung ist dafür nicht nötig.",
+    "linkLabel": "Spotify-Songlink",
+    "linkHint": "Ein Link auf einen einzelnen Song, zum Beispiel aus dem Teilen-Menü der Spotify-App.",
+    "urlPlaceholder": "https://open.spotify.com/track/…",
+    "invalidLink": "Das ist kein Link auf einen einzelnen Spotify-Song.",
+    "load": "Song laden",
+    "playlistsLater": "Ganze Playlists und Alben folgen später. Im Moment geht es um einzelne Songs.",
+    "sourceYtmusic": "Gesucht wird über YouTube Music, das trifft meist die Albumfassung statt des Musikvideos. Umstellbar in den Einstellungen unter „Musikquelle für Suchen“.",
+    "sourceYoutube": "Gesucht wird über die normale YouTube-Suche, das ist häufig das Musikvideo. In den Einstellungen lässt sich YouTube Music bevorzugen."
   },
   "stats": {
     "title": "Statistiken",

@@ -10,15 +10,15 @@ withDefaults(
 </script>
 
 <template>
-  <div class="bx-card">
-    <div v-if="title || $slots.action" class="bx-card-head">
+  <div class="card">
+    <div v-if="title || $slots.action" class="card__header spread">
       <div>
-        <h3 v-if="title" class="bx-card-title">{{ title }}</h3>
-        <div v-if="subtitle" class="bx-card-sub">{{ subtitle }}</div>
+        <h3 v-if="title">{{ title }}</h3>
+        <p v-if="subtitle" class="help">{{ subtitle }}</p>
       </div>
       <slot name="action" />
     </div>
-    <div v-if="padded" class="bx-card-section"><slot /></div>
+    <div v-if="padded" class="card__body"><slot /></div>
     <slot v-else />
   </div>
 </template>

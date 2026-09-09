@@ -7,6 +7,7 @@ import PageHead from '../components/PageHead.vue'
 import BxCard from '../components/BxCard.vue'
 import BxBtn from '../components/BxBtn.vue'
 import BxChip from '../components/BxChip.vue'
+import BxTile from '../components/BxTile.vue'
 import BxDialog from '../components/BxDialog.vue'
 import AppIcon from '../components/AppIcon.vue'
 import { useTemplatesStore } from '../stores/templates'
@@ -29,6 +30,17 @@ function formatSummary(template: DownloadTemplate): string {
   return `${template.videoContainer.toUpperCase()} + ${template.audioFormat.toUpperCase()}`
 }
 
+// Symbol und Ton der Kachel richten sich nach der Betriebsart.
+function modeIcon(template: DownloadTemplate): string {
+  if (template.mode === 'audio') return 'activity'
+  return template.mode === 'video' ? 'image' : 'layout'
+}
+
+function modeTone(template: DownloadTemplate): 'azure' | 'indigo' | 'amber' {
+  if (template.mode === 'audio') return 'azure'
+  return template.mode === 'video' ? 'indigo' : 'amber'
+}
+
 async function confirmDelete(): Promise<void> {
   if (deleteTarget.value) {
     await templates.remove(deleteTarget.value.id)
@@ -41,66 +53,55 @@ async function confirmDelete(): Promise<void> {
   <PageHead :title="t('templates.title')" :sub="t('templates.subtitle')">
     <template #actions>
       <BxBtn
-        icon="add"
-        variant="cta"
+        icon="plus"
+        variant="primary"
         :label="t('templates.create')"
         @click="router.push({ name: 'template-edit', params: { id: 'new' } })"
       />
     </template>
   </PageHead>
 
-  <div v-if="templates.entries.length === 0" class="bx-card">
-    <div class="bx-card-section" style="color: var(--fg2); text-align: center; padding: 48px">
-      <AppIcon name="layout" :size="40" style="color: var(--marine-40)" />
-      <p>{{ t('templates.empty') }}</p>
+  <BxCard v-if="templates.entries.length === 0" :padded="false">
+    <div class="empty">
+      <span class="empty__icon">
+        <AppIcon name="layout" class="icon--xl icon--duo" />
+      </span>
+      <p class="empty__title">{{ t('templates.empty') }}</p>
     </div>
-  </div>
+  </BxCard>
 
-  <div v-else class="bx-tiles">
-    <button
+  <div v-else class="grid-auto">
+    <BxTile
       v-for="template in templates.entries"
       :key="template.id"
-      class="bx-tile"
-      type="button"
+      :icon="modeIcon(template)"
+      :tone="modeTone(template)"
+      :label="template.name"
+      :sub="template.folder || t('templates.defaultFolder')"
       @click="router.push({ name: 'template-edit', params: { id: template.id } })"
     >
-      <div class="bx-tile-head">
-        <div class="bx-tile-icon">
-          <AppIcon
-            :name="template.mode === 'audio' ? 'music' : template.mode === 'video' ? 'video-player' : 'layout'"
-          />
-        </div>
-        <div class="bx-tile-headtext">
-          <span class="bx-tile-label">{{ template.name }}</span>
-          <span class="bx-tile-sub">{{
-            template.folder || t('templates.defaultFolder')
-          }}</span>
-        </div>
-        <AppIcon name="pencil" class="bx-tile-chev" />
-      </div>
-      <div class="bx-tile-badges">
-        <span class="bx-tile-badge bx-tile-badge--meta">{{ modeLabel(template) }}</span>
-        <span class="bx-tile-badge bx-tile-badge--meta">{{ formatSummary(template) }}</span>
-        <span v-if="template.writeSubtitles" class="bx-tile-badge bx-tile-badge--new">{{
-          t('settings.sections.subtitles')
-        }}</span>
+      <!-- Langform des Slots: die Raute-Kurzform wuerde die Regelpruefung
+           auf Farbwerte faelschlich ausloesen. -->
+      <template v-slot:badges>
+        <BxChip variant="slate">{{ modeLabel(template) }}</BxChip>
+        <BxChip variant="slate">{{ formatSummary(template) }}</BxChip>
+        <BxChip v-if="template.writeSubtitles" variant="accent">
+          {{ t('settings.sections.subtitles') }}
+        </BxChip>
         <span class="spacer" />
         <BxChip
-          variant="neg"
+          variant="danger"
           icon="trash"
-          style="cursor: pointer"
+          class="tile-delete"
           @click.stop="deleteTarget = template"
-          >{{ t('common.delete') }}</BxChip
         >
-      </div>
-    </button>
+          {{ t('common.delete') }}
+        </BxChip>
+      </template>
+    </BxTile>
   </div>
 
-  <BxDialog
-    :open="!!deleteTarget"
-    :title="t('templates.deleteTitle')"
-    @close="deleteTarget = null"
-  >
+  <BxDialog :open="!!deleteTarget" :title="t('templates.deleteTitle')" @close="deleteTarget = null">
     {{ t('templates.deleteQuestion', { name: deleteTarget?.name ?? '' }) }}
     <template #actions>
       <BxBtn variant="ghost" :label="t('common.cancel')" @click="deleteTarget = null" />
@@ -108,3 +109,11 @@ async function confirmDelete(): Promise<void> {
     </template>
   </BxDialog>
 </template>
+
+<style scoped>
+/* Das Abzeichen zum Loeschen ist anklickbar, dafuer kennt der
+   Baukasten keine eigene Art. */
+.tile-delete {
+  cursor: pointer;
+}
+</style>

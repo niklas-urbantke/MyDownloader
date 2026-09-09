@@ -4,23 +4,25 @@ import AppIcon from './AppIcon.vue'
 
 const props = withDefaults(
   defineProps<{
-    variant?: 'apple' | 'info' | 'warn'
+    /** Die Hinweis-Arten des Baukastens (urbDesign). */
+    variant?: 'success' | 'info' | 'warning' | 'danger'
     icon?: string
   }>(),
-  { variant: 'apple' }
+  { variant: 'success' }
 )
 
 const effectiveIcon = computed(() => {
   if (props.icon) return props.icon
-  if (props.variant === 'info') return 'help-in-circle'
-  if (props.variant === 'warn') return 'attention-in-circle'
-  return 'information-in-circle'
+  if (props.variant === 'info') return 'info'
+  if (props.variant === 'warning') return 'alert-triangle'
+  if (props.variant === 'danger') return 'x-circle'
+  return 'check-circle'
 })
 </script>
 
 <template>
-  <div class="bx-banner" :class="variant !== 'apple' ? `bx-banner--${variant}` : ''">
-    <AppIcon :name="effectiveIcon" />
+  <div class="alert" :class="`alert--${variant}`">
+    <span class="alert__icon"><AppIcon :name="effectiveIcon" /></span>
     <div><slot /></div>
   </div>
 </template>

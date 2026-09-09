@@ -2,7 +2,7 @@
 defineProps<{
   open: boolean
   title: string
-  /** Breitere Variante für formularlastige Dialoge (Onboarding, Metadaten) */
+  /** Breitere Variante fuer formularlastige Dialoge (Onboarding, Metadaten) */
   wide?: boolean
 }>()
 
@@ -11,13 +11,17 @@ const emit = defineEmits<{ close: [] }>()
 
 <template>
   <Teleport to="body">
-    <div v-if="open" class="bx-dialog-scrim" @click="emit('close')">
-      <div class="bx-dialog" :class="{ 'bx-dialog--wide': wide }" @click.stop>
-        <div class="bx-dialog-head">
-          <h3>{{ title }}</h3>
-        </div>
-        <div class="bx-dialog-body"><slot /></div>
-        <div class="bx-dialog-actions">
+    <div v-if="open" class="modal__backdrop" @click="emit('close')">
+      <div
+        class="modal glass glass--strong"
+        :class="{ 'modal--wide': wide }"
+        role="dialog"
+        aria-modal="true"
+        @click.stop
+      >
+        <h3 class="modal__title">{{ title }}</h3>
+        <div class="modal__body"><slot /></div>
+        <div class="modal__actions">
           <slot name="actions" />
         </div>
       </div>

@@ -27,10 +27,10 @@ const confirmClear = ref(false)
 
 const filterOptions = computed(() => [
   { value: 'all', label: t('history.filter.all') },
-  { value: 'audio', label: t('history.filter.audio'), icon: 'music' },
-  { value: 'video', label: t('history.filter.video'), icon: 'video-player' },
-  { value: 'playlists', label: t('history.filter.playlists'), icon: 'checklist' },
-  { value: 'errors', label: t('history.filter.errors'), icon: 'attention' }
+  { value: 'audio', label: t('history.filter.audio'), icon: 'activity' },
+  { value: 'video', label: t('history.filter.video'), icon: 'image' },
+  { value: 'playlists', label: t('history.filter.playlists'), icon: 'list' },
+  { value: 'errors', label: t('history.filter.errors'), icon: 'alert-triangle' }
 ])
 
 const periodOptions = computed(() => [
@@ -116,7 +116,7 @@ function editTags(entry: HistoryEntry): void {
     <template #actions>
       <BxBtn
         icon="trash"
-        variant="outline"
+        variant="secondary"
         :label="t('history.clearAll')"
         :disabled="history.entries.length === 0"
         @click="confirmClear = true"
@@ -125,7 +125,7 @@ function editTags(entry: HistoryEntry): void {
   </PageHead>
 
   <div class="stack">
-    <div class="row" style="gap: 16px; flex-wrap: wrap">
+    <div class="cluster" style="--cluster-gap: var(--space-4)">
       <div style="flex: 1; min-width: 260px">
         <BxField v-model="search" icon="search" :placeholder="t('history.searchPlaceholder')" />
       </div>
@@ -133,15 +133,17 @@ function editTags(entry: HistoryEntry): void {
       <BxSegmented v-model="period" :options="periodOptions" />
     </div>
 
-    <div v-if="filtered.length === 0" class="bx-card">
-      <div class="bx-card-section" style="color: var(--fg2); text-align: center; padding: 48px">
-        <AppIcon name="time" :size="40" style="color: var(--marine-40)" />
-        <p>{{ t('history.empty') }}</p>
+    <BxCard v-if="filtered.length === 0" :padded="false">
+      <div class="empty">
+        <span class="empty__icon">
+          <AppIcon name="clock" class="icon--xl icon--duo" />
+        </span>
+        <p class="empty__title">{{ t('history.empty') }}</p>
       </div>
-    </div>
+    </BxCard>
 
     <BxCard v-else :padded="false">
-      <table class="bx-table">
+      <table class="table table--plain">
         <thead>
           <tr>
             <th style="width: 40px"></th>
@@ -153,30 +155,35 @@ function editTags(entry: HistoryEntry): void {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="entry in filtered" :key="entry.id" style="cursor: default">
+          <tr v-for="entry in filtered" :key="entry.id">
             <td>
               <AppIcon
-                class="row-icon"
-                :name="
-                  entry.isPlaylist ? 'checklist' : entry.mode === 'audio' ? 'music' : 'video-player'
-                "
+                :name="entry.isPlaylist ? 'list' : entry.mode === 'audio' ? 'activity' : 'image'"
               />
             </td>
             <td>
               <strong>{{ entry.title }}</strong>
-              <span v-if="entry.uploader" style="color: var(--fg2)"> · {{ entry.uploader }}</span>
+              <span v-if="entry.uploader" class="text-muted"> · {{ entry.uploader }}</span>
             </td>
             <td>
-              <BxChip variant="neutral">{{ entry.format.toUpperCase() }}</BxChip>
+              <BxChip variant="slate">{{ entry.format.toUpperCase() }}</BxChip>
             </td>
             <td>
-              <BxChip :variant="entry.status === 'completed' ? 'apple' : entry.status === 'error' ? 'neg' : 'warn'">
+              <BxChip
+                :variant="
+                  entry.status === 'completed'
+                    ? 'success'
+                    : entry.status === 'error'
+                      ? 'danger'
+                      : 'warning'
+                "
+              >
                 {{ t(`status.${entry.status}`) }}
               </BxChip>
             </td>
-            <td style="color: var(--fg2)">{{ formatDateTime(entry.timestamp, locale) }}</td>
+            <td class="text-muted">{{ formatDateTime(entry.timestamp, locale) }}</td>
             <td>
-              <div class="row" style="justify-content: flex-end">
+              <div class="cluster" style="justify-content: flex-end">
                 <BxBtn
                   icon="folder"
                   variant="ghost"

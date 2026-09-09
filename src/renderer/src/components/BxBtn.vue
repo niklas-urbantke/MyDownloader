@@ -6,8 +6,9 @@ withDefaults(
     label?: string
     icon?: string
     iconRight?: string
-    variant?: 'primary' | 'cta' | 'outline' | 'ghost' | 'danger'
-    size?: 'sm'
+    /** Die Schaltflaechen-Arten des Baukastens (urbDesign). */
+    variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'glass'
+    size?: 'sm' | 'lg'
     disabled?: boolean
     type?: 'button' | 'submit'
   }>(),
@@ -29,8 +30,8 @@ defineEmits<{ click: [event: MouseEvent] }>()
     :disabled="disabled"
     @click="$emit('click', $event)"
   >
-    <AppIcon v-if="icon" :name="icon" />
+    <AppIcon v-if="icon" :name="icon" class="icon--sm" />
     <span v-if="label || $slots.default"><slot>{{ label }}</slot></span>
-    <AppIcon v-if="iconRight" :name="iconRight" />
+    <AppIcon v-if="iconRight" :name="iconRight" class="icon--sm" />
   </button>
 </template>

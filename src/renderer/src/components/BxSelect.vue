@@ -23,23 +23,21 @@ const currentLabel = computed(
 </script>
 
 <template>
-  <div class="f">
-    <div v-if="label" class="f-label">{{ label }}</div>
+  <div class="field">
+    <span v-if="label" class="label">{{ label }}</span>
 
-    <div v-if="readonly" class="f-readonly">
-      <AppIcon v-if="icon" :name="icon" />
+    <div v-if="readonly" class="input field__static">
+      <AppIcon v-if="icon" :name="icon" class="icon--sm" />
       <span>{{ currentLabel }}</span>
     </div>
 
-    <!-- Select liegt als Overlay über der gesamten Box — komplette Fläche klickbar -->
-    <div v-else class="f-control f-control--select" :class="{ 'has-icon': !!icon }">
-      <AppIcon v-if="icon" :name="icon" class="f-deco" />
-      <select v-model="model">
+    <div v-else class="field__group" :class="{ 'field__group--icon': !!icon }">
+      <AppIcon v-if="icon" :name="icon" class="icon--sm" />
+      <select v-model="model" class="select">
         <option v-for="o in options" :key="o.value" :value="o.value">{{ o.label }}</option>
       </select>
-      <AppIcon name="arrow-down" class="f-deco f-deco--arrow" />
     </div>
 
-    <div v-if="hint" class="f-hint">{{ hint }}</div>
+    <span v-if="hint" class="help">{{ hint }}</span>
   </div>
 </template>

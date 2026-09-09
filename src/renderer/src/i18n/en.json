@@ -289,8 +289,19 @@
       "autoUpdateAuto": "Download automatically",
       "autoUpdateNotify": "Notify only",
       "autoUpdateOff": "Disabled",
-      "themeColorful": "Colorful",
-      "themeFlat": "Flat"
+      "style": "Style",
+      "styleClassic": "Previous",
+      "styleAero": "New",
+      "styleHint": "Both styles come in light and dark. “New” is the urbDesign system with glass surfaces.",
+      "accent": "Accent colour",
+      "accentAzure": "Azure",
+      "accentIndigo": "Indigo",
+      "accentAmber": "Amber",
+      "accentJade": "Jade",
+      "accentRose": "Rose",
+      "accentSlate": "Slate",
+      "glass": "Glass surfaces",
+      "vivid": "Vivid gradients"
     },
     "binaries": {
       "title": "Components",
@@ -320,13 +331,6 @@
       "useCookies": "Use account cookies for downloads",
       "useCookiesHint": "Required for 18+ content. Cookies are only passed to yt-dlp on this device."
     },
-    "spotify": {
-      "title": "Spotify",
-      "description": "The Spotify import needs your own (free) app on developer.spotify.com. Create an app there, set http://127.0.0.1:8988/callback as the redirect URI and paste the client ID here. Every user then logs in with their own Spotify account.",
-      "clientId": "Client ID",
-      "clientIdHint": "From your Spotify developer dashboard. No client secret needed (PKCE).",
-      "statusLoggedOut": "Not connected"
-    },
     "restartOnboarding": "Start setup assistant"
   },
   "about": {
@@ -345,7 +349,7 @@
       "Audio preview before downloading",
       "Metadata editor with MusicBrainz",
       "Loudness normalization & lyrics",
-      "Spotify import with your own account",
+      "Spotify track links: the song is fetched from YouTube",
       "YouTube account for age-restricted content",
       "System tray, drag & drop, deep links",
       "Auto-updates & .urbupdate files",
@@ -454,24 +458,16 @@
   },
   "spotify": {
     "title": "Spotify import",
-    "subtitle": "Import Spotify playlists, albums and tracks as audio downloads.",
-    "setupHint": "First add a Spotify client ID in the settings and log in.",
-    "loginHint": "Log in with your Spotify account to load playlists.",
-    "login": "Log in with Spotify",
-    "loggedIn": "Logged in to Spotify",
-    "connectedAs": "Connected as {name}",
-    "urlPlaceholder": "https://open.spotify.com/playlist/… or album/track link",
-    "load": "Load playlist",
-    "loadFailed": "Could not load the playlist.",
-    "tracks": "{n} tracks",
-    "import": "Download {n} tracks",
-    "sourceYtmusic": "Tracks are looked up on YouTube Music, which usually finds the album version instead of the music video. Change this in Settings under “Music source for searches”.",
-    "sourceYoutube": "Tracks are looked up with the regular YouTube search, which often returns the music video. You can prefer YouTube Music in Settings.",
-    "columns": {
-      "track": "Track",
-      "query": "YouTube search query",
-      "duration": "Duration"
-    }
+    "subtitle": "Paste a Spotify track link, the song is then fetched from YouTube.",
+    "howItWorks": "Nothing is downloaded from Spotify itself. The link is only read for artist and title, the file then comes from YouTube. No account or login needed.",
+    "linkLabel": "Spotify track link",
+    "linkHint": "A link to a single song, for example from the share menu of the Spotify app.",
+    "urlPlaceholder": "https://open.spotify.com/track/…",
+    "invalidLink": "That is not a link to a single Spotify track.",
+    "load": "Load song",
+    "playlistsLater": "Whole playlists and albums will follow later. For now this is about single songs.",
+    "sourceYtmusic": "The song is looked up on YouTube Music, which usually finds the album version instead of the music video. Change this in Settings under “Music source for searches”.",
+    "sourceYoutube": "The song is looked up with the regular YouTube search, which often returns the music video. You can prefer YouTube Music in Settings."
   },
   "stats": {
     "title": "Statistics",

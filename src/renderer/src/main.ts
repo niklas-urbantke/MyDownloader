@@ -1,18 +1,20 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
-// Schriften (offline, kein CDN)
-import '@fontsource/montserrat/500.css'
-import '@fontsource/montserrat/600.css'
-import '@fontsource/montserrat/700.css'
+// Schriften (offline, kein CDN). urbDesign fragt "Segoe UI Variable" zuerst
+// an und faellt dann auf Open Sans zurueck, deshalb wird nur diese gebraucht.
 import '@fontsource/open-sans/400.css'
 import '@fontsource/open-sans/600.css'
 import '@fontsource/open-sans/700.css'
 
-// Batix-CI Design-System
-import './design/colors_and_type.css'
-import './design/batix-icons.css'
-import './design/kit.css'
+// urbDesign, Theme "Aero Plasma". Die Layer-Zeile muss vor den
+// Stylesheets stehen, danach gilt: tokens < base < components < app.
+import './design/layers.css'
+import './design/tokens.css'
+// Zweiter Token-Satz: der bisherige Batix-Look, waehlbar ueber data-style
+import './design/classic.css'
+import './design/components.css'
+import './design/app.css'
 
 import App from './App.vue'
 import { router } from './router'

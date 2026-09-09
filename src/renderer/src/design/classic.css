@@ -1,0 +1,114 @@
+/* ============================================================
+   urbDesign fuer MyDownloader: der Token-Satz "classic"
+
+   Das ist der bisherige Batix-Look, als zweiter Satz semantischer
+   Rollen ausgedrueckt. Es gibt bewusst KEINE zweite Komponenten-
+   Schicht: die Komponenten lesen nur Rollen, ein Stilwechsel biegt
+   ausschliesslich diese Datei ein.
+
+   Rohe Farbwerte sind hier zulaessig und richtig, genau wie in
+   tokens.css: das ist eine Token-Datei, keine Komponenten-Datei.
+   Die Regel "niemals rohe Farbwerte" gilt fuer components.css,
+   app.css und die Views, nicht fuer die Token-Ebene.
+
+   Laedt nach tokens.css und vor components.css.
+   ============================================================ */
+
+@layer tokens {
+
+/* ============================================================
+   STIL "classic": der bisherige Batix-Look
+   ------------------------------------------------------------
+   Zweiter Token-Satz, keine zweite Komponenten-Schicht. Es werden
+   nur semantische Rollen umgebogen, genau wie beim Theme-Wechsel.
+   Marine-Blau als Akzent, Apfelgruen als Erfolg, weiche Radien und
+   Pillen-Schaltflaechen, kein Glas.
+   ============================================================ */
+[data-style="classic"] {
+  --color-bg:        #f2f5f9;
+  --color-surface:   #ffffff;
+  --color-surface-2: #f2f5f9;
+  --color-surface-3: #e5eaf0;
+
+  --color-text:           #35383d;
+  --color-text-secondary: #686b70;
+  --color-text-muted:     #a3a5a9;
+  --color-text-inverted:  #ffffff;
+
+  --color-border:        #ccd4e0;
+  --color-border-strong: #99a9c1;
+
+  --color-accent:        #003063;
+  --color-accent-hover:  #00214a;
+  --color-accent-active: #00214a;
+  --color-accent-soft:   #e5eaf0;
+  --color-accent-line:   #ccd4e0;
+  --color-on-accent:     #ffffff;
+  --color-focus-ring:    #99a9c1;
+
+  --color-success:      #8fc01a;
+  --color-success-soft: #e8f2d5;
+  --color-success-line: #cfe3a3;
+  --color-danger:       #c10015;
+  --color-danger-soft:  #fbe9ec;
+  --color-danger-line:  #f2b8c0;
+  --color-warning:      #f2c037;
+  --color-warning-soft: #fff6e0;
+  --color-warning-line: #ffe3a3;
+  --color-info:         #2a6fdb;
+  --color-info-soft:    #e5eaf0;
+  --color-info-line:    #ccd4e0;
+
+  /* Weiche Radien und Pillen wie bisher. */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-2xl: 16px;
+
+  /* Kein Glas: deckende Flaechen, kein Glanz, keine Koernung. */
+  --glass-blur:          0px;
+  --glass-blur-strong:   0px;
+  --glass-tint:          var(--color-surface);
+  --glass-tint-strong:   var(--color-surface);
+  --glass-tint-sunken:   var(--color-surface);
+  --glass-edge:          var(--color-border);
+  --glass-highlight:     transparent;
+  --glass-lowlight:      transparent;
+  --glass-sheen:         none;
+  --glass-noise-opacity: 0;
+  --glass-glow:          transparent;
+
+  --app-canvas: none;
+}
+
+/* Der bisherige Look im Dunkeln. */
+[data-theme="dark"][data-style="classic"] {
+  --color-bg:        #0e1726;
+  --color-surface:   #16243a;
+  --color-surface-2: #1b2c47;
+  --color-surface-3: #24385a;
+
+  --color-text:           #e6ebf2;
+  --color-text-secondary: #9fb0c5;
+  --color-text-muted:     #5f7187;
+
+  --color-border:        #2e4670;
+  --color-border-strong: #41598c;
+
+  --color-accent:        #a9c4ec;
+  --color-accent-hover:  #8fafdc;
+  --color-accent-active: #8fafdc;
+  --color-accent-soft:   #24385a;
+  --color-accent-line:   #2e4670;
+  --color-on-accent:     #0e1726;
+
+  --color-success:      #b5e15c;
+  --color-success-soft: #2c3b1c;
+  --color-danger:       #ff9aa8;
+  --color-warning:      #e8b84b;
+  --color-info:         #6fa0f0;
+}
+
+
+}

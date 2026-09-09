@@ -6,10 +6,117 @@ import { JsonStore } from './store'
 import { getSettings } from './settings'
 
 /**
- * Spotify-Anbindung (Issue #35) über OAuth 2.0 mit PKCE — dafür reicht die
- * Client-ID einer eigenen (kostenlosen) Spotify-Developer-App; ein Secret
- * wird nicht benötigt. Redirect-URI der App: http://127.0.0.1:8988/callback
+ * Spotify-Anbindung (Issue #35).
+ *
+ * Zwei Wege liegen hier nebeneinander:
+ *
+ *  1. Ein einzelner Song ohne jede Registrierung (siehe unten). Das ist der
+ *     Weg, den die Oberfläche anbietet.
+ *  2. Ganze Playlists und Alben über die Web-API, dafür braucht es OAuth 2.0
+ *     mit PKCE und die Client-ID einer eigenen (kostenlosen) Developer-App.
+ *     Der Code bleibt erhalten, wird derzeit aber nicht angeboten.
  */
+
+// ---------------------------------------------------------------------------
+// Einzelner Song, ganz ohne Anmeldung
+// ---------------------------------------------------------------------------
+
+/** open.spotify.com/track/<id>, auch mit /intl-xx/ davor, und spotify:track:<id> */
+const TRACK_LINK = /(?:open\.spotify\.com\/(?:intl-[a-z-]+\/)?track\/|spotify:track:)([A-Za-z0-9]+)/
+
+/**
+ * Der User-Agent entscheidet, was Spotify ausliefert.
+ *
+ * Ein voller Desktop-Browser bekommt nur das Gerüst des Web-Players, das seine
+ * Inhalte per JavaScript nachlädt: darin steht keine einzige og-Angabe. Ein
+ * mobiler oder schlichter User-Agent bekommt dagegen die fertig gebaute Seite
+ * mit Titel und Künstler. Deshalb steht hier ein Mobil-Browser vorn, und ein
+ * schlichter Kennzeichner als Rückfallebene, falls Spotify das später anders
+ * verteilt.
+ */
+const PAGE_USER_AGENTS = [
+  'Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36',
+  'Mozilla/5.0 MyDownloader'
+]
+
+/** Ist das ein Link auf einen einzelnen Song? */
+export function isSpotifyTrackLink(url: string): boolean {
+  return TRACK_LINK.test(url.trim())
+}
+
+/** Die wenigen Entities, die in og-Angaben tatsächlich vorkommen. */
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_m, d: string) => String.fromCodePoint(Number(d)))
+    .replace(/&#x([0-9a-f]+);/gi, (_m, h: string) => String.fromCodePoint(Number.parseInt(h, 16)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+}
+
+/** Inhalt einer og-Auszeichnung, in beiden möglichen Attribut-Reihenfolgen. */
+function metaContent(html: string, property: string): string | null {
+  const first = new RegExp(
+    `<meta[^>]+property=["']${property}["'][^>]+content=["']([^"']*)["']`,
+    'i'
+  ).exec(html)
+  if (first) return decodeEntities(first[1])
+  const second = new RegExp(
+    `<meta[^>]+content=["']([^"']*)["'][^>]+property=["']${property}["']`,
+    'i'
+  ).exec(html)
+  return second ? decodeEntities(second[1]) : null
+}
+
+/**
+ * Liest Künstler und Titel eines Songs aus der ganz normalen Songseite.
+ *
+ * Bewusst OHNE Web-API: die Seite trägt die Angaben in ihren
+ * OpenGraph-Auszeichnungen, und die sind ohne Client-ID, ohne Secret und ohne
+ * Anmeldung lesbar.
+ *
+ *   og:title       "Yellow"
+ *   og:description "Coldplay · Parachutes · Song · 2000"
+ *
+ * Aus dem ersten Feld der Beschreibung kommt der Künstler.
+ *
+ * @returns "Künstler - Titel", nur den Titel, wenn kein Künstler zu ermitteln
+ *          ist, oder null, wenn die Seite nicht lesbar war.
+ */
+export async function resolveSpotifyTrackQuery(url: string): Promise<string | null> {
+  const match = TRACK_LINK.exec(url.trim())
+  if (!match) return null
+  for (const userAgent of PAGE_USER_AGENTS) {
+    try {
+      const res = await fetch(`https://open.spotify.com/track/${match[1]}`, {
+        headers: {
+          'User-Agent': userAgent,
+          'Accept-Language': 'de,en;q=0.8'
+        },
+        signal: AbortSignal.timeout(15000)
+      })
+      if (!res.ok) continue
+      const html = await res.text()
+      const title = (metaContent(html, 'og:title') ?? '').trim()
+      // Leer heißt: die Sparfassung ohne og-Angaben, also den nächsten
+      // User-Agent versuchen
+      if (!title) continue
+      const artist = (metaContent(html, 'og:description') ?? '').split('·')[0].trim()
+      if (!artist || artist.toLowerCase() === title.toLowerCase()) return title
+      return `${artist} - ${title}`
+    } catch {
+      // Zeitüberschreitung oder Netzfehler: nächsten Versuch zulassen
+    }
+  }
+  return null
+}
+
+// ---------------------------------------------------------------------------
+// Playlists und Alben über die Web-API (PKCE, derzeit nicht in der Oberfläche)
+// ---------------------------------------------------------------------------
 
 export const SPOTIFY_REDIRECT_URI = 'http://127.0.0.1:8988/callback'
 const CALLBACK_PORT = 8988
