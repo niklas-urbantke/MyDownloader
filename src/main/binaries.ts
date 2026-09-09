@@ -140,8 +140,26 @@ export async function reconcileManagedYtDlp(): Promise<void> {
   }
 }
 
-/** Neueste offiziell veröffentlichte yt-dlp-Version (null = nicht ermittelbar) */
+/**
+ * Neueste offiziell veröffentlichte yt-dlp-Version (null = nicht ermittelbar).
+ *
+ * Zuerst über die Weiterleitung von /releases/latest auf /releases/tag/<version>,
+ * weil das kein API-Aufruf ist und deshalb keiner Ratenbegrenzung unterliegt.
+ * Die API bleibt als Rückfall; sie zählt unauthentifizierte Abfragen je IP und
+ * schlägt hinter geteilten Adressen (Firmennetz, CI-Runner) schnell fehl.
+ */
 export async function latestYtDlpVersion(): Promise<string | null> {
+  try {
+    const res = await fetch('https://github.com/yt-dlp/yt-dlp/releases/latest', {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(15000)
+    })
+    const location = res.headers.get('location')
+    const tag = location ? /\/releases\/tag\/([^/?#]+)/.exec(location)?.[1] : null
+    if (tag) return decodeURIComponent(tag).trim()
+  } catch {
+    /* weiter mit der API */
+  }
   try {
     const res = await fetch('https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest', {
       headers: { Accept: 'application/vnd.github+json' },
