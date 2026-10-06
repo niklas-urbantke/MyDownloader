@@ -50,7 +50,7 @@ const featureList = (): string[] => {
 }
 
 function openRepo(): void {
-  void window.api.system.openExternal('https://github.com/niklas-urbantke/YouTube-Downloader')
+  void window.api.system.openExternal('https://github.com/niklas-urbantke/MyDownloader')
 }
 </script>
 

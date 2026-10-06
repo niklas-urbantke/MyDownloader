@@ -155,7 +155,7 @@ export async function searchMusicBrainz(
   try {
     const res = await fetch(url, {
       headers: {
-        'User-Agent': 'MyDownloader/5.0 (https://github.com/niklas-urbantke/YouTube-Downloader)'
+        'User-Agent': 'MyDownloader/5.0 (https://github.com/niklas-urbantke/MyDownloader)'
       },
       signal: AbortSignal.timeout(15000)
     })

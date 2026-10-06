@@ -7,10 +7,10 @@
   "author": {
     "name": "Niklas Urbantke"
   },
-  "homepage": "https://github.com/niklas-urbantke/YouTube-Downloader",
+  "homepage": "https://github.com/niklas-urbantke/MyDownloader",
   "repository": {
     "type": "git",
-    "url": "https://github.com/niklas-urbantke/YouTube-Downloader.git"
+    "url": "https://github.com/niklas-urbantke/MyDownloader.git"
   },
   "license": "MIT",
   "private": true,
