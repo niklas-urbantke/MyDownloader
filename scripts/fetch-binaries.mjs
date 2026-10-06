@@ -20,7 +20,7 @@
  *   yt-dlp  — offizielle GitHub-Releases (yt-dlp/yt-dlp)
  *   ffmpeg  — statische Builds aus eugeneware/ffmpeg-static (GitHub-Releases)
  */
-import { mkdir, chmod, writeFile, readFile, access } from 'node:fs/promises'
+import { mkdir, chmod, writeFile, readFile, access, rm } from 'node:fs/promises'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
@@ -79,11 +79,35 @@ async function download(url, dest) {
   process.stdout.write(`${(buf.length / 1024 / 1024).toFixed(1)} MB ✓\n`)
 }
 
-/** Neueste veröffentlichte yt-dlp-Version (null = nicht ermittelbar) */
+/**
+ * Neueste veröffentlichte yt-dlp-Version (null = nicht ermittelbar).
+ *
+ * Zuerst über die Weiterleitung von /releases/latest auf /releases/tag/<version>:
+ * das ist kein API-Aufruf und kennt deshalb keine Ratenbegrenzung. Der API-Weg
+ * bleibt als Rückfall, ist auf CI-Runnern aber unzuverlässig, weil
+ * unauthentifizierte Abfragen je IP begrenzt sind und Runner sich IPs teilen.
+ * Genau daran scheiterte der macOS-Job in v5.2.0 und protokollierte „latest“
+ * statt der Versionsnummer.
+ */
 async function latestYtDlpTag() {
   try {
+    const res = await fetch('https://github.com/yt-dlp/yt-dlp/releases/latest', {
+      redirect: 'manual',
+      signal: AbortSignal.timeout(20000)
+    })
+    const location = res.headers.get('location')
+    const tag = location && /\/releases\/tag\/([^/?#]+)/.exec(location)?.[1]
+    if (tag) return decodeURIComponent(tag).trim()
+  } catch {
+    /* weiter mit der API */
+  }
+  try {
+    const headers = { Accept: 'application/vnd.github+json' }
+    // Im CI hebt das Token die Ratenbegrenzung deutlich an
+    const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN
+    if (token) headers.Authorization = `Bearer ${token}`
     const res = await fetch('https://api.github.com/repos/yt-dlp/yt-dlp/releases/latest', {
-      headers: { Accept: 'application/vnd.github+json' },
+      headers,
       signal: AbortSignal.timeout(20000)
     })
     if (!res.ok) return null
@@ -144,7 +168,14 @@ async function main() {
       ? `https://github.com/yt-dlp/yt-dlp/releases/download/${wanted}/${ytAsset}`
       : `https://github.com/yt-dlp/yt-dlp/releases/latest/download/${ytAsset}`
     await download(url, ytDest)
-    await writeFile(ytStamp, `${wanted ?? 'latest'}\n`, 'utf-8')
+    if (wanted) {
+      await writeFile(ytStamp, `${wanted}\n`, 'utf-8')
+    } else {
+      // Ohne bekannte Version keinen Stempel hinterlassen: „latest“ wäre beim
+      // nächsten Abgleich wertlos und im Build-Log irreführend
+      await rm(ytStamp, { force: true })
+      console.warn('  ! Version unbekannt — kein Stempel geschrieben')
+    }
   } else if (havePresent) {
     console.log(`  yt-dlp aktuell (${haveVersion ?? 'Version unbekannt'})`)
   } else {
